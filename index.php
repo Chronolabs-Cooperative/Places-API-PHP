@@ -102,81 +102,130 @@
 	if ($help==true) {
 		http_response_code(400);
 		include dirname(__FILE__).'/help.php';
+		if ($sessions = PlacesCache::read('sessions-'.md5($_SERVER['HTTP_HOST'])))
+		{
+		    foreach($sessions as $key => $seconds)
+		        if ($seconds<time())
+		        {
+		            PlacesCache::delete($key);
+		            unset ($sessions[$key]);
+		        }
+		    PlacesCache::write('sessions-'.md5($_SERVER['HTTP_HOST']), $sessions, API_CACHE_SECONDS * API_CACHE_SECONDS * API_CACHE_SECONDS);
+		}
 		exit;
 	}
 	http_response_code(200);
 	if (!$data = PlacesCache::read(md5($_SERVER['REQUEST_URI'])))
 	{
-    	switch ($mode) {
-    	    case 'countries':
-    	        $sql = "SELECT *, md5(concat(`CountryID`,`Country`)) as `key`  FROM `$mode` ORDER BY `Country`";
-    	        $data = array();
-    	        $result = $GLOBALS['DebauchDB']->queryF($sql);
-    	        while($row = $GLOBALS['DebauchDB']->fetchArray($result))
+	    $retries = 0;
+	    $data = array();
+	    while (empty($data) || $retries<11)
+	    {
+	        $retries++;
+        	switch ($mode) {
+        	    case 'countries':
+        	        $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key`  FROM `$mode`  GROUP BY `CountryID` ORDER BY `Country`";
+        	        $result = $GLOBALS['DebauchDB']->queryF($sql);
+        	        while($row = $GLOBALS['DebauchDB']->fetchArray($result))
+        	        {
+        	            $table = $row['Table'];
+        	            unset($row['Table']);
+        	            unset($row['CountryID']);
+        	            if ($output!='xml')
+        	                $data[$row['key']] = $row;
+    	                else
+    	                    $data[$table] = $row;
+        	        }
+        	        break;
+        	    case 'continents':
+        	        $sql = "SELECT *, md5(concat(`ContinentID`, `Continent`, max(`ContinentID`) - `ContinentID` + 1)) as `key` FROM `$mode`  GROUP BY `ContinentID` ORDER BY `Continent`";
+        	        $result = $GLOBALS['DebauchDB']->queryF($sql);
+        	        while($row = $GLOBALS['DebauchDB']->fetchArray($result))
+        	        {
+        	            $continent = str_replace(array(" ", "'". "`", "-"), "", ucwords(strtolower($row['Continent'])));
+        	            unset($row['ContinentID']);
+        	            if ($output!='xml')
+        	                $data[$row['key']] = $row;
+        	            else 
+        	                $data[$continent] = $row;
+        	        }
+        	        break;
+        		default:
+        			$data = findPlace($country, $place, $output, $number);
+        			break;
+        		case 'nearby':
+        			$data = findNearby($latitude, $longitude, $radius, $output);
+        			break;
+        		case 'key':
+        			$data = findKey($key, $radius, $output);
+        			break;
+        	}
+        	foreach($data as $key => $values)
+        	    if (empty($values))
+        	        unset($data[$key]);
+    	        elseif(is_array($values))
     	        {
-    	            $table = $row['Table'];
-    	            unset($row['Table']);
-    	            unset($row['CountryID']);
-    	            if ($output!='xml')
-    	                $data[$row['key']] = $row;
-	                else
-	                    $data[$table] = $row;
-    	        }
-    	        break;
-    	    case 'continents':
-    	        $sql = "SELECT *, md5(concat(`ContinentID`,`Continent`)) as `key` FROM `$mode` ORDER BY `Continent`";
-    	        $data = array();
-    	        $result = $GLOBALS['DebauchDB']->queryF($sql);
-    	        while($row = $GLOBALS['DebauchDB']->fetchArray($result))
-    	        {
-    	            $continent = str_replace(array(" ", "'". "`", "-"), "", ucwords(strtolower($row['Continent'])));
-    	            unset($row['ContinentID']);
-    	            if ($output!='xml')
-    	                $data[$row['key']] = $row;
-    	            else 
-    	                $data[$continent] = $row;
-    	        }
-    	        break;
+    	            $empty = true;
+    	            foreach($values as $keb => $value)
+    	                if (!empty($value))
+    	                    $empty = false;
+                    if ($empty==true)
+                        unset($data[$key]);
+                }
+	    }
+    	if (!empty($data))
+    	{
+    	    PlacesCache::write(md5($_SERVER['REQUEST_URI']), $data, API_CACHE_SECONDS);
+    	    if (!$sessions = PlacesCache::read('sessions-'.md5($_SERVER['HTTP_HOST'])))
+    	        $sessions = array();
+	        $sessions[md5($_SERVER['REQUEST_URI'])] = time() + API_CACHE_SECONDS;
+	        PlacesCache::write('sessions-'.md5($_SERVER['HTTP_HOST']), $sessions, API_CACHE_SECONDS * API_CACHE_SECONDS * API_CACHE_SECONDS);
+    	}
+	}
+	
+	foreach($data as $key => $values)
+	    if (empty($values))
+	        unset($data[$key]);
+        elseif(is_array($values))
+        {
+            $empty = true;
+            foreach($values as $keb => $value)
+                if (!empty($value))
+                    $empty = false;
+            if ($empty==true)
+                unset($data[$key]);
+        }
+        
+	if (!empty($data))
+	{
+    	switch ($output) {
     		default:
-    			$data = findPlace($country, $place, $output, $number);
+    			echo '<h1>' . $country . ' - ' . $place . ' (Places data)</h1>';
+    			echo '<pre style="font-family: \'Courier New\', Courier, Terminal; font-size: 0.77em;">';
+    			echo print_r($data, true);
+    			echo '</pre>';
     			break;
-    		case 'nearby':
-    			$data = findNearby($latitude, $longitude, $radius, $output);
+    		case 'raw':
+    			echo var_dump($data);
     			break;
-    		case 'key':
-    			$data = findKey($key, $radius, $output);
+    		case 'json':
+    			header('Content-type: application/json');
+    			echo json_encode($data);
+    			break;
+    		case 'serial':
+    			header('Content-type: text/html');
+    			echo serialize($data);
+    			break;
+    		case 'xml':
+    			header('Content-type: application/xml');
+    			$dom = new XmlDomConstruct('1.0', 'utf-8');
+    			$dom->fromMixed(array($mode=>$data));
+     			echo $dom->saveXML();
     			break;
     	}
-    	PlacesCache::write(md5($_SERVER['REQUEST_URI']), $data, API_CACHE_SECONDS);
-    	if (!$sessions = PlacesCache::read('sessions-'.md5($_SERVER['HTTP_HOST'])))
-    	    $sessions = array();
-    	$sessions[md5($_SERVER['REQUEST_URI'])] = time() + API_CACHE_SECONDS;
-    	PlacesCache::write('sessions-'.md5($_SERVER['HTTP_HOST']), $sessions, API_CACHE_SECONDS * API_CACHE_SECONDS * API_CACHE_SECONDS);
-	}
-	switch ($output) {
-		default:
-			echo '<h1>' . $country . ' - ' . $place . ' (Places data)</h1>';
-			echo '<pre style="font-family: \'Courier New\', Courier, Terminal; font-size: 0.77em;">';
-			echo print_r($data, true);
-			echo '</pre>';
-			break;
-		case 'raw':
-			echo var_dump($data);
-			break;
-		case 'json':
-			header('Content-type: application/json');
-			echo json_encode($data);
-			break;
-		case 'serial':
-			header('Content-type: text/html');
-			echo serialize($data);
-			break;
-		case 'xml':
-			header('Content-type: application/xml');
-			$dom = new XmlDomConstruct('1.0', 'utf-8');
-			$dom->fromMixed(array($mode=>$data));
- 			echo $dom->saveXML();
-			break;
+	} else {
+	    http_response_code(501);
+	    include dirname(__FILE__).'/help.php';
 	}
 	
 	if ($sessions = PlacesCache::read('sessions-'.md5($_SERVER['HTTP_HOST'])))
@@ -187,5 +236,6 @@
 	            PlacesCache::delete($key);
 	            unset ($sessions[$key]);
 	        }
+	    PlacesCache::write('sessions-'.md5($_SERVER['HTTP_HOST']), $sessions, API_CACHE_SECONDS * API_CACHE_SECONDS * API_CACHE_SECONDS);
 	}
 ?>		
