@@ -109,23 +109,26 @@
 	{
     	switch ($mode) {
     	    case 'countries':
-    	        $sql = "SELECT md5(concat(`CountryID`,`Country`)) as `key`, *  FROM `$mode` ORDER BY `Table`";
+    	        $sql = "SELECT *, md5(concat(`CountryID`,`Country`)) as `key`  FROM `$mode` ORDER BY `Country`";
     	        $data = array();
     	        $result = $GLOBALS['DebauchDB']->queryF($sql);
     	        while($row = $GLOBALS['DebauchDB']->fetchArray($result))
     	        {
+    	            unset($row['Table']);
     	            unset($row['CountryID']);
-    	            $data[$row['key']] = $row;
+    	            foreach($row as $key => $value)
+    	                $data[$row['key']][strtolower($key)] = $value;
     	        }
     	        break;
     	    case 'continents':
-    	        $sql = "SELECT *, md5(concat(`ContinentID`,`Continent`)) as `key` FROM `$mode` ORDER BY `Table`";
+    	        $sql = "SELECT *, md5(concat(`ContinentID`,`Continent`)) as `key` FROM `$mode` ORDER BY `Continent`";
     	        $data = array();
     	        $result = $GLOBALS['DebauchDB']->queryF($sql);
     	        while($row = $GLOBALS['DebauchDB']->fetchArray($result))
     	        {
     	            unset($row['ContinentID']);
-    	            $data[$row['key']] = $row;
+    	            foreach($row as $key => $value)
+    	                $data[$row['key']][strtolower($key)] = $value;
     	        }
     	        break;
     		default:
