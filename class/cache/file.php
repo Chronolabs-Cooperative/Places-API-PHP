@@ -108,7 +108,9 @@ class PlacesCacheFile extends PlacesCacheEngine
     function init($settings = array())
     {
         parent::init($settings);
-        $defaults = array('path' => Places_VAR_PATH . '/caches/Places_cache' , 'extension' => '.php' , 'prefix' => 'Places_' , 'lock' => false , 'serialize' => false , 'duration' => 31556926);
+        if (!is_dir(API_CACHE_PATH))
+            mkdir(API_CACHE_PATH, 0777, true);
+        $defaults = array('path' => API_CACHE_PATH , 'extension' => '.php' , 'prefix' => strtolower($_SERVER['HTTP_HOST']).'__' , 'lock' => false , 'serialize' => false , 'duration' => 31556926);
         $this->settings = array_merge($defaults, $this->settings);
         if (!isset($this->file)) {
             require_once dirname(__DIR__) . DIRECTORY_SEPARATOR . 'file' . DIRECTORY_SEPARATOR . 'placesfile.php';
