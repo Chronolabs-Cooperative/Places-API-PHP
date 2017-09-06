@@ -58,7 +58,18 @@
 	if ((!isset($_GET['country']) || empty($_GET['country'])) && (!isset($_GET['place']) || empty($_GET['place']))) {
 		$help=true;
 	} elseif (isset($_GET['output']) || !empty($_GET['output'])) {
-		if (isset($_GET['country']) && $_GET['country'] == 'key') {
+	    if (isset($_GET['country']) && $_GET['country'] == 'list') {
+            $output = trim($_GET['output']);
+            switch ($_GET['place'])
+            {
+    	        default:
+                    $mode = 'countries';
+                    break;
+    	        case 'continents':
+    	            $mode = 'continents';
+    	            break;
+            }
+	   } elseif (isset($_GET['country']) && $_GET['country'] == 'key') {
 			$key = trim($_GET['place']);
 			$radius = intval($_GET['number']);
 			if ($radius<0)
@@ -97,6 +108,26 @@
 	if (!$data = PlacesCache::read(md5($_SERVER['REQUEST_URI'])))
 	{
     	switch ($mode) {
+    	    case 'countries':
+    	        $sql = "SELECT md5(concat(`CountryID`,`Country`)) as `key`, *  FROM `$mode` ORDER BY `Table`";
+    	        $data = array();
+    	        $result = $GLOBALS['DebauchDB']->queryF($sql);
+    	        while($row = $GLOBALS['DebauchDB']->fetchArray($result))
+    	        {
+    	            unset($row['CountryID']);
+    	            $data[$row['key']] = $row;
+    	        }
+    	        break;
+    	    case 'continents':
+    	        $sql = "SELECT *, md5(concat(`ContinentID`,`Continent`)) as `key` FROM `$mode` ORDER BY `Table`";
+    	        $data = array();
+    	        $result = $GLOBALS['DebauchDB']->queryF($sql);
+    	        while($row = $GLOBALS['DebauchDB']->fetchArray($result))
+    	        {
+    	            unset($row['ContinentID']);
+    	            $data[$row['key']] = $row;
+    	        }
+    	        break;
     		default:
     			$data = findPlace($country, $place, $output, $number);
     			break;
