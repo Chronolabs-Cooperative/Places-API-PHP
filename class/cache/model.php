@@ -1,6 +1,6 @@
 <?php
 /**
- * Cache engine For Places
+ * Chronolabs REST Geospatial Plaves Services API
  *
  * You may not change or alter any portion of this comment or credits
  * of supporting developers from this source code or any supporting source code
@@ -9,14 +9,18 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * @copyright       The Places Project http://sourceforge.net/projects/Places/
- * @license         GNU GPL 2 (http://www.gnu.org/licenses/old-licenses/gpl-2.0.html)
- * @package         class
- * @subpackage      cache
- * @since           2.3.0
- * @author          Taiwen Jiang <phppp@users.sourceforge.net>
- * @version         $Id: model.php 12537 2014-05-19 14:19:33Z beckmi $
+ * @copyright       Chronolabs Cooperative http://snails.email
+ * @license         GNU GPL 3 (http://www.gnu.org/licenses/old-licenses/gpl-2.0.html)
+ * @package         api
+ * @since           2.0.1
+ * @author          Simon Roberts <wishcraft@users.sourceforge.net>
+ * @subpackage		places
+ * @description		Geospatial Plaves Services API
+ * @see			    http://internetfounder.wordpress.com
+ * @see			    http://sourceoforge.net/projects/chronolabsapis
+ * @see			    https://github.com/Chronolabs-Cooperative/Places-API-PHP
  */
+
 defined('API_ROOT_PATH') || die('Restricted access');
 
 /**
