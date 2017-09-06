@@ -116,7 +116,10 @@
     	        {
     	            unset($row['Table']);
     	            unset($row['CountryID']);
-    	            $data[] = $row;
+    	            if ($output!='xml')
+    	                $data[$row['key']] = $row;
+	                else
+	                    $data[] = $row;
     	        }
     	        break;
     	    case 'continents':
@@ -126,7 +129,10 @@
     	        while($row = $GLOBALS['DebauchDB']->fetchArray($result))
     	        {
     	            unset($row['ContinentID']);
-    	            $data[] = $row;
+    	            if ($output!='xml')
+    	                $data[$row['key']] = $row;
+    	            else 
+    	                $data[] = $row;
     	        }
     	        break;
     		default:
@@ -153,7 +159,7 @@
 			echo '</pre>';
 			break;
 		case 'raw':
-			echo $data;
+			echo var_dump($data);
 			break;
 		case 'json':
 			header('Content-type: application/json');
