@@ -174,7 +174,7 @@
 		case 'xml':
 			header('Content-type: application/xml');
 			$dom = new XmlDomConstruct('1.0', 'utf-8');
-			$dom->fromMixed(array('root'=>$data));
+			$dom->fromMixed(array($mode=>$data));
  			echo $dom->saveXML();
 			break;
 	}
