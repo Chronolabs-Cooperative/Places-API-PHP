@@ -114,12 +114,13 @@
     	        $result = $GLOBALS['DebauchDB']->queryF($sql);
     	        while($row = $GLOBALS['DebauchDB']->fetchArray($result))
     	        {
+    	            $table = $row['Table'];
     	            unset($row['Table']);
     	            unset($row['CountryID']);
     	            if ($output!='xml')
     	                $data[$row['key']] = $row;
 	                else
-	                    $data[] = $row;
+	                    $data[$table] = $row;
     	        }
     	        break;
     	    case 'continents':
@@ -128,11 +129,12 @@
     	        $result = $GLOBALS['DebauchDB']->queryF($sql);
     	        while($row = $GLOBALS['DebauchDB']->fetchArray($result))
     	        {
+    	            $continent = str_replace(array(" ", "'". "`", "-"), "", ucwords(strtolower($row['Continent'])));
     	            unset($row['ContinentID']);
     	            if ($output!='xml')
     	                $data[$row['key']] = $row;
     	            else 
-    	                $data[] = $row;
+    	                $data[$continent] = $row;
     	        }
     	        break;
     		default:
