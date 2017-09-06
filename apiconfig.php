@@ -26,7 +26,7 @@
  * Paths
  */
 define('API_ROOT_PATH', __DIR__);
-define('API_CACHE_PATH', __DIR__ . DIRECTORY_SEPARATOR . 'cache');
+define('API_CACHE_PATH', DIRECTORY_SEPARATOR . 'tmp');
 
 /**
  * Times && Limits
