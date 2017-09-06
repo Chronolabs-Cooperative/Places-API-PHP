@@ -21,8 +21,10 @@
  * @see			    https://github.com/Chronolabs-Cooperative/Places-API-PHP
  */
 
-
-	$parts = explode(".", microttime(true));
+    error_reporting(E_ERROR);
+    ini_set('display_errors', true);
+    
+	$parts = explode(".", microtime(true));
 	mt_srand(mt_rand(-time(), time())/$parts[1]);
 	mt_srand(mt_rand(-time(), time())/$parts[1]);
 	mt_srand(mt_rand(-time(), time())/$parts[1]);
