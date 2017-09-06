@@ -1,12 +1,12 @@
 @CHARSET "ISO-8859-1";
 
-@import url(https://fonts.ringwould.com.au/v1/random/black-bold/Api-Header-Alpha/css.api);
-@import url(https://fonts.ringwould.com.au/v1/random/semibold-bold/Api-Header-Omega/css.api);
-@import url(https://fonts.ringwould.com.au/v1/random/normal-regular-ctt-btt-bbt-cc-bb-bt/Api-Content/css.api);
-@import url(https://fonts.ringwould.com.au/v1/random/normal-regular/Api-Fields/css.api);
-@import url(https://fonts.ringwould.com.au/v1/random/condensed/Api-Bullets/css.api);
-@import url(https://fonts.ringwould.com.au/v1/random/italic/Api-Main/css.api);
-@import url(https://fonts.ringwould.com.au/v1/random/courier-terminal-shell/Api-Code-Examples/css.api);
+@import url(https://fonts.snails.email/v1/random/black-bold/Api-Header-Alpha/css.api);
+@import url(https://fonts.snails.email/v1/random/semibold-bold/Api-Header-Omega/css.api);
+@import url(https://fonts.snails.email/v1/random/normal-regular-ctt-btt-bbt-cc-bb-bt/Api-Content/css.api);
+@import url(https://fonts.snails.email/v1/random/normal-regular/Api-Fields/css.api);
+@import url(https://fonts.snails.email/v1/random/condensed/Api-Bullets/css.api);
+@import url(https://fonts.snails.email/v1/random/italic/Api-Main/css.api);
+@import url(https://fonts.snails.email/v1/random/courier-terminal-shell/Api-Code-Examples/css.api);
 
 body {
 	font-family: "Api Content", "Trebuchet MS", Arial, Helvetica, sans-serif;

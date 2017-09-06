@@ -9,11 +9,11 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * @copyright       Chronolabs Cooperative http://labs.coop
+ * @copyright       Chronolabs Cooperative http://snails.email
  * @license         GNU GPL 2 (http://www.gnu.org/licenses/old-licenses/gpl-2.0.html)
  * @package         places
  * @since           1.0.2
- * @author          Simon Roberts <meshy@labs.coop>
+ * @author          Simon Roberts <meshy@snails.email>
  * @version         $Id: functions.php 1000 2013-06-07 01:20:22Z mynamesnot $
  * @subpackage		api
  * @description		Screening API Service REST
@@ -24,7 +24,7 @@ if (!function_exists("whitelistGetIP")) {
 	/* function whitelistGetIPAddy()
 	 *
 	* 	provides an associative array of whitelisted IP Addresses
-	* @author 		Simon Roberts (Chronolabs) simon@labs.coop
+	* @author 		Simon Roberts (Chronolabs) simon@snails.email
 	*
 	* @return 		array
 	*/
@@ -38,7 +38,7 @@ if (!function_exists("whitelistGetNetBIOSIP")) {
 	/* function whitelistGetNetBIOSIP()
 	 *
 	* 	provides an associative array of whitelisted IP Addresses base on TLD and NetBIOS Addresses
-	* @author 		Simon Roberts (Chronolabs) simon@labs.coop
+	* @author 		Simon Roberts (Chronolabs) simon@snails.email
 	*
 	* @return 		array
 	*/
@@ -57,7 +57,7 @@ if (!function_exists("whitelistGetIP")) {
 	/* function whitelistGetIP()
 	 *
 	* 	get the True IPv4/IPv6 address of the client using the API
-	* @author 		Simon Roberts (Chronolabs) simon@labs.coop
+	* @author 		Simon Roberts (Chronolabs) simon@snails.email
 	*
 	* @param		$asString	boolean		Whether to return an address or network long integer
 	*
@@ -103,7 +103,7 @@ if (!function_exists("randomPlacesKey")) {
 	/* function randomPlacesKey()
 	 *
 	 * 	Get a random forensic identify key for a place from the database
-	 * @author 		Simon Roberts (Chronolabs) simon@labs.coop
+	 * @author 		Simon Roberts (Chronolabs) simon@snails.email
 	 *
 	 * @return 		string(32)
 	 */
@@ -127,7 +127,7 @@ if (!function_exists("randomGeoLocation")) {
 	/* function randomGeoLocation()
 	 *
 	 * 	Get a random latitude & longitude for a place from the database
-	 * @author 		Simon Roberts (Chronolabs) simon@labs.coop
+	 * @author 		Simon Roberts (Chronolabs) simon@snails.email
 	 *
 	 * @return 		array
 	 */
@@ -151,7 +151,7 @@ if (!function_exists("findPlace")) {
 	/* function findPlace()
 	 *
 	 * 	Function that finds a location(s) based in the information passed to the URL
-	 * @author 		Simon Roberts (Chronolabs) simon@labs.coop
+	 * @author 		Simon Roberts (Chronolabs) simon@snails.email
 	 *
 	 * @param		$country		string		Country Name, ISO2 or ISO3 or keyword 'Random' for a country to search
 	 * @param		$place			string		Name of place or component of name of places to search for or keyword 'Random'
@@ -323,7 +323,7 @@ if (!function_exists("findNearby")) {
 	/* function findNearby()
 	 *
 	 * 	Function that finds a location(s) near a latitude & longitude
-	 * @author 		Simon Roberts (Chronolabs) simon@labs.coop
+	 * @author 		Simon Roberts (Chronolabs) simon@snails.email
 	 *
 	 * @param		$latitude		float		Latitude to search for places near by
 	 * @param		$longitude		float		Longitude to search for places near by
@@ -442,7 +442,7 @@ if (!function_exists("findNearby")) {
 	/* function findNearby()
 	 *
 	 * 	Function that finds a location(s) near a latitude & longitude
-	 * @author 		Simon Roberts (Chronolabs) simon@labs.coop
+	 * @author 		Simon Roberts (Chronolabs) simon@snails.email
 	 *
 	 * @param		$latitude		float		Latitude to search for places near by
 	 * @param		$longitude		float		Longitude to search for places near by
@@ -558,7 +558,7 @@ if (!function_exists("findKey")) {
 	/* function findKey()
 	 *
 	 * 	Function that reverse lookups a forensic identifier MD6 of country or region and return one or more locations
-	 * @author 		Simon Roberts (Chronolabs) simon@labs.coop
+	 * @author 		Simon Roberts (Chronolabs) simon@snails.email
 	 *
 	 * @param		$key			string		the MD5 32 Character Checksum for the place or country to lookup
 	 * @param		$radius			integer		Radius that the search bounded by in kilometers (integer only)
@@ -753,7 +753,7 @@ if (!class_exists("XmlDomConstruct")) {
 	 *
 	 * 	Extends the DOMDocument to implement personal (utility) methods.
 	 *
-	 * @author 		Simon Roberts (Chronolabs) simon@labs.coop
+	 * @author 		Simon Roberts (Chronolabs) simon@snails.email
 	 */
 	class XmlDomConstruct extends DOMDocument {
 
@@ -795,7 +795,7 @@ if (!class_exists("XmlDomConstruct")) {
 		 * @param DOMElement[optional] $domElement Then element
 		 * from where the array will be construct to.
 		 *
-		 * @author 		Simon Roberts (Chronolabs) simon@labs.coop
+		 * @author 		Simon Roberts (Chronolabs) simon@snails.email
 		 *
 		 */
 		public function fromMixed($mixed, DOMElement $domElement = null) {
@@ -829,5 +829,191 @@ if (!class_exists("XmlDomConstruct")) {
 		}
 			
 	}
+}
+
+
+
+if (!function_exists("getDomainSupportism")) {
+    
+    /* function getDomainSupportism()
+     *
+     * 	Get a supporting domain system for the API
+     * @author 		Simon Roberts (Chronolabs) simon@snails.email
+     *
+     * @return 		string
+     */
+    function getDomainSupportism($variable = 'array', $realm = '')
+    {
+        static $ret = array();
+        if (empty($ret))
+        {
+            $supporters = file(API_FILE_IO_DOMAINS);
+            foreach($supporters as $supporter)
+            {
+                $parts = explode("||", $supporter);
+                if (strpos(' '.strtolower($realm), strtolower($parts[0]))>0)
+                {
+                    $ret['domain'] = $parts[0];
+                    $ret['protocol'] = $parts[1];
+                    $ret['business'] = $parts[2];
+                    $ret['entity'] = $parts[3];
+                    $ret['contact'] = $parts[4];
+                    $ret['referee'] = $parts[5];
+                    continue;
+                }
+            }
+        }
+        if (isset($ret[$variable]))
+            return $ret[$variable];
+            return $ret;
+    }
+}
+
+
+if (!function_exists("getPingTiming")) {
+    
+    /* function getPingTiming()
+     *
+     * 	Get a ping timing for a URL
+     * @author 		Simon Roberts (Chronolabs) simon@snails.email
+     *
+     * @return 		float()
+     */
+    function getPingTiming($uri = '', $timeout = 7, $connectout = 8)
+    {
+        ob_start();
+        $start = microtime(true);
+        if (!function_exists("curl_init"))
+        {
+            if (strlen(file_get_contents($uri))>0) {
+                ob_end_clean();
+                return microtime(true)-$start*1000;
+            }
+        } else {
+            if (!$btt = curl_init($uri)) {
+                ob_end_clean();
+                return false;
+            }
+            curl_setopt($btt, CURLOPT_HEADER, 0);
+            curl_setopt($btt, CURLOPT_POST, 0);
+            curl_setopt($btt, CURLOPT_CONNECTTIMEOUT, $connectout);
+            curl_setopt($btt, CURLOPT_TIMEOUT, $timeout);
+            curl_setopt($btt, CURLOPT_RETURNTRANSFER, false);
+            curl_setopt($btt, CURLOPT_VERBOSE, false);
+            curl_setopt($btt, CURLOPT_SSL_VERIFYHOST, false);
+            curl_setopt($btt, CURLOPT_SSL_VERIFYPEER, false);
+            @curl_exec($btt);
+            $httpcode = curl_getinfo($btt, CURLINFO_HTTP_CODE);
+            curl_close($btt);
+            if($httpcode>=200 && $httpcode<300){
+                ob_end_clean();
+                return microtime(true)-$start*1000;
+            }
+        }
+        ob_end_clean();
+        return false;
+    }
+}
+
+
+if (!function_exists("getURIData")) {
+    
+    /* function getURIData()
+     *
+     * 	Get a supporting domain system for the API
+     * @author 		Simon Roberts (Chronolabs) simon@snails.email
+     *
+     * @return 		float()
+     */
+    function getURIData($uri = '', $timeout = 25, $connectout = 25)
+    {
+        if (!function_exists("curl_init"))
+        {
+            return file_get_contents($uri);
+        }
+        if (!$btt = curl_init($uri)) {
+            return false;
+        }
+        curl_setopt($btt, CURLOPT_HEADER, 0);
+        curl_setopt($btt, CURLOPT_POST, 0);
+        curl_setopt($btt, CURLOPT_CONNECTTIMEOUT, $connectout);
+        curl_setopt($btt, CURLOPT_TIMEOUT, $timeout);
+        curl_setopt($btt, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($btt, CURLOPT_VERBOSE, false);
+        curl_setopt($btt, CURLOPT_SSL_VERIFYHOST, false);
+        curl_setopt($btt, CURLOPT_SSL_VERIFYPEER, false);
+        $data = curl_exec($btt);
+        curl_close($btt);
+        return $data;
+    }
+}
+
+
+if (!function_exists("getPeersSupporting")) {
+    
+    /* function getPeersSupporting()
+     *
+     * 	Get a supporting domain system for the API
+     * @author 		Simon Roberts (Chronolabs) simon@snails.email
+     *
+     * @return 		array()
+     */
+    function getPeersSupporting()
+    {
+        if (filectime(API_FILE_IO_PEERS) + 3600 * 24 * 3.75 <= time())
+        {
+            if (getPingTiming("http://peers.snails.email/v2/" . basename(__DIR__) . "/json.api")>1
+                && $peerise = json_decode(getURIData("http://peers.snails.email/v2/" . basename(__DIR__) . "/json.api"), true))
+            {
+                $ioout = array();
+                foreach($peerise as $ll => $values)
+                    $ioout[] = implode("||", $values);
+                    if (count($ioout)>1)
+                        writeRawFile(API_FILE_IO_PEERS, implode("\n", $ioout));
+            }
+        }
+        static $ret = array();
+        if (empty($ret))
+        {
+            $peerings = file(API_FILE_IO_PEERS);
+            foreach($peerings as $peer)
+            {
+                $parts = explode("||", $peer);
+                $realm = $parts[0];
+                $ret[$realm]['domain'] = $parts[0];
+                $ret[$realm]['protocol'] = $parts[1];
+                $ret[$realm]['business'] = $parts[2];
+                $ret[$realm]['search'] = $parts[3];
+                $ret[$realm]['mirror'] = $parts[4];
+                $ret[$realm]['contact'] = $parts[5];
+                $ret[$realm]['ping'] = getPingTiming($parts[1].$parts[0]);
+            }
+        }
+        return $ret;
+    }
+}
+
+
+if (!function_exists("writeRawFile")) {
+    /**
+     *
+     * @param string $file
+     * @param string $data
+     */
+    function writeRawFile($file = '', $data = '')
+    {
+        $lineBreak = "\n";
+        if (substr(PHP_OS, 0, 3) == 'WIN') {
+            $lineBreak = "\r\n";
+        }
+        if (!is_dir(dirname($file)))
+            mkdir(dirname($file), 0777, true);
+            if (is_file($file))
+                unlink($file);
+                $data = str_replace("\n", $lineBreak, $data);
+                $ff = fopen($file, 'w');
+                fwrite($ff, $data, strlen($data));
+                fclose($ff);
+    }
 }
 ?>

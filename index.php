@@ -9,21 +9,21 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * @copyright       Chronolabs Cooperative http://labs.coop
+ * @copyright       Chronolabs Cooperative http://snails.email
  * @license         GNU GPL 2 (http://www.gnu.org/licenses/old-licenses/gpl-2.0.html)
  * @package         places
  * @since           1.0.2
- * @author          Simon Roberts <meshy@labs.coop>
+ * @author          Simon Roberts <meshy@snails.email>
  * @version         $Id: functions.php 1000 2013-06-07 01:20:22Z mynamesnot $
  * @subpackage		api
  * @description		Screening API Service REST
  */
 
-	$parts = explode(".", microtime(true));
-	mt_srand(mt_rand(-microtime(true), microtime(true))/$parts[1]);
-	mt_srand(mt_rand(-microtime(true), microtime(true))/$parts[1]);
-	mt_srand(mt_rand(-microtime(true), microtime(true))/$parts[1]);
-	mt_srand(mt_rand(-microtime(true), microtime(true))/$parts[1]);
+	$parts = explode(".", microttime(true));
+	mt_srand(mt_rand(-time(), time())/$parts[1]);
+	mt_srand(mt_rand(-time(), time())/$parts[1]);
+	mt_srand(mt_rand(-time(), time())/$parts[1]);
+	mt_srand(mt_rand(-time(), time())/$parts[1]);
 	$salter = ((float)(mt_rand(0,1)==1?'':'-').$parts[1].'.'.$parts[0]) / sqrt((float)$parts[1].'.'.intval(cosh($parts[0])))*tanh($parts[1]) * mt_rand(1, intval($parts[0] / $parts[1]));
 	header('Blowfish-salt: '. $salter);
 	
@@ -48,11 +48,6 @@
 	$pu = parse_url($_SERVER['REQUEST_URI']);
 	$source = (isset($_SERVER['HTTPS'])?'https://':'http://').strtolower($_SERVER['HTTP_HOST']).$pu['path'];
 	unset($pu);
-
-	define('MAXIMUM_QUERIES', 25);
-	ini_set('memory_limit', '128M');
-	include dirname(__FILE__).'/functions.php';
-	include dirname(__FILE__).'/class/debauchosity.php';
 
 	$help=false;
 	if ((!isset($_GET['country']) || empty($_GET['country'])) && (!isset($_GET['place']) || empty($_GET['place']))) {
@@ -94,22 +89,30 @@
 		exit;
 	}
 	http_response_code(200);
-	switch ($mode) {
-		default:
-			$data = findPlace($country, $place, $output, $number);
-			break;
-		case 'nearby':
-			$data = findNearby($latitude, $longitude, $radius, $output);
-			break;
-		case 'key':
-			$data = findKey($key, $radius, $output);
-			break;
+	if (!$data = PlacesCache::read(md5($_SERVER['REQUEST_URI'])))
+	{
+    	switch ($mode) {
+    		default:
+    			$data = findPlace($country, $place, $output, $number);
+    			break;
+    		case 'nearby':
+    			$data = findNearby($latitude, $longitude, $radius, $output);
+    			break;
+    		case 'key':
+    			$data = findKey($key, $radius, $output);
+    			break;
+    	}
+    	PlacesCache::write(md5($_SERVER['REQUEST_URI']), $data, API_CACHE_SECONDS);
+    	if (!$sessions = PlacesCache::read('sessions-'.md5($_SERVER['HTTP_HOST'])))
+    	    $sessions = array();
+    	$sessions[md5($_SERVER['REQUEST_URI'])] = time() + API_CACHE_SECONDS;
+    	PlacesCache::write('sessions-'.md5($_SERVER['HTTP_HOST']), $sessions, API_CACHE_SECONDS * API_CACHE_SECONDS * API_CACHE_SECONDS);
 	}
 	switch ($output) {
 		default:
 			echo '<h1>' . $country . ' - ' . $place . ' (Places data)</h1>';
 			echo '<pre style="font-family: \'Courier New\', Courier, Terminal; font-size: 0.77em;">';
-			echo $data;
+			echo print_r($data, true);
 			echo '</pre>';
 			break;
 		case 'raw':
@@ -129,5 +132,15 @@
 			$dom->fromMixed(array('root'=>$data));
  			echo $dom->saveXML();
 			break;
+	}
+	
+	if ($sessions = PlacesCache::read('sessions-'.md5($_SERVER['HTTP_HOST'])))
+	{
+	    foreach($sessions as $key => $seconds)
+	        if ($seconds<time())
+	        {
+	            PlacesCache::delete($key);
+	            unset ($sessions[$key]);
+	        }
 	}
 ?>		

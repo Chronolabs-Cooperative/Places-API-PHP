@@ -9,11 +9,11 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * @copyright       Chronolabs Cooperative http://labs.coop
+ * @copyright       Chronolabs Cooperative http://snails.email
  * @license         GNU GPL 2 (http://www.gnu.org/licenses/old-licenses/gpl-2.0.html)
  * @package         places
  * @since           1.0.2
- * @author          Simon Roberts <meshy@labs.coop>
+ * @author          Simon Roberts <meshy@snails.email>
  * @version         $Id: functions.php 1000 2013-06-07 01:20:22Z mynamesnot $
  * @subpackage		api
  * @description		REST GeoSpatial Places API
@@ -23,7 +23,7 @@
  * Database Constants
  *
  * @abstract
- * @author     Simon Roberts <meshy@labs.coop>
+ * @author     Simon Roberts <meshy@snails.email>
  * @package    places
  * @subpackage database
  */
@@ -32,22 +32,22 @@
 /**
  * @var string		Database Name (Database Source One)
  */
-define('DB_DEBAUCH_NAME', '');
+define('DB_DEBAUCH_NAME', 'geospatial');
 
 /**
  * @var string		Database Username (Database Source One)
  */
-define('DB_DEBAUCH_USER', '');
+define('DB_DEBAUCH_USER', 'geosptial');
 
 /**
  * @var string		Database Password (Database Source One)
  */
-define('DB_DEBAUCH_PASS', '');
+define('DB_DEBAUCH_PASS', 'r6vpIaTtcGBysbL5');
 
 /**
  * @var string		Database Host Address/IP (Database Source One)
  */
-define('DB_DEBAUCH_HOST', '');
+define('DB_DEBAUCH_HOST', 'localhost');
 
 /**
  * @var string		Database Character Set (Global)

@@ -1,1 +1,1 @@
-# Chronolabs Cooperative ~ GeoSpatial Places Lookups API ~ http://places.labs.coop
+# Chronolabs Cooperative ~ GeoSpatial Places Lookups API ~ http://places.snails.email

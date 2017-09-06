@@ -9,11 +9,11 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * @copyright       Chronolabs Cooperative http://labs.coop
+ * @copyright       Chronolabs Cooperative http://snails.email
  * @license         GNU GPL 2 (http://www.gnu.org/licenses/old-licenses/gpl-2.0.html)
  * @package         places
  * @since           1.0.2
- * @author          Simon Roberts <meshy@labs.coop>
+ * @author          Simon Roberts <meshy@snails.email>
  * @version         $Id: functions.php 1000 2013-06-07 01:20:22Z mynamesnot $
  * @subpackage		api
  * @description		Screening API Service REST
@@ -32,7 +32,7 @@
 <head>
 <meta property="og:title" content="Geographical Places API Services"/>
 <meta property="og:type" content="api"/>
-<meta property="og:image" content="https://icons.ringwould.com.au/trusting/apple-touch-icon-114x114.png"/>
+<meta property="og:image" content="https://icons.snails.email/trusting/apple-touch-icon-114x114.png"/>
 <meta property="og:url" content="<?php echo (isset($_SERVER["HTTPS"])?"https://":"http://").$_SERVER["HTTP_HOST"].$_SERVER["REQUEST_URI"]; ?>" />
 <meta property="og:site_name" content="<?php echo $business; ?>"/>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -69,13 +69,13 @@
 </script>
 <!-- AddThis Smart Layers END -->
 <link rel="stylesheet" href="<?php echo $source; ?>/style.css" type="text/css" />
-<link rel="stylesheet" href="https://css.ringwould.com.au/3/gradientee/stylesheet.css" type="text/css" />
-<link rel="stylesheet" href="https://css.ringwould.com.au/3/shadowing/styleheet.css" type="text/css" />
+<link rel="stylesheet" href="https://css.xortify.com/3/gradientee/stylesheet.css" type="text/css" />
+<link rel="stylesheet" href="https://css.xortify.com/3/shadowing/styleheet.css" type="text/css" />
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
 <script>
 	var icoroite = 9966 * Math.random() + 7755;
 	setTimeout(function() {
-		jQuery.getJSON( "https://icons.ringwould.com.au/icons/java/<?php echo ($GLOBALS["domain"]=="ringwould.com.au"?"ringwould":"invader"); ?>/random.json", function( data ) {
+		jQuery.getJSON( "https://icons.snails.email/icons/java/<?php echo ($GLOBALS["domain"]=="snails.email"?"ringwould":"invader"); ?>/random.json", function( data ) {
 			$.each(data, function( keyey, value ) {
 				$( "#" + keyey ).href = value;
 			});
@@ -84,11 +84,11 @@
 </script>
 <?php
 	if ((!isset($_SESSION['icon-meta-html']) || empty($_SESSION['icon-meta-html'])) && session_id())
-		$_SESSION['icon-meta-html'] = file_get_contents("https://icons.ringwould.com.au/icons/java/".($GLOBALS["domain"]=="ringwould.com.au"?"ringwould":"invader")."/random.html");
+		$_SESSION['icon-meta-html'] = file_get_contents("https://icons.snails.email/icons/java/".($GLOBALS["domain"]=="snails.email"?"ringwould":"invader")."/random.html");
 	if (isset($_SESSION['icon-meta-html']) && !empty($_SESSION['icon-meta-html']))
 		echo $_SESSION['icon-meta-html'];
 	else
-		echo file_get_contents("https://icons.ringwould.com.au/icons/java/".($GLOBALS["domain"]=="ringwould.com.au"?"ringwould":"invader")."/random.html");
+		echo file_get_contents("https://icons.snails.email/icons/java/".($GLOBALS["domain"]=="snails.email"?"ringwould":"invader")."/random.html");
 ?>
 </head>
 
@@ -100,7 +100,7 @@
     <h2>Examples of Calls (Using JSON)</h2>
     <p>There is a couple of calls to the API which I will explain.</p>
     <blockquote>
-    			For example if you want a list of the countries you call the following (this is in JSON you can see the API Help for further formats) :: <a href="<?php echo $source; ?>v1/list/list/json.api" target="_blank"><?php echo $source; ?>v1/list/list/json.api</a> SSL on this API is available if you aren't already using it; <a href="https://places.labs.coop/v1/list/list/json.api" target="_blank">https://places.labs.coop/v1/list/list/json.api</a> to return a random number of areas from a country you would do the following for a single random area from Australia :: <a href="<?php echo $source; ?>v1/australia/random/json.api" target="_blank"><?php echo $source; ?>v1/australia/random/json.api</a> or if you want to return 10 random areas from Australia <a href="<?php echo $source; ?>v1/australia/random/<?php echo $distance; ?>/json.api" target="_blank"><?php echo $source; ?>v1/australia/random/<?php echo $distance; ?>/json.api</a>.<br/><br/>
+    			For example if you want a list of the countries you call the following (this is in JSON you can see the API Help for further formats) :: <a href="<?php echo $source; ?>v1/list/list/json.api" target="_blank"><?php echo $source; ?>v1/list/list/json.api</a> SSL on this API is available if you aren't already using it; <a href="https://places.snails.email/v1/list/list/json.api" target="_blank">https://places.snails.email/v1/list/list/json.api</a> to return a random number of areas from a country you would do the following for a single random area from Australia :: <a href="<?php echo $source; ?>v1/australia/random/json.api" target="_blank"><?php echo $source; ?>v1/australia/random/json.api</a> or if you want to return 10 random areas from Australia <a href="<?php echo $source; ?>v1/australia/random/<?php echo $distance; ?>/json.api" target="_blank"><?php echo $source; ?>v1/australia/random/<?php echo $distance; ?>/json.api</a>.<br/><br/>
     			Of course there is a random return from any country with any random selected location of that country is down like so :: <a href="<?php echo $source; ?>v1/random/random/<?php echo $distance; ?>/json.api" target="_blank"><?php echo $source; ?>v1/random/random/<?php echo $distance; ?>/json.api</a> this is for 10 random locations in a country or for a single return from a country of any random is as follows :: <a href="<?php echo $source; ?>v1/random/random/json.api" target="_blank"><?php echo $source; ?>v1/random/random/json.api</a>.<br/><br/>
     			Each place and country is provided a unique MD5 Key for the record and placement, you can reverse lookup this if you wish we're for any place key, that is a locality not a country you can also specify a radius based in kilometres that returns all the nearby items of it and distance from that key. If you we're going to reverse look up a place key the call would be like so :: <a href="<?php echo $source; ?>v1/key/<?php echo $key; ?>/json.api" target="_blank"><?php echo $source; ?>v1/key/<?php echo $key; ?>/json.api</a>.<br/><br/>
     			If for example you wanted to reverse lookup a key and also return the nearest items within a 15Km radius the call would be like so :: <a href="<?php echo $source; ?>v1/key/<?php echo $key; ?>/15/json.api" target="_blank"><?php echo $source; ?>v1/key/<?php echo $key; ?>/15/json.api</a>. The maximum radius for a search is 145 kilometres!<br/><br/>
