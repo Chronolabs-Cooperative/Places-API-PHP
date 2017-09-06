@@ -9,11 +9,11 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * @copyright       Chronolabs Cooperative http://labs.coop
+ * @copyright       Chronolabs Cooperative http://snails.email
  * @license         GNU GPL 2 (http://www.gnu.org/licenses/old-licenses/gpl-2.0.html)
  * @package         places
  * @since           1.0.2
- * @author          Simon Roberts <meshy@labs.coop>
+ * @author          Simon Roberts <meshy@snails.email>
  * @version         $Id: functions.php 1000 2013-06-07 01:20:22Z mynamesnot $
  * @subpackage		api
  * @description		REST GeoSpatial Places API
@@ -24,7 +24,7 @@
  * MySQL class for Database access
  *
  * @abstract
- * @author     Simon Roberts <meshy@labs.coop>
+ * @author     Simon Roberts <meshy@snails.email>
  * @package    places
  * @subpackage database
  */
