@@ -116,8 +116,7 @@
     	        {
     	            unset($row['Table']);
     	            unset($row['CountryID']);
-    	            foreach($row as $key => $value)
-    	                $data[$row['key']][$key] = $value;
+    	            $data[] = $row;
     	        }
     	        break;
     	    case 'continents':
@@ -127,8 +126,7 @@
     	        while($row = $GLOBALS['DebauchDB']->fetchArray($result))
     	        {
     	            unset($row['ContinentID']);
-    	            foreach($row as $key => $value)
-    	                $data[$row['key']][$key] = $value;
+    	            $data[] = $row;
     	        }
     	        break;
     		default:
