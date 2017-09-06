@@ -22,6 +22,8 @@
  */
 
 
+require_once __DIR__ . DIRECTORY_SEPARATOR . 'sqlutility.php';
+
 /**
  * Database Manager Class Factory
  *
