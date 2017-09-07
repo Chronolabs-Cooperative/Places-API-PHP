@@ -115,7 +115,11 @@
 		exit;
 	}
 	http_response_code(200);
-	if (!$data = PlacesCache::read(md5($_SERVER['REQUEST_URI'])))
+	if ($country == 'random' || $place == 'random')
+	    $keyname = md5(whitelistGetIP(true) . '___' . $_SERVER['HTTP_HOST'] . '___' . $_SERVER['REQUEST_URI']);
+	else 
+	    $keyname = md5($_SERVER['REQUEST_URI']);
+	if (!$data = PlacesCache::read($keyname))
 	{
 	    $retries = 0;
 	    $data = array();
@@ -175,14 +179,10 @@
 	    }
     	if (!empty($data))
     	{
-    	    if (strpos($_SERVER['REQUEST_URI'], 'random')>0)
-    	       define('CACHE_FOR_SECONDS', 7);
-    	    else
-    	        define('CACHE_FOR_SECONDS', API_CACHE_SECONDS);
-    	    PlacesCache::write(md5($_SERVER['REQUEST_URI']), $data, CACHE_FOR_SECONDS);
+    	    PlacesCache::write($keyname, $data, API_CACHE_SECONDS);
     	    if (!$sessions = PlacesCache::read('sessions-'.md5($_SERVER['HTTP_HOST'])))
     	        $sessions = array();
-    	    $sessions[md5($_SERVER['REQUEST_URI'])] = time() + CACHE_FOR_SECONDS;
+    	    $sessions[$keyname] = time() + API_CACHE_SECONDS;
 	        PlacesCache::write('sessions-'.md5($_SERVER['HTTP_HOST']), $sessions, API_CACHE_SECONDS * API_CACHE_SECONDS * API_CACHE_SECONDS);
     	}
 	}
