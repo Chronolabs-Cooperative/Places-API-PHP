@@ -9,10 +9,10 @@ This API is a Geospatial service provided by PHP7.0 - it utilises file caches as
 This goes in your API_ROOT_PATH/.htaccess file
 
     RewriteEngine On
-    RewriteRule ^v([0-9]{1,2})/([a-zA-Z\ \(\)]+)/([0-9a-zA-Z\ \(\)]+)/([0-9]+)/(raw|html|serial|json|xml).api ./index.php?version=$1&country=$2&place=$3&radius=$4&output=$5 [L,NC,QSA]
-    RewriteRule ^v([0-9]{1,2})/([a-zA-Z\ \(\)]+)/([0-9a-zA-Z\ \(\)]+)/(raw|html|serial|json|xml).api ./index.php?version=$1&country=$2&place=$3&output=$4 [L,NC,QSA]
+    RewriteRule ^v([0-9]{1,2})/([0-9a-zA-Z\ \(\)\-\,]+)/([0-9a-zA-Z\ \(\)\-\,]+)/([0-9]+)/(raw|html|serial|json|xml).api ./index.php?version=$1&country=$2&place=$3&radius=$4&output=$5 [L,NC,QSA]
+    RewriteRule ^v([0-9]{1,2})/([0-9a-zA-Z\ \(\)\-\,]+)/([0-9a-zA-Z\ \(\)\-\,]+)/(raw|html|serial|json|xml).api ./index.php?version=$1&country=$2&place=$3&output=$4 [L,NC,QSA]
     RewriteRule ^v([0-9]{1,2})/(nearby)/([0-9\.\-]+)/([0-9\.\-]+)/([0-9]+)/(raw|html|serial|json|xml).api ./index.php?version=$1&country=$2&latitude=$3&longitude=$4&radius=$5&output=$6 [L,NC,QSA]
-    RewriteRule ^v([0-9]{1,2})/(list)/([a-zA-Z\ \(\)]+)/(raw|html|serial|json|xml).api ./index.php?version=$1&country=$2&place=$3&output=$4 [L,NC,QSA]
+    RewriteRule ^v([0-9]{1,2})/(list)/([0-9a-zA-Z\ \(\)\-\,]+)/(raw|html|serial|json|xml).api ./index.php?version=$1&country=$2&place=$3&output=$4 [L,NC,QSA]
     
 # Importing Database & Configuring
 
