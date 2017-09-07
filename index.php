@@ -54,13 +54,39 @@
 	$source = (isset($_SERVER['HTTPS'])?'https://':'http://').strtolower($_SERVER['HTTP_HOST']).$pu['path'];
 	unset($pu);
 
+	$odds = $inner = array();
+	foreach($_GET as $key => $values)
+        if (!isset($inner[$key]))
+            $inner[$key] = $values;
+        elseif (!in_array((!is_array($values)?$values:md5(json_encode($values, true)))), array_keys($odds[$key])) {
+            if (is_array($values))
+                $odds[$key][md5(json_encode($inner[$key] = $values, true))] = $values;
+            else
+                $odds[$key][$inner[$key] = $values] = "$values--$key";
+    foreach($_POST as $key => $values)
+        if (!isset($inner[$key]))
+                $inner[$key] = $values;
+        elseif (!in_array((!is_array($values)?$values:md5(json_encode($values, true)))), array_keys($odds[$key])) {
+            if (is_array($values))
+                $odds[$key][md5(json_encode($inner[$key] = $values, true))] = $values;
+            else
+                $odds[$key][$inner[$key] = $values] = "$values--$key";
+    foreach(parse_url('http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'].(strpos($_SERVER['REQUEST_URI'], '?')?'&':'?').$_SERVER['QUERY_STRING'], PHP_URL_QUERY) as $key => $values)
+        if (!isset($inner[$key]))
+            $inner[$key] = $values;
+        elseif (!in_array((!is_array($values)?$values:md5(json_encode($values, true)))), array_keys($odds[$key])) {
+            if (is_array($values))
+                $odds[$key][md5(json_encode($inner[$key] = $values, true))] = $values;
+            else
+                $odds[$key][$inner[$key] = $values] = "$values--$key";
+        
 	$help=false;
-	if ((!isset($_GET['country']) || empty($_GET['country'])) && (!isset($_GET['place']) || empty($_GET['place']))) {
+	if ((!isset($inner['country']) || empty($inner['country'])) && (!isset($inner['place']) || empty($inner['place'])) && (!isset($inner['address']) || empty($inner['address']))) {
 		$help=true;
-	} elseif (isset($_GET['output']) || !empty($_GET['output'])) {
-	    if (isset($_GET['country']) && $_GET['country'] == 'list') {
-            $output = trim($_GET['output']);
-            switch ($_GET['place'])
+	} elseif (isset($inner['output']) || !empty($inner['output'])) {
+	    if (isset($inner['country']) && $inner['country'] == 'list') {
+            $output = trim($inner['output']);
+            switch ($inner['place'])
             {
     	        default:
                     $mode = 'countries';
@@ -69,44 +95,52 @@
     	            $mode = 'continents';
     	            break;
             }
-	   } elseif (isset($_GET['country']) && $_GET['country'] == 'key') {
-			$key = trim($_GET['place']);
-			$radius = intval($_GET['radius']);
+	   } elseif (isset($inner['country']) && $inner['country'] == 'key') {
+			$key = trim($inner['place']);
+			$radius = isset($inner['radius'])?(float)$inner['radius']:1;
 			if ($radius<0)
 				$radius = 0;
 			elseif ($radius>245)
 				$radius = 145;
-			$output = trim($_GET['output']);
+			$output = trim($inner['output']);
 			$mode = 'key';
-		} elseif (isset($_GET['country']) && $_GET['country'] == 'nearby') {
-			$latitude = (float)$_GET['latitude'];
-			$longitude = (float)$_GET['longitude'];
-			$radius = intval($_GET['radius']);
+		} elseif (isset($inner['country']) && $inner['country'] == 'nearby') {
+			$latitude = (float)$inner['latitude'];
+			$longitude = (float)$inner['longitude'];
+			$radius = isset($inner['radius'])?(float)$inner['radius']:1;
 			if ($radius<0)
 				$radius = 0;
 			elseif ($radius>245)
 				$radius = 145;
-			$output = trim($_GET['output']);
+			$output = trim($inner['output']);
 			$mode = 'nearby';
-		} elseif (isset($_GET['country']) && $_GET['country'] == 'venues') {
-		    $key = (string)$_GET['place'];
-		    $radius = intval($_GET['radius']);
+		} elseif (isset($inner['country']) && $inner['country'] == 'venues') {
+		    $key = (string)$inner['place'];
+		    $radius = isset($inner['radius'])?(float)$inner['radius']:1;
 		    if ($radius<0)
 		        $radius = 0;
 	        elseif ($radius>245)
 	           $radius = 145;
-	        $output = trim($_GET['output']);
+	        $output = trim($inner['output']);
+	        $type = trim($inner['type']);
 	        $mode = 'venues';
-		} elseif (isset($_GET['country']) && $_GET['country'] == 'maps') {
-		    $key = (string)$_GET['place'];
-		    $output = trim($_GET['output']);
+		} elseif (isset($inner['country']) && $inner['country'] == 'maps') {
+		    $key = (string)$inner['place'];
+		    $output = trim($inner['output']);
+		    $mode = 'maps';
+		} elseif (isset($inner['country']) && $inner['country'] == 'address') {
+		    $address = (string)$inner['address'];
+		    $key = (string)$inner['place'];
+		    $radius = isset($inner['radius'])?(float)$inner['radius']:1;
+		    $output = trim($inner['output']);
+		    $type = trim($inner['type']);
 		    $mode = 'maps';
 		} else {
 			$mode = 'place';
-			$country = trim($_GET['country']);
-			$place = trim($_GET['place']);
-			$output = trim($_GET['output']);
-			$number = isset($_GET['radius'])?(integer)$_GET['radius']:1;
+			$country = trim($inner['country']);
+			$place = trim($inner['place']);
+			$output = trim($inner['output']);
+			$number = isset($inner['radius'])?(float)$inner['radius']:1;
 		}
 	} else {
 		$help=true;
