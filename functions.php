@@ -229,50 +229,51 @@ if (!function_exists("findPlace")) {
     		elseif (strlen($country)==2)
     			$sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `countries` WHERE lower(`ISO2`) LIKE '".strtolower($country)."' GROUP BY `CountryID` ORDER BY RAND() LIMIT 1 ";
     		if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
-    			
-			    while($country = $GLOBALS['DebauchDB']->fetchArray($result)) {
-			        $sql = "SELECT count(*) as records FROM `" . $country['Table'] . "`";
+			    while($cuntree = $GLOBALS['DebauchDB']->fetchArray($result)) {
+			        $sql = "SELECT count(*) as records FROM `" . $cuntree['Table'] . "`";
 			        if ($resultb = $GLOBALS['DebauchDB']->queryF($sql)) {
 			            $records = $GLOBALS['DebauchDB']->fetchArray($resultb);
-			            $country['records'] = $records['records'];
+			            $cuntree['records'] = $records['records'];
 			        } else
-			            $country['records'] = 0 ;
-		            $table = $country['Table'];
-		            unset($country['CountryID']);
-		            unset($country['Table']);
+			            $cuntree['records'] = 0 ;
+		            $table = $cuntree['Table'];
+		            unset($cuntree['CountryID']);
+		            unset($cuntree['Table']);
 		            if ($format!='xml')
-		                $ret['countries'][$country['key']]=$country;
+		                $ret['countries'][$cuntree['key']]=$cuntree;
 	                else
-	                    $ret['countries'][$table]=$country;
+	                    $ret['countries'][$table]=$cuntree;
     		
         			if (strtolower($place)!='random')
-        			    $sql = "SELECT *, md5(concat(`CountryID`, `CordID`)) as `key`  FROM `" . $table . "` WHERE LOWER(`RegionName`) LIKE '" . strtolower($place) . "'  ORDER BY RAND() LIMIT 1";
-        			elseif (strtolower($place)=='random')
-        			    $sql = "SELECT *, md5(concat(`CountryID`, `CordID`)) as `key`  FROM `" . $table . "` ORDER BY RAND() LIMIT " . $return;
-        			else 
-        			    $sql = "SELECT *, md5(concat(`CountryID`, `CordID`)) as `key`  FROM `" . $table . "` WHERE LOWER(`RegionName`) LIKE '%" . strtolower($place) . "%'  ORDER BY RAND() LIMIT 1";
+        			    $sql = "SELECT *, md5(concat(`CountryID`, `CordID`)) as `key`  FROM `" . $table . "` WHERE LOWER(`RegionName`) LIKE '" . strtolower($place) . "'  GROUP BY `CordID` ORDER BY RAND() LIMIT 1";
+        			elseif (strtolower($place) == 'random' && strtolower($country) == 'random')
+        			    $sql = "SELECT *, md5(concat(`CountryID`, `CordID`)) as `key`  FROM `" . $table . "` GROUP BY `CordID` ORDER BY RAND() LIMIT 1";
+        			elseif (strtolower($place) == 'random' && strtolower($country) != 'random') {
+        			    $sql = "SELECT *, md5(concat(`CountryID`, `CordID`)) as `key`  FROM `" . $table . "` GROUP BY `CordID` ORDER BY RAND() LIMIT $return";
+        			    $numberof = $return;
+        			} else 
+        			    $sql = "SELECT *, md5(concat(`CountryID`, `CordID`)) as `key`  FROM `" . $table . "` WHERE LOWER(`RegionName`) LIKE '%" . strtolower($place) . "%'  GROUP BY `CordID` ORDER BY RAND() LIMIT 1";
         			
     				if ($resultb = $GLOBALS['DebauchDB']->queryF($sql)) {
-    					while ($place = $GLOBALS['DebauchDB']->fetchArray($resultb)) {
-    						unset($place['CountryID']);
-    						unset($place['CordID']);
-    						$place['country-key'] = $country['key'];
-    						if (strpos($place['RegionName'], ',')) {
-    							$parts = explode(', ',$place['RegionName']);
-    							$place['RegionName'] = $parts[1] . ' ' . $parts[0];
+    					while ($region = $GLOBALS['DebauchDB']->fetchArray($resultb)) {
+    					    unset($region['CountryID']);
+    					    unset($region['CordID']);
+    					    $region['country-key'] = $country['key'];
+    					    if (strpos($region['RegionName'], ',')) {
+    					        $parts = explode(', ',$region['RegionName']);
+    					        $region['RegionName'] = $parts[1] . ' ' . $parts[0];
     						}
-    						$key = str_replace(array(" ", "'", "-", "_", "\"", "`"), "", strtolower($place['RegionName']));
+    						$key = str_replace(array(" ", "'", "-", "_", "\"", "`" , ",", "(", ")"), "", strtolower($region['RegionName']));
     						if ($format!='xml')
-    						  $ret['places'][$place['key']]=$place;
+    						  $ret['places'][$region['key']]=$region;
     						else 
-    						  $ret['places'][$key]=$place;
+    						  $ret['places'][$key]=$region;
     					}
     				}
 			    }
     		}
 		}
 		return $ret;
-						
 	}	
 }
 
@@ -347,50 +348,7 @@ if (!function_exists("findNearby")) {
 		$ret['search']['type'] = 'nearby';
 		$ret['search']['countries'] = count($ret['results']['countries']);
 		$ret['search']['places'] = $places;
-	
-		switch ($format) {
-			case "html":
-			case "raw":
-				$string = '';
-				foreach($ret as $key => $values) {
-					$string .= $key . ' [';
-					$i=0;
-					foreach($values as $keyb => $value) {
-						$i++;
-						$j=0;
-						$string .= ' { ';
-						if (is_array($value)) {
-							$string .= $keyb . '::';
-							foreach($value as $keyc => $valueb) {
-								if (is_array($valueb)) {
-									$j++;
-									$string .= ' { ';
-									if (is_array($valueb)) {
-										$string .= $keyc . '::';
-										foreach($valueb as $keyd => $valuec) {
-											$string .= (($j>0)?' - ':'') .  $keyd . ': ' . $valuec;
-										}
-									} else {
-										$string .= $keyb . ': ' . $value;
-									}
-								} else {
-									$string .= ' }';
-									$string .= (($i>0)?' - ':'') .  $keyc . ': ' . $valueb;
-								}
-							}
-						} else {
-							$string .= $keyb . ': ' . $value;
-						}
-						$string .= ' }';
-					}
-					$string .= " ]".($format=='raw'?"\n":"<br/>");
-				}
-				return $string;
-				break;
-			default:
-				return $ret;
-		}
-		return false;
+		return $ret;
 	}
 }
 
@@ -466,50 +424,7 @@ if (!function_exists("findNearby")) {
 		$ret['search']['type'] = 'nearby';
 		$ret['search']['countries'] = count($ret['results']['countries']);
 		$ret['search']['places'] = $places;
-	
-		switch ($format) {
-			case "html":
-			case "raw":
-				$string = '';
-				foreach($ret as $key => $values) {
-					$string .= $key . ' [';
-					$i=0;
-					foreach($values as $keyb => $value) {
-						$i++;
-						$j=0;
-						$string .= ' { ';
-						if (is_array($value)) {
-							$string .= $keyb . '::';
-							foreach($value as $keyc => $valueb) {
-								if (is_array($valueb)) {
-									$j++;
-									$string .= ' { ';
-									if (is_array($valueb)) {
-										$string .= $keyc . '::';
-										foreach($valueb as $keyd => $valuec) {
-											$string .= (($j>0)?' - ':'') .  $keyd . ': ' . $valuec;
-										}
-									} else {
-										$string .= $keyb . ': ' . $value;
-									}
-								} else {
-									$string .= ' }';
-									$string .= (($i>0)?' - ':'') .  $keyc . ': ' . $valueb;
-								}
-							}
-						} else {
-							$string .= $keyb . ': ' . $value;
-						}
-						$string .= ' }';
-					}
-					$string .= " ]".($format=='raw'?"\n":"<br/>");
-				}
-				return $string;
-				break;
-			default:
-				return $ret;
-		}
-		return false;
+		return $ret;
 	}
 }
 
@@ -659,50 +574,7 @@ if (!function_exists("findKey")) {
 			if ($ret['search']['result']['nearby']>0)
 				$ret['search']['result']['type'] = 'nearby';
 		}
-		
-		switch ($format) {
-			case "html":
-			case "raw":
-				$string = '';
-				foreach($ret as $key => $values) {
-					$string .= $key . ' [';
-					$i=0;
-					foreach($values as $keyb => $value) {
-						$i++;
-						$j=0;
-						$string .= ' { ';
-						if (is_array($value)) {
-							$string .= $keyb . '::';
-							foreach($value as $keyc => $valueb) {
-								if (is_array($valueb)) {
-									$j++;
-									$string .= ' { ';
-									if (is_array($valueb)) {
-										$string .= $keyc . '::';
-										foreach($valueb as $keyd => $valuec) {
-											$string .= (($j>0)?' - ':'') .  $keyd . ': ' . $valuec;
-										}
-									} else {
-										$string .= $keyb . ': ' . $value;
-									}
-								} else {
-									$string .= ' }';
-									$string .= (($i>0)?' - ':'') .  $keyc . ': ' . $valueb;
-								}
-							}
-						} else {
-							$string .= $keyb . ': ' . $value;
-						}
-						$string .= ' }';
-					}
-					$string .= " ]".($format=='raw'?"\n":"<br/>");
-				}
-				return $string;
-				break;
-			default:
-				return $ret;
-		}
-		return false;
+		return $ret;
 	}
 }
 
