@@ -187,7 +187,7 @@ if (!function_exists("findPlace")) {
 		}
 		
 		$numberof = 0;
-		while ($numberof < $return)
+		while ($numberof != $return)
 		{
 		    $numberof++;
     		$sql = '';
