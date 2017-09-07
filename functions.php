@@ -244,16 +244,18 @@ if (!function_exists("findPlace")) {
 	                else
 	                    $ret['countries'][$table]=$cuntree;
     		
-        			if (strtolower($place)!='random')
-        			    $sql = "SELECT *, md5(concat(`CountryID`, `CordID`)) as `key`  FROM `" . $table . "` WHERE LOWER(`RegionName`) LIKE '" . strtolower($place) . "'  GROUP BY `CordID` ORDER BY RAND() LIMIT 1";
-        			elseif (strtolower($place) == 'random' && strtolower($country) == 'random')
+        			if (strtolower($place)!='random') {
+        			    $sql = "SELECT *, md5(concat(`CountryID`, `CordID`)) as `key`  FROM `" . $table . "` WHERE LOWER(`RegionName`) LIKE '" . strtolower($place) . "'  GROUP BY `CordID` ORDER BY RAND() LIMIT $return";
+        			    $numberof = $return;
+        			} elseif (strtolower($place) == 'random' && strtolower($country) == 'random')
         			    $sql = "SELECT *, md5(concat(`CountryID`, `CordID`)) as `key`  FROM `" . $table . "` GROUP BY `CordID` ORDER BY RAND() LIMIT 1";
         			elseif (strtolower($place) == 'random' && strtolower($country) != 'random') {
         			    $sql = "SELECT *, md5(concat(`CountryID`, `CordID`)) as `key`  FROM `" . $table . "` GROUP BY `CordID` ORDER BY RAND() LIMIT $return";
         			    $numberof = $return;
-        			} else 
-        			    $sql = "SELECT *, md5(concat(`CountryID`, `CordID`)) as `key`  FROM `" . $table . "` WHERE LOWER(`RegionName`) LIKE '%" . strtolower($place) . "%'  GROUP BY `CordID` ORDER BY RAND() LIMIT 1";
-        			
+        			} else {
+        			    $sql = "SELECT *, md5(concat(`CountryID`, `CordID`)) as `key`  FROM `" . $table . "` WHERE LOWER(`RegionName`) LIKE '%" . strtolower($place) . "%'  GROUP BY `CordID` ORDER BY RAND() LIMIT $return";
+        			    $numberof = $return;
+        			}
     				if ($resultb = $GLOBALS['DebauchDB']->queryF($sql)) {
     					while ($region = $GLOBALS['DebauchDB']->fetchArray($resultb)) {
     					    unset($region['CountryID']);
@@ -313,7 +315,7 @@ if (!function_exists("findNearby")) {
 		}
 		
 		$ret = array();
-		$places = 0;
+		$ret['search']['places'] = $ret['search']['countries'] = 0;
 		$sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key`  FROM `countries` GROUP BY `CountryID` ORDER BY `Country` ASC ";
 		if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
 			while($country = $GLOBALS['DebauchDB']->fetchArray($result)) {
@@ -325,6 +327,7 @@ if (!function_exists("findNearby")) {
 					$country['records'] = 0 ;
 				$sql = "SELECT *, md5(concat(`CountryID`, `CordID`)) as `key`, 3956 * 2 * ASIN(SQRT(POWER(SIN((" . abs($latitude) . " - abs(`Latitude_Float`)) * pi() / 180 / 2), 2) + COS(" . abs($latitude) . " * pi() / 180 ) * COS(abs(`Latitude_Float`) *  pi() / 180) * POWER(SIN((" . $longitude . " - `Longitude_Float`) *  pi() / 180 / 2), 2) )) as distance FROM `" . $country['Table'] . "` having `distance` <= ".$radius." ORDER BY `distance`";
 				$table = $country['Table'];
+				$ret['search']['countries']++;
 				unset($resultb);
 				unset($country['Table']);
 				unset($country['CountryID']);
@@ -346,15 +349,12 @@ if (!function_exists("findNearby")) {
 						    $ret['results']['places'][$country['key']][$place['key']]=$place;
 					    else
 					        $ret['results']['places'][$table][$key]=$place;
-						
-						$places++;
+						$ret['search']['places']++;
 					}
 				}
 			}
 		}
 		$ret['search']['type'] = 'nearby';
-		$ret['search']['countries'] = count($ret['results']['countries']);
-		$ret['search']['places'] = $places;
 		return $ret;
 	}
 }
@@ -397,7 +397,7 @@ if (!function_exists("findNearby")) {
 		}
 		
 		$ret = array();
-		$places = 0;
+		$places = $ret['search']['countries'] = $ret['search']['places'] = 0;
 		$sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key`  FROM `countries` GROUP BY `CountryID` ORDER BY `Country` ASC ";
 		if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
 			while($country = $GLOBALS['DebauchDB']->fetchArray($result)) {
@@ -408,6 +408,7 @@ if (!function_exists("findNearby")) {
 				} else
 					$country['records'] = 0 ;
 				$table = $country['Table'];
+				$ret['search']['countries']++;
 				$sql = "SELECT *, md5(concat(`CountryID`, `CordID`)) as `key`, 3956 * 2 * ASIN(SQRT(POWER(SIN((" . abs($latitude) . " - abs(`Latitude_Float`)) * pi() / 180 / 2), 2) + COS(" . abs($latitude) . " * pi() / 180 ) * COS(abs(`Latitude_Float`) *  pi() / 180) * POWER(SIN((" . $longitude . " - `Longitude_Float`) *  pi() / 180 / 2), 2) )) as distance FROM `" . $country['Table'] . "` having `distance` <= ".$radius." ORDER BY `distance`";
 				unset($resultb);
 				unset($country['Table']);
@@ -429,14 +430,12 @@ if (!function_exists("findNearby")) {
 						    $ret['results']['places'][$country['key']][$place['key']]=$place;
 					    else
 					        $ret['results']['places'][$table][$key]=$place;
-						$places++;
+					    $ret['search']['places']++;
 					}
 				}
 			}
 		}
 		$ret['search']['type'] = 'nearby';
-		$ret['search']['countries'] = count($ret['results']['countries']);
-		$ret['search']['places'] = $places;
 		return $ret;
 	}
 }
@@ -495,6 +494,7 @@ if (!function_exists("findKey")) {
 		$sql = '';
 		$ret = array();
 		$found = false;
+		$ret['search']['result']['count'] = 0;
 		
 		$sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `countries` WHERE md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) LIKE '".$key."' GROUP BY `CountryID` ORDER BY `Country` ASC ";
 		if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
@@ -595,11 +595,11 @@ if (!function_exists("findKey")) {
 							    $ret['results']['nearby']['places'][$country['key']][$place['key']]=$place;
 						    else
 						        $ret['results']['nearby']['places'][$table][$key]=$place;
+						    $ret['search']['result']['count']++;
 						}
 					}
 				}
 			}
-			$ret['search']['result']['nearby'] = count($ret['results']['nearby']['places']);
 			if ($ret['search']['result']['nearby']>0)
 				$ret['search']['result']['type'] = 'nearby';
 		}
