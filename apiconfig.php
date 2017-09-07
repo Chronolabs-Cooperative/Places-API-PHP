@@ -26,14 +26,20 @@
  * Paths
  */
 define('API_ROOT_PATH', __DIR__);
-define('API_CACHE_PATH', DIRECTORY_SEPARATOR . 'tmp' . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR . 'places');
+define('API_CACHE_PATH', DIRECTORY_SEPARATOR . 'tmp' . DIRECTORY_SEPARATOR . 'caches' . DIRECTORY_SEPARATOR . 'places');
 
 /**
  * Times && Limits
  */
+define('API_GOOGLE_PAGES_RESULTS', 13);
 define('API_CACHE_SECONDS', 8444);
 define('MAXIMUM_QUERIES', 25);
 ini_set('memory_limit', '128M');
+
+/**
+ * Keys & Identify Strings
+ */
+define('API_GOOGLE_KEY','AIzaSyD0tstaeCtH0gugLJUeYcUSUT_TdXL24Uo');    // Get from: https://developers.google.com/places/web-service/get-api-key
 
 /**
  * Include libraries

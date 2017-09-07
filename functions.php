@@ -115,7 +115,7 @@ if (!function_exists("randomPlacesKey")) {
 		$sql = "SELECT * FROM `countries` ORDER BY RAND() LIMIT 1 ";
 		if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
 			$country = $GLOBALS['DebauchDB']->fetchArray($result);
-			$sql = "SELECT * FROM `" . $country['Table'] . "` ORDER BY RAND() LIMIT 1 ";
+			$sql = "SELECT * FROM `" . $table . "` ORDER BY RAND() LIMIT 1 ";
 			if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
 				if ($place = $GLOBALS['DebauchDB']->fetchArray($result))
 					return md5($place['CountryID'].$place['CordID']);
@@ -139,7 +139,7 @@ if (!function_exists("randomGeoPlace")) {
         $sql = "SELECT * FROM `countries` ORDER BY RAND() LIMIT 1 ";
         if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
             $country = $GLOBALS['DebauchDB']->fetchArray($result);
-            $sql = "SELECT * FROM `" . $country['Table'] . "` ORDER BY RAND() LIMIT 1 ";
+            $sql = "SELECT * FROM `" . $table . "` ORDER BY RAND() LIMIT 1 ";
             if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
                 if ($place = $GLOBALS['DebauchDB']->fetchArray($result))
                     return array('country' => $country['Country'], 'iso3' => $country['ISO3'], 'iso2' => $country['ISO2'], 'region' => $place['RegionName']);
@@ -162,7 +162,7 @@ if (!function_exists("randomGeoLocation")) {
 		$sql = "SELECT * FROM `countries` ORDER BY RAND() LIMIT 1 ";
 		if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
 			$country = $GLOBALS['DebauchDB']->fetchArray($result);
-			$sql = "SELECT * FROM `" . $country['Table'] . "` ORDER BY RAND() LIMIT 1 ";
+			$sql = "SELECT * FROM `" . $table . "` ORDER BY RAND() LIMIT 1 ";
 			if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
 				if ($place = $GLOBALS['DebauchDB']->fetchArray($result))
 					return array('latitude'=>$place['Latitude_Float'], 'longitude' => $place['Longitude_Float']);
@@ -319,13 +319,13 @@ if (!function_exists("findNearby")) {
 		$sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key`  FROM `countries` GROUP BY `CountryID` ORDER BY `Country` ASC ";
 		if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
 			while($country = $GLOBALS['DebauchDB']->fetchArray($result)) {
-				$sql = "SELECT count(*) as records FROM `" . $country['Table'] . "`";
+				$sql = "SELECT count(*) as records FROM `" . $table . "`";
 				if ($resultb = $GLOBALS['DebauchDB']->queryF($sql)) {
 					$records = $GLOBALS['DebauchDB']->fetchArray($resultb);
 					$country['records'] = $records['records'];
 				} else
 					$country['records'] = 0 ;
-				$sql = "SELECT *, md5(concat(`CountryID`, `CordID`)) as `key`, 3956 * 2 * ASIN(SQRT(POWER(SIN((" . abs($latitude) . " - abs(`Latitude_Float`)) * pi() / 180 / 2), 2) + COS(" . abs($latitude) . " * pi() / 180 ) * COS(abs(`Latitude_Float`) *  pi() / 180) * POWER(SIN((" . $longitude . " - `Longitude_Float`) *  pi() / 180 / 2), 2) )) as distance FROM `" . $country['Table'] . "` having `distance` <= ".$radius." ORDER BY `distance`";
+				$sql = "SELECT *, md5(concat(`CountryID`, `CordID`)) as `key`, 3956 * 2 * ASIN(SQRT(POWER(SIN((" . abs($latitude) . " - abs(`Latitude_Float`)) * pi() / 180 / 2), 2) + COS(" . abs($latitude) . " * pi() / 180 ) * COS(abs(`Latitude_Float`) *  pi() / 180) * POWER(SIN((" . $longitude . " - `Longitude_Float`) *  pi() / 180 / 2), 2) )) as distance FROM `" . $table . "` having `distance` <= ".$radius." ORDER BY `distance`";
 				$table = $country['Table'];
 				$ret['search']['countries']++;
 				unset($resultb);
@@ -362,7 +362,7 @@ if (!function_exists("findNearby")) {
 
 
 
-if (!function_exists("findNearby")) {
+if (!function_exists("findExacty")) {
 
 	/* function findNearby()
 	 *
@@ -401,7 +401,7 @@ if (!function_exists("findNearby")) {
 		$sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key`  FROM `countries` GROUP BY `CountryID` ORDER BY `Country` ASC ";
 		if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
 			while($country = $GLOBALS['DebauchDB']->fetchArray($result)) {
-				$sql = "SELECT count(*) as records FROM `" . $country['Table'] . "`";
+				$sql = "SELECT count(*) as records FROM `" . $table . "`";
 				if ($resultb = $GLOBALS['DebauchDB']->queryF($sql)) {
 					$records = $GLOBALS['DebauchDB']->fetchArray($resultb);
 					$country['records'] = $records['records'];
@@ -409,7 +409,7 @@ if (!function_exists("findNearby")) {
 					$country['records'] = 0 ;
 				$table = $country['Table'];
 				$ret['search']['countries']++;
-				$sql = "SELECT *, md5(concat(`CountryID`, `CordID`)) as `key`, 3956 * 2 * ASIN(SQRT(POWER(SIN((" . abs($latitude) . " - abs(`Latitude_Float`)) * pi() / 180 / 2), 2) + COS(" . abs($latitude) . " * pi() / 180 ) * COS(abs(`Latitude_Float`) *  pi() / 180) * POWER(SIN((" . $longitude . " - `Longitude_Float`) *  pi() / 180 / 2), 2) )) as distance FROM `" . $country['Table'] . "` having `distance` <= ".$radius." ORDER BY `distance`";
+				$sql = "SELECT *, md5(concat(`CountryID`, `CordID`)) as `key`, 3956 * 2 * ASIN(SQRT(POWER(SIN((" . abs($latitude) . " - abs(`Latitude_Float`)) * pi() / 180 / 2), 2) + COS(" . abs($latitude) . " * pi() / 180 ) * COS(abs(`Latitude_Float`) *  pi() / 180) * POWER(SIN((" . $longitude . " - `Longitude_Float`) *  pi() / 180 / 2), 2) )) as distance FROM `" . $table . "` having `distance` <= ".$radius." ORDER BY `distance`";
 				unset($resultb);
 				unset($country['Table']);
 				unset($country['CountryID']);
@@ -499,7 +499,7 @@ if (!function_exists("findKey")) {
 		$sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `countries` WHERE md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) LIKE '".$key."' GROUP BY `CountryID` ORDER BY `Country` ASC ";
 		if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
 			if($country = $GLOBALS['DebauchDB']->fetchArray($result)) {
-				$sql = "SELECT count(*) as records FROM `" . $country['Table'] . "`";
+				$sql = "SELECT count(*) as records FROM `" . $table . "`";
 				if ($resultb = $GLOBALS['DebauchDB']->queryF($sql)) {
 					$records = $GLOBALS['DebauchDB']->fetchArray($resultb);
 					$country['records'] = $records['records'];
@@ -525,11 +525,11 @@ if (!function_exists("findKey")) {
 			$sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `countries` GROUP BY `CountryID` ORDER BY `Country` ASC ";
 			if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
 				while(($country = $GLOBALS['DebauchDB']->fetchArray($result)) && $found == false) {
-					$sql = "SELECT *, md5(concat(`CountryID`, `CordID`)) as `key` FROM `" . $country['Table'] . "` WHERE md5(concat(`CountryID`, `CordID`)) LIKE '" . $key . "' ORDER BY RAND() LIMIT 1";
+					$sql = "SELECT *, md5(concat(`CountryID`, `CordID`)) as `key` FROM `" . $table . "` WHERE md5(concat(`CountryID`, `CordID`)) LIKE '" . $key . "' ORDER BY RAND() LIMIT 1";
 					if ($resultb = $GLOBALS['DebauchDB']->queryF($sql)) {
 						while (($place = $GLOBALS['DebauchDB']->fetchArray($resultb)) && $found == false) {
-							$tablename = $country['Table'];
-							$sql = "SELECT count(*) as records FROM `" . $country['Table'] . "`";
+							$table = $country['Table'];
+							$sql = "SELECT count(*) as records FROM `" . $table . "`";
 							if ($resultb = $GLOBALS['DebauchDB']->queryF($sql)) {
 								$records = $GLOBALS['DebauchDB']->fetchArray($resultb);
 								$country['records'] = $records['records'];
@@ -564,17 +564,17 @@ if (!function_exists("findKey")) {
 			}
 		}
 		
-		if ($found = true && $radius > 0 && $ret['search']['result']['type'] = 'place' && (!empty($tablename) && !empty($ret['results']['place']['Longitude_Float']) && !empty($ret['results']['place']['Latitude_Float']))) {
+		if ($found = true && $radius > 0 && $ret['search']['result']['type'] = 'place' && (!empty($table) && !empty($ret['results']['place']['Longitude_Float']) && !empty($ret['results']['place']['Latitude_Float']))) {
 			$sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `countries` GROUP BY `CountryID` ORDER BY `Country` ASC ";
 			if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
 				while(($country = $GLOBALS['DebauchDB']->fetchArray($result)) && $found == true) {
-					$sql = "SELECT count(*) as records FROM `" . $country['Table'] . "`";
+					$sql = "SELECT count(*) as records FROM `" . $table . "`";
 					if ($resultb = $GLOBALS['DebauchDB']->queryF($sql)) {
 						$records = $GLOBALS['DebauchDB']->fetchArray($resultb);
 						$country['records'] = $records['records'];
 					} else
 						$country['records'] = 0 ;
-					$sql = "SELECT *, md5(concat(`CountryID`, `CordID`)) as `key`, 3956 * 2 * ASIN(SQRT(POWER(SIN((" . abs($ret['results']['place']['Latitude_Float']) . " - abs(`Latitude_Float`)) * pi() / 180 / 2), 2) + COS(" . abs($ret['results']['place']['Latitude_Float']) . " * pi() / 180 ) * COS(abs(`Latitude_Float`) *  pi() / 180) * POWER(SIN((" . $ret['results']['place']['Longitude_Float'] . " - `Longitude_Float`) *  pi() / 180 / 2), 2) )) as distance FROM `" . $country['Table'] . "` having `distance` <= ".$radius." ORDER BY `distance`";
+					$sql = "SELECT *, md5(concat(`CountryID`, `CordID`)) as `key`, 3956 * 2 * ASIN(SQRT(POWER(SIN((" . abs($ret['results']['place']['Latitude_Float']) . " - abs(`Latitude_Float`)) * pi() / 180 / 2), 2) + COS(" . abs($ret['results']['place']['Latitude_Float']) . " * pi() / 180 ) * COS(abs(`Latitude_Float`) *  pi() / 180) * POWER(SIN((" . $ret['results']['place']['Longitude_Float'] . " - `Longitude_Float`) *  pi() / 180 / 2), 2) )) as distance FROM `" . $table . "` having `distance` <= ".$radius." ORDER BY `distance`";
 					$table = $country['Table'];
 					unset($country['Table']);
 					unset($country['CountryID']);
@@ -605,6 +605,374 @@ if (!function_exists("findKey")) {
 		}
 		return $ret;
 	}
+}
+
+
+if (!function_exists("findKeyVenues")) {
+    
+    /* function findKey()
+     *
+     * 	Function that reverse lookups a forensic identifier MD6 of country or region and return one or more locations
+     * @author 		Simon Roberts (Chronolabs) simon@snails.email
+     *
+     * @param		$key			string		the MD5 32 Character Checksum for the place or country to lookup
+     * @param		$radius			integer		Radius that the search bounded by in kilometers (integer only)
+     * @param		$format			string		API Output mode (JSON, XML, SERIAL, HTML, RAW)
+     *
+     * @return 		array
+     */
+    function findKeyVenues($type = 'towns', $key = '', $radius = 0, $format = 'json')
+    {
+        
+        session_start();
+        if (!in_array(whitelistGetIP(true), whitelistGetIPAddy())) {
+            if (isset($_SESSION['places']['queries']['time'])) {
+                if ($_SESSION['places']['queries']['time']>time()) {
+                    $_SESSION['places']['queries']['number'] = 0;
+                    $_SESSION['places']['queries']['time'] = time()+3600;
+                }
+            } elseif (!isset($_SESSION['places']['queries']['time'])) {
+                $_SESSION['places']['queries']['number'] = 0;
+                $_SESSION['places']['queries']['time'] = time()+3600;
+            }
+            if ($_SESSION['places']['queries']['number']>MAXIMUM_QUERIES) {
+                header("HTTP/1.0 404 Not Found");
+                exit;
+            }
+            $_SESSION['places']['queries']['number']++;
+        }
+        
+        error_reporting(E_ERROR);
+        session_start();
+        if (isset($_SESSION['places']['queries']['time'])) {
+            if ($_SESSION['places']['queries']['time']>time()) {
+                $_SESSION['places']['queries']['number'] = 0;
+                $_SESSION['places']['queries']['time'] = time()+3600;
+            }
+        } elseif (!isset($_SESSION['places']['queries']['time'])) {
+            $_SESSION['places']['queries']['number'] = 0;
+            $_SESSION['places']['queries']['time'] = time()+3600;
+        }
+        if ($_SESSION['places']['queries']['number']>MAXIMUM_QUERIES) {
+            header("HTTP/1.0 404 Not Found");
+            exit;
+        }
+        $_SESSION['places']['queries']['number']++;
+        
+        $sql = '';
+        $ret = array();
+        $found = false;
+        $ret['search']['result']['count'] = 0;
+        
+        $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `countries` WHERE md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) LIKE '".$key."' GROUP BY `CountryID` ORDER BY `Country` ASC ";
+        if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
+            if($country = $GLOBALS['DebauchDB']->fetchArray($result)) {
+                $sql = "SELECT count(*) as records FROM `" . $table . "`";
+                if ($resultb = $GLOBALS['DebauchDB']->queryF($sql)) {
+                    $records = $GLOBALS['DebauchDB']->fetchArray($resultb);
+                    $country['records'] = $records['records'];
+                } else
+                    return false;
+            }
+        }
+        
+        if ($found==false) {
+            $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `countries` GROUP BY `CountryID` ORDER BY `Country` ASC ";
+            if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
+                while(($country = $GLOBALS['DebauchDB']->fetchArray($result)) && $found == false) {
+                    $sql = "SELECT *, md5(concat(`CountryID`, `CordID`)) as `key` FROM `" . $table . "` WHERE md5(concat(`CountryID`, `CordID`)) LIKE '" . $key . "' ORDER BY RAND() LIMIT 1";
+                    if ($resultb = $GLOBALS['DebauchDB']->queryF($sql) && $found != true) {
+                        while (($place = $GLOBALS['DebauchDB']->fetchArray($resultb)) && $found == false) {
+                            $found = true;
+                            $table = $country['Table'];
+                            $sql = "SELECT count(*) as records FROM `" . $table . "`";
+                            if ($resultb = $GLOBALS['DebauchDB']->queryF($sql)) {
+                                $records = $GLOBALS['DebauchDB']->fetchArray($resultb);
+                                $country['records'] = $records['records'];
+                            } else
+                                $country['records'] = 0 ;
+                            $table = $country['Table'];
+                            unset($country['Table']);
+                            unset($country['CountryID']);
+                            if ($format!='xml')
+                                $ret['results']['countries'][$country['key']]=$country;
+                            else
+                                $ret['results']['countries'][$table]=$country;
+                            $countryid = $place['CountryID'];
+                            $cordid = $place['CordID'];
+                            unset($place['CountryID']);
+                            unset($place['CordID']);
+                            if (strpos($place['RegionName'], ',')) {
+                                $parts = explode(', ',$place['RegionName']);
+                                $place['RegionName'] = $parts[1] . ' ' . $parts[0];
+                            }
+                            $key = str_replace(array(" ", "'", "-", "_", "\"", "`" , ",", "(", ")"), "", strtolower($place['RegionName']));
+                            if ($format!='xml')
+                                $ret['results']['places'][$country['key']][$place['key']]=$place;
+                            else
+                                $ret['results']['places'][$table][$key]=$place;
+                            $ret['results']['venues'] = array();
+                            $ret['search']['result']['type'] = 'place';
+                            $ret['search']['result']['count'] = 1;
+                            $ret['search']['result']['venues'] = 0;
+                            continue;
+                            continue;
+                        }
+                    }
+                }
+            }
+        }
+       
+        $results = array();
+        
+        if ($found != false && isset($place) && !empty($place)) 
+        {
+            require_once __DIR__ . DIRECTORY_SEPARATOR . 'class' . DIRECTORY_SEPARATOR . 'google' . DIRECTORY_SEPARATOR . 'places.php';
+            $places = new GooglePlaces(API_GOOGLE_KEY);
+            if ($radius>0 && $type == 'all')
+            {
+                $places->location = array($place['Latitude_Float'], $place['Longitude_Float']);
+                $places->radius   = $radius * 1000;
+                if (!$results[]   = $places->nearbySearch())
+                    $found = $results = false;
+                else 
+                    $found = true;
+            } elseif ($radius > 0 && !empty($type)) {
+                $places->location = array($place['Latitude_Float'], $place['Longitude_Float']);
+                $places->rankby   = 'distance';
+                $places->radius   = $radius * 1000;
+                $places->types    = $type; // Requires keyword, name or types
+                if (!$results[]   = $places->nearbySearch())
+                    $found = $results = false;
+                else
+                    $found = true;
+            } elseif ($radius == 0 && !empty($type)) {
+                $places->location = array($place['Latitude_Float'], $place['Longitude_Float']);
+                $places->rankby   = 'distance';
+                $places->types    = $type; // Requires keyword, name or types
+                if (!$results[]   = $places->nearbySearch())
+                    $found = $results = false;
+                else
+                    $found = true;
+            } elseif ($radius > 0 && empty($type)) {
+                $places->location = array($place['Latitude_Float'], $place['Longitude_Float']);
+                $places->rankby   = 'distance';
+                $places->radius   = $radius * 1000;
+                if (!$results[]   = $places->nearbySearch())
+                    $found = $results = false;
+                else
+                    $found = true;
+            }
+            if (count($results)>0)
+            while (!empty($results[count($results)-1]['next_page_token']) && count($results) <= API_GOOGLE_PAGES_RESULTS)
+            {
+                $places->pagetoken = $results[count($results)-1]['next_page_token'];
+                $results[]         = $places->nearbySearch();
+            }
+            die(print_r($results, true));
+        }
+        return $ret;
+    }
+}
+
+
+if (!function_exists("findKeyMaps")) {
+    
+    /* function findKey()
+     *
+     * 	Function that reverse lookups a forensic identifier MD6 of country or region and return one or more locations
+     * @author 		Simon Roberts (Chronolabs) simon@snails.email
+     *
+     * @param		$key			string		the MD5 32 Character Checksum for the place or country to lookup
+     * @param		$radius			integer		Radius that the search bounded by in kilometers (integer only)
+     * @param		$format			string		API Output mode (JSON, XML, SERIAL, HTML, RAW)
+     *
+     * @return 		array
+     */
+    function findKeyMaps($key = '', $radius = 0, $address = '', $format = 'json')
+    {
+        
+        session_start();
+        if (!in_array(whitelistGetIP(true), whitelistGetIPAddy())) {
+            if (isset($_SESSION['places']['queries']['time'])) {
+                if ($_SESSION['places']['queries']['time']>time()) {
+                    $_SESSION['places']['queries']['number'] = 0;
+                    $_SESSION['places']['queries']['time'] = time()+3600;
+                }
+            } elseif (!isset($_SESSION['places']['queries']['time'])) {
+                $_SESSION['places']['queries']['number'] = 0;
+                $_SESSION['places']['queries']['time'] = time()+3600;
+            }
+            if ($_SESSION['places']['queries']['number']>MAXIMUM_QUERIES) {
+                header("HTTP/1.0 404 Not Found");
+                exit;
+            }
+            $_SESSION['places']['queries']['number']++;
+        }
+        
+        error_reporting(E_ERROR);
+        session_start();
+        if (isset($_SESSION['places']['queries']['time'])) {
+            if ($_SESSION['places']['queries']['time']>time()) {
+                $_SESSION['places']['queries']['number'] = 0;
+                $_SESSION['places']['queries']['time'] = time()+3600;
+            }
+        } elseif (!isset($_SESSION['places']['queries']['time'])) {
+            $_SESSION['places']['queries']['number'] = 0;
+            $_SESSION['places']['queries']['time'] = time()+3600;
+        }
+        if ($_SESSION['places']['queries']['number']>MAXIMUM_QUERIES) {
+            header("HTTP/1.0 404 Not Found");
+            exit;
+        }
+        $_SESSION['places']['queries']['number']++;
+        
+        if (empty($address))
+        {
+            $sql = '';
+            $ret = array();
+            $found = false;
+            $ret['search']['result']['count'] = 0;
+            
+            $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `countries` WHERE md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) LIKE '".$key."' GROUP BY `CountryID` ORDER BY `Country` ASC ";
+            if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
+                if($country = $GLOBALS['DebauchDB']->fetchArray($result)) {
+                    $sql = "SELECT count(*) as records FROM `" . $table . "`";
+                    if ($resultb = $GLOBALS['DebauchDB']->queryF($sql)) {
+                        $records = $GLOBALS['DebauchDB']->fetchArray($resultb);
+                        $country['records'] = $records['records'];
+                    } else
+                        $country['records'] = 0;
+                    $table = $country['Table'];
+                    $address = $country['Country'];
+                    unset($country['Table']);
+                    unset($country['CountryID']);
+                    if ($format!='xml')
+                        $ret['results']['countries'][$country['key']] = $country;
+                    else
+                        $ret['results']['countries'][$table] = $country;
+                        $ret['results']['places'] = array();
+                        $ret['results']['nearby'] = array();
+                        $ret['search']['result']['type'] = 'country';
+                        $ret['search']['result']['count'] = 1;
+                        $ret['search']['result']['nearby'] = 0;
+                        $found = true;
+                }
+            }
+            
+            if ($found==false) {
+                $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `countries` GROUP BY `CountryID` ORDER BY `Country` ASC ";
+                if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
+                    while(($country = $GLOBALS['DebauchDB']->fetchArray($result)) && $found == false) {
+                        $sql = "SELECT *, md5(concat(`CountryID`, `CordID`)) as `key` FROM `" . $table . "` WHERE md5(concat(`CountryID`, `CordID`)) LIKE '" . $key . "' ORDER BY RAND() LIMIT 1";
+                        if ($resultb = $GLOBALS['DebauchDB']->queryF($sql)) {
+                            while (($place = $GLOBALS['DebauchDB']->fetchArray($resultb)) && $found == false) {
+                                $table = $country['Table'];
+                                $sql = "SELECT count(*) as records FROM `" . $table . "`";
+                                if ($resultb = $GLOBALS['DebauchDB']->queryF($sql)) {
+                                    $records = $GLOBALS['DebauchDB']->fetchArray($resultb);
+                                    $country['records'] = $records['records'];
+                                } else
+                                    $country['records'] = 0 ;
+                                $table = $country['Table'];
+                                unset($country['Table']);
+                                unset($country['CountryID']);
+                                if ($format!='xml')
+                                    $ret['results']['countries'][$country['key']]=$country;
+                                else
+                                    $ret['results']['countries'][$table]=$country;
+                                unset($place['CountryID']);
+                                unset($place['CordID']);
+                                if (strpos($place['RegionName'], ',')) {
+                                    $parts = explode(', ',$place['RegionName']);
+                                    $place['RegionName'] = $parts[1] . ' ' . $parts[0];
+                                }
+                                $address = $place['RegionName'] . ', ' . $address;
+                                $key = str_replace(array(" ", "'", "-", "_", "\"", "`" , ",", "(", ")"), "", strtolower($place['RegionName']));
+                                if ($format!='xml')
+                                    $ret['results']['places'][$country['key']][$place['key']]=$place;
+                                else
+                                    $ret['results']['places'][$table][$key]=$place;
+                                    $ret['results']['nearby'] = array();
+                                    $ret['search']['result']['type'] = 'place';
+                                    $ret['search']['result']['count'] = 1;
+                                    $ret['search']['result']['nearby'] = 0;
+                                    $found = true;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            if ($found = true && $radius > 0 && $ret['search']['result']['type'] = 'place' && (!empty($table) && !empty($ret['results']['place']['Longitude_Float']) && !empty($ret['results']['place']['Latitude_Float']))) {
+                $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `countries` GROUP BY `CountryID` ORDER BY `Country` ASC ";
+                if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
+                    while(($country = $GLOBALS['DebauchDB']->fetchArray($result)) && $found == true) {
+                        $sql = "SELECT count(*) as records FROM `" . $table . "`";
+                        if ($resultb = $GLOBALS['DebauchDB']->queryF($sql)) {
+                            $records = $GLOBALS['DebauchDB']->fetchArray($resultb);
+                            $country['records'] = $records['records'];
+                        } else
+                            $country['records'] = 0 ;
+                            $sql = "SELECT *, md5(concat(`CountryID`, `CordID`)) as `key`, 3956 * 2 * ASIN(SQRT(POWER(SIN((" . abs($ret['results']['place']['Latitude_Float']) . " - abs(`Latitude_Float`)) * pi() / 180 / 2), 2) + COS(" . abs($ret['results']['place']['Latitude_Float']) . " * pi() / 180 ) * COS(abs(`Latitude_Float`) *  pi() / 180) * POWER(SIN((" . $ret['results']['place']['Longitude_Float'] . " - `Longitude_Float`) *  pi() / 180 / 2), 2) )) as distance FROM `" . $table . "` having `distance` <= ".$radius." ORDER BY `distance`";
+                            $table = $country['Table'];
+                            unset($country['Table']);
+                            unset($country['CountryID']);
+                            if ($resultb = $GLOBALS['DebauchDB']->queryF($sql)) {
+                                while ($place = $GLOBALS['DebauchDB']->fetchArray($resultb)) {
+                                    if ($format!='xml')
+                                        $ret['results']['nearby']['countries'][$country['key']]=$country;
+                                    else
+                                        $ret['results']['nearby']['countries'][$table]=$country;
+                                    unset($place['CountryID']);
+                                    unset($place['CordID']);
+                                    if (strpos($place['RegionName'], ',')) {
+                                        $parts = explode(', ',$place['RegionName']);
+                                        $place['RegionName'] = $parts[1] . ' ' . $parts[0];
+                                    }
+                                    $key = str_replace(array(" ", "'", "-", "_", "\"", "`" , ",", "(", ")"), "", strtolower($place['RegionName']));
+                                    if ($format!='xml')
+                                        $ret['results']['nearby']['places'][$country['key']][$place['key']]=$place;
+                                    else
+                                        $ret['results']['nearby']['places'][$table][$key]=$place;
+                                        $ret['search']['result']['count']++;
+                                }
+                            }
+                    }
+                }
+                if ($ret['search']['result']['nearby']>0)
+                    $ret['search']['result']['type'] = 'nearby';
+            }
+        }
+        
+        $url = "http://maps.googleapis.com/maps/api/geocode/json?sensor=false&address=".urlencode($address);
+        if (empty($address))
+            $lat_long = $place['Latitude_Float'] . ',' . $place['Longitude_Float'];
+        else 
+            $lat_long = '0,0';
+        $script = array();
+        $script['header'][] = array('meta' => array('uri'=>'http://maps.googleapis.com/maps/api/js?sensor=false'), 'html' => '<script src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>');
+        $script['public'][] = '<div id="map_canvas"></div>';
+        $script['footer'][] = array('html' => '<script>
+(function() { 
+function initialize() {
+	var myLatlng = new google.maps.LatLng('.$lat_long.'),
+	mapOptions = {
+		zoom: 15,
+		center: myLatlng
+	},
+	map = new google.maps.Map(document.getElementById(\'map_canvas\'), mapOptions),
+	marker = new google.maps.Marker({
+		position: myLatlng,
+		map: map,
+		title: \''.$address.'\'
+	});
+}
+google.maps.event.addDomListener(window, \'load\', initialize);
+})();
+</script>');
+        return $script;
+    }
 }
 
 

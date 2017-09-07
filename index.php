@@ -88,6 +88,19 @@
 				$radius = 145;
 			$output = trim($_GET['output']);
 			$mode = 'nearby';
+		} elseif (isset($_GET['country']) && $_GET['country'] == 'venues') {
+		    $key = (string)$_GET['place'];
+		    $radius = intval($_GET['radius']);
+		    if ($radius<0)
+		        $radius = 0;
+	        elseif ($radius>245)
+	           $radius = 145;
+	        $output = trim($_GET['output']);
+	        $mode = 'venues';
+		} elseif (isset($_GET['country']) && $_GET['country'] == 'maps') {
+		    $key = (string)$_GET['place'];
+		    $output = trim($_GET['output']);
+		    $mode = 'maps';
 		} else {
 			$mode = 'place';
 			$country = trim($_GET['country']);
@@ -163,6 +176,12 @@
         		case 'key':
         			$data = findKey($key, $radius, $output);
         			break;
+        		case 'maps':
+        		    $data = findKeyMaps($key, $radius, $output);
+        		    break;
+        		case 'venues':
+        		    $data = findKeyVenues($key, $radius, $output);
+        		    break;
         	}
         	foreach($data as $key => $values)
         	    if (empty($values))
