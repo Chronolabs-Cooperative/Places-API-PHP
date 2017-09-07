@@ -21,8 +21,9 @@ Run the following command replacing 'username' with the username with root acces
     $ mysql -uusername -ppassword
     
     mysql> create database `geospatial`;
-    mysql> user `geospatial`;
-    mysql> source /var/www/places.xortify.com/sql/geospatial.sql
+    mysql> use `geospatial`;
+    mysql> source /var/www/places.xortify.com/sql/geospatial.sql;
+    mysql> exit;
 
 
 Now either create a username that is system specific or use your root access and configure class/debauchosity.php with the username and password information for the geospatial database
