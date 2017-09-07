@@ -125,6 +125,29 @@ if (!function_exists("randomPlacesKey")) {
 	}
 }
 
+if (!function_exists("randomGeoPlace")) {
+    
+    /* function randomPlacesKey()
+     *
+     * 	Get a random forensic identify key for a place from the database
+     * @author 		Simon Roberts (Chronolabs) simon@snails.email
+     *
+     * @return 		string(32)
+     */
+    function randomGeoPlace()
+    {
+        $sql = "SELECT * FROM `countries` ORDER BY RAND() LIMIT 1 ";
+        if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
+            $country = $GLOBALS['DebauchDB']->fetchArray($result);
+            $sql = "SELECT * FROM `" . $country['Table'] . "` ORDER BY RAND() LIMIT 1 ";
+            if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
+                if ($place = $GLOBALS['DebauchDB']->fetchArray($result))
+                    return array('country' => $country['Country'], 'iso3' => $country['ISO3'], 'iso2' => $country['ISO2'], 'region' => $place['RegionName']);
+            }
+        }
+        return false;
+    }
+}
 if (!function_exists("randomGeoLocation")) {
 
 	/* function randomGeoLocation()
