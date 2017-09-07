@@ -208,7 +208,7 @@
 			echo '</pre>';
 			break;
 		case 'raw':
-			echo var_dump($data);
+		    echo "<?php\n\nreturn " . var_export($data, true) . ";\n\n?>";
 			break;
 		case 'json':
 			header('Content-type: application/json');
