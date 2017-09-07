@@ -258,16 +258,15 @@ if (!function_exists("findPlace")) {
     					while ($region = $GLOBALS['DebauchDB']->fetchArray($resultb)) {
     					    unset($region['CountryID']);
     					    unset($region['CordID']);
-    					    $region['country-key'] = $country['key'];
     					    if (strpos($region['RegionName'], ',')) {
     					        $parts = explode(', ',$region['RegionName']);
     					        $region['RegionName'] = $parts[1] . ' ' . $parts[0];
     						}
     						$key = str_replace(array(" ", "'", "-", "_", "\"", "`" , ",", "(", ")"), "", strtolower($region['RegionName']));
     						if ($format!='xml')
-    						  $ret['places'][$region['key']]=$region;
+    						    $ret['places'][$country['key']][$region['key']]=$region;
     						else 
-    						  $ret['places'][$key]=$region;
+    						    $ret['places'][$table][$key]=$region;
     					}
     				}
 			    }
