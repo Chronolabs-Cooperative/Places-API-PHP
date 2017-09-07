@@ -175,10 +175,14 @@
 	    }
     	if (!empty($data))
     	{
-    	    PlacesCache::write(md5($_SERVER['REQUEST_URI']), $data, API_CACHE_SECONDS);
+    	    if (strpos($_SERVER['REQUEST_URI'], 'random')>0)
+    	       define('CACHE_FOR_SECONDS', 7);
+    	    else
+    	        define('CACHE_FOR_SECONDS', API_CACHE_SECONDS);
+    	    PlacesCache::write(md5($_SERVER['REQUEST_URI']), $data, CACHE_FOR_SECONDS);
     	    if (!$sessions = PlacesCache::read('sessions-'.md5($_SERVER['HTTP_HOST'])))
     	        $sessions = array();
-	        $sessions[md5($_SERVER['REQUEST_URI'])] = time() + API_CACHE_SECONDS;
+    	    $sessions[md5($_SERVER['REQUEST_URI'])] = time() + CACHE_FOR_SECONDS;
 	        PlacesCache::write('sessions-'.md5($_SERVER['HTTP_HOST']), $sessions, API_CACHE_SECONDS * API_CACHE_SECONDS * API_CACHE_SECONDS);
     	}
 	}
@@ -196,36 +200,30 @@
                 unset($data[$key]);
         }
         
-	if (!empty($data))
-	{
-    	switch ($output) {
-    		default:
-    			echo '<h1>' . $country . ' - ' . $place . ' (Places data)</h1>';
-    			echo '<pre style="font-family: \'Courier New\', Courier, Terminal; font-size: 0.77em;">';
-    			echo print_r($data, true);
-    			echo '</pre>';
-    			break;
-    		case 'raw':
-    			echo var_dump($data);
-    			break;
-    		case 'json':
-    			header('Content-type: application/json');
-    			echo json_encode($data);
-    			break;
-    		case 'serial':
-    			header('Content-type: text/html');
-    			echo serialize($data);
-    			break;
-    		case 'xml':
-    			header('Content-type: application/xml');
-    			$dom = new XmlDomConstruct('1.0', 'utf-8');
-    			$dom->fromMixed(array($mode=>$data));
-     			echo $dom->saveXML();
-    			break;
-    	}
-	} else {
-	    http_response_code(501);
-	    include dirname(__FILE__).'/help.php';
+ 	switch ($output) {
+		default:
+			echo '<h1>' . $country . ' - ' . $place . ' (Places data)</h1>';
+			echo '<pre style="font-family: \'Courier New\', Courier, Terminal; font-size: 0.77em;">';
+			echo print_r($data, true);
+			echo '</pre>';
+			break;
+		case 'raw':
+			echo var_dump($data);
+			break;
+		case 'json':
+			header('Content-type: application/json');
+			echo json_encode($data);
+			break;
+		case 'serial':
+			header('Content-type: text/html');
+			echo serialize($data);
+			break;
+		case 'xml':
+			header('Content-type: application/xml');
+			$dom = new XmlDomConstruct('1.0', 'utf-8');
+			$dom->fromMixed(array($mode=>$data));
+ 			echo $dom->saveXML();
+			break;
 	}
 	
 	if ($sessions = PlacesCache::read('sessions-'.md5($_SERVER['HTTP_HOST'])))
