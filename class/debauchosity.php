@@ -40,7 +40,7 @@ define('DB_DEBAUCH_NAME', 'geospatial');
 /**
  * @var string		Database Username (Database Source One)
  */
-define('DB_DEBAUCH_USER', 'geosptial');
+define('DB_DEBAUCH_USER', 'geospatial');
 
 /**
  * @var string		Database Password (Database Source One)

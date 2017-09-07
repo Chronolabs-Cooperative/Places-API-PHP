@@ -239,7 +239,7 @@ class PlacesCache
 	    	$caches[$key] = time().$duration;
 	    	self::write('caches-systemosity', $caches, 3600 * 24 * 7 * 4 * 12);
 	    }
-        $key = substr(md5(Places_URL), 0, 8) . '_' . $key;
+        $key = substr(md5(PLACES_URL), 0, 8) . '_' . $key;
         $_this =& PlacesCache::getInstance();
         $config = null;
         if (is_array($duration)) {
@@ -292,7 +292,7 @@ class PlacesCache
      */
     static function read($key, $config = null)
     {
-        $key = substr(md5(Places_URL), 0, 8) . '_' . $key;
+        $key = substr(md5(PLACES_URL), 0, 8) . '_' . $key;
         $_this =& PlacesCache::getInstance();
         $config = $_this->config($config);
 
@@ -324,7 +324,7 @@ class PlacesCache
      */
     static function delete($key, $config = null)
     {
-        $key = substr(md5(Places_URL), 0, 8) . '_' . $key;
+        $key = substr(md5(PLACES_URL), 0, 8) . '_' . $key;
         $_this =& PlacesCache::getInstance();
 
         $config = $_this->config($config);

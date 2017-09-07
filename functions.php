@@ -112,10 +112,10 @@ if (!function_exists("randomPlacesKey")) {
 	 */
 	function randomPlacesKey()
 	{
-		$sql = "SELECT * FROM `countries` ORDER BY RAND() LIMIT 1 ";
+		$sql = "SELECT * FROM `countries` WHERE `Records` > 1000 ORDER BY RAND() LIMIT 1 ";
 		if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
 			$country = $GLOBALS['DebauchDB']->fetchArray($result);
-			$sql = "SELECT * FROM `" . $table . "` ORDER BY RAND() LIMIT 1 ";
+			$sql = "SELECT * FROM `" . $country['Table'] . "` ORDER BY RAND() LIMIT 1 ";
 			if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
 				if ($place = $GLOBALS['DebauchDB']->fetchArray($result))
 					return md5($place['CountryID'].$place['CordID']);
@@ -136,10 +136,10 @@ if (!function_exists("randomGeoPlace")) {
      */
     function randomGeoPlace()
     {
-        $sql = "SELECT * FROM `countries` ORDER BY RAND() LIMIT 1 ";
+        $sql = "SELECT * FROM `countries` WHERE `Records` > 1000  ORDER BY RAND() LIMIT 1 ";
         if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
             $country = $GLOBALS['DebauchDB']->fetchArray($result);
-            $sql = "SELECT * FROM `" . $table . "` ORDER BY RAND() LIMIT 1 ";
+            $sql = "SELECT * FROM `" . $country['Table'] . "` ORDER BY RAND() LIMIT 1 ";
             if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
                 if ($place = $GLOBALS['DebauchDB']->fetchArray($result))
                     return array('country' => $country['Country'], 'iso3' => $country['ISO3'], 'iso2' => $country['ISO2'], 'region' => $place['RegionName']);
@@ -159,10 +159,10 @@ if (!function_exists("randomGeoLocation")) {
 	 */
 	function randomGeoLocation()
 	{
-		$sql = "SELECT * FROM `countries` ORDER BY RAND() LIMIT 1 ";
+		$sql = "SELECT * FROM `countries` WHERE `Records` > 1000  ORDER BY RAND() LIMIT 1 ";
 		if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
 			$country = $GLOBALS['DebauchDB']->fetchArray($result);
-			$sql = "SELECT * FROM `" . $table . "` ORDER BY RAND() LIMIT 1 ";
+			$sql = "SELECT * FROM `" . $country['Table'] . "` ORDER BY RAND() LIMIT 1 ";
 			if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
 				if ($place = $GLOBALS['DebauchDB']->fetchArray($result))
 					return array('latitude'=>$place['Latitude_Float'], 'longitude' => $place['Longitude_Float']);
@@ -946,7 +946,7 @@ if (!function_exists("findKeyMaps")) {
         }
         
         $url = "http://maps.googleapis.com/maps/api/geocode/json?sensor=false&address=".urlencode($address);
-        if (empty($address))
+        if (strpos($address, ',') > 0 && (strpos($address, ',', strpos($address, ',')+1) == 0 || strpos($address, ',', strpos($address, ',', strpos($address, ',') + 1) + 1) == 0) )
             $lat_long = $place['Latitude_Float'] . ',' . $place['Longitude_Float'];
         else 
             $lat_long = '0,0';

@@ -25,6 +25,10 @@
 /**
  * Paths
  */
+$pu = parse_url($_SERVER['REQUEST_URI']);
+$source = (isset($_SERVER['HTTPS'])?'https://':'http://').strtolower($_SERVER['HTTP_HOST']).$pu['path'];
+unset($pu);
+define('PLACES_URL', $source);
 define('API_ROOT_PATH', __DIR__);
 define('API_CACHE_PATH', DIRECTORY_SEPARATOR . 'tmp' . DIRECTORY_SEPARATOR . 'caches' . DIRECTORY_SEPARATOR . 'places');
 

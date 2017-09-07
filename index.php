@@ -23,6 +23,8 @@
 
     error_reporting(E_ERROR);
     ini_set('display_errors', true);
+    ini_set('log_errors', true);
+    ini_set('error_log', __DIR__ . DIRECTORY_SEPARATOR . date('Y-m') .'--error-log.txt');
     
 	$parts = explode(".", microtime(true));
 	mt_srand(mt_rand(-time(), time())/$parts[1]);
@@ -34,6 +36,7 @@
 	
 	global $domain, $protocol, $business, $entity, $contact, $referee, $peerings, $source;
 	require_once __DIR__ . DIRECTORY_SEPARATOR . 'apiconfig.php';
+	require_once __DIR__ . DIRECTORY_SEPARATOR . 'verify.php';
 	
 	/**
 	 * Global API Configurations and Setting from file Constants!
@@ -50,35 +53,42 @@
 	 * URI Path Finding of API URL Source Locality
 	 * @var unknown_type
 	 */
-	$pu = parse_url($_SERVER['REQUEST_URI']);
-	$source = (isset($_SERVER['HTTPS'])?'https://':'http://').strtolower($_SERVER['HTTP_HOST']).$pu['path'];
-	unset($pu);
-
 	$odds = $inner = array();
-	foreach($_GET as $key => $values)
-        if (!isset($inner[$key]))
-            $inner[$key] = $values;
-        elseif (!in_array((!is_array($values)?$values:md5(json_encode($values, true)))), array_keys($odds[$key])) {
-            if (is_array($values))
-                $odds[$key][md5(json_encode($inner[$key] = $values, true))] = $values;
-            else
-                $odds[$key][$inner[$key] = $values] = "$values--$key";
-    foreach($_POST as $key => $values)
-        if (!isset($inner[$key]))
-                $inner[$key] = $values;
-        elseif (!in_array((!is_array($values)?$values:md5(json_encode($values, true)))), array_keys($odds[$key])) {
-            if (is_array($values))
-                $odds[$key][md5(json_encode($inner[$key] = $values, true))] = $values;
-            else
-                $odds[$key][$inner[$key] = $values] = "$values--$key";
-    foreach(parse_url('http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'].(strpos($_SERVER['REQUEST_URI'], '?')?'&':'?').$_SERVER['QUERY_STRING'], PHP_URL_QUERY) as $key => $values)
-        if (!isset($inner[$key]))
+	foreach($_GET as $key => $values) {
+        if (!isset($inner[$key])) {
             $inner[$key] = $values;
-        elseif (!in_array((!is_array($values)?$values:md5(json_encode($values, true)))), array_keys($odds[$key])) {
-            if (is_array($values))
+        } elseif (!in_array(!is_array($values) ? $values : md5(json_encode($values, true)), array_keys($odds[$key]))) {
+            if (is_array($values)) {
                 $odds[$key][md5(json_encode($inner[$key] = $values, true))] = $values;
-            else
+            } else {
                 $odds[$key][$inner[$key] = $values] = "$values--$key";
+            }
+        }
+	}
+	
+	foreach($_POST as $key => $values) {
+	    if (!isset($inner[$key])) {
+	        $inner[$key] = $values;
+	    } elseif (!in_array(!is_array($values) ? $values : md5(json_encode($values, true)), array_keys($odds[$key]))) {
+	        if (is_array($values)) {
+	            $odds[$key][md5(json_encode($inner[$key] = $values, true))] = $values;
+	        } else {
+	            $odds[$key][$inner[$key] = $values] = "$values--$key";
+	        }
+	    }
+	}
+	
+	foreach(parse_url('http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'].(strpos($_SERVER['REQUEST_URI'], '?')?'&':'?').$_SERVER['QUERY_STRING'], PHP_URL_QUERY) as $key => $values) {
+	    if (!isset($inner[$key])) {
+	        $inner[$key] = $values;
+	    } elseif (!in_array(!is_array($values) ? $values : md5(json_encode($values, true)), array_keys($odds[$key]))) {
+	        if (is_array($values)) {
+	            $odds[$key][md5(json_encode($inner[$key] = $values, true))] = $values;
+	        } else {
+	            $odds[$key][$inner[$key] = $values] = "$values--$key";
+	        }
+	    }
+	}
         
 	$help=false;
 	if ((!isset($inner['country']) || empty($inner['country'])) && (!isset($inner['place']) || empty($inner['place'])) && (!isset($inner['address']) || empty($inner['address']))) {
