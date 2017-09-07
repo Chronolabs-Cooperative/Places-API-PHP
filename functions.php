@@ -165,7 +165,9 @@ if (!function_exists("findPlace")) {
 	 */
 	function findPlace($country = '', $place = '', $format = 'json', $return = 1)
 	{
-		
+	    if (empty($return) || $return < 1)
+	        $return = 1;
+	   
 		session_start();
 		if (!in_array(whitelistGetIP(true), whitelistGetIPAddy())) {
 			if (isset($_SESSION['places']['queries']['time'])) {
@@ -184,137 +186,69 @@ if (!function_exists("findPlace")) {
 			$_SESSION['places']['queries']['number']++;
 		}
 		
-		$sql = '';
-		$ret = array();
-		if (strlen($country)>3&&strtolower($country)!='list'&&strtolower($country)!='random') {
-			$sql = "SELECT * FROM `countries` WHERE lower(`Country`) LIKE '".strtolower($country)."' ORDER BY RAND() LIMIT ".$return;
-			
-		} elseif (strlen($country)>3&&strtolower($country)!='list'&&strtolower($country)=='random') {
-			$sql = "SELECT * FROM `countries` ORDER BY RAND() LIMIT ".$return;
-			
-		} elseif (strlen($country)>3&&strtolower($country)=='list') {
-			$sql = "SELECT * FROM `countries` ORDER BY `Country` ASC ";
-			
-			if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
-				while($country = $GLOBALS['DebauchDB']->fetchArray($result)) {
-					$sql = "SELECT count(*) as records FROM `" . $country['Table'] . "`";
-					if ($resultb = $GLOBALS['DebauchDB']->queryF($sql)) {
-						$records = $GLOBALS['DebauchDB']->fetchArray($resultb);
-						$country['records'] = $records['records'];
-					} else
-						$country['records'] = 0 ;
-					$country['key'] = md5($country['Table'].$country['CountryID']);
-					unset($country['Table']);
-					unset($country['CountryID']);
-					
-					$ret['countries'][$country['Country']] = $country;
-				}
-				
-				switch ($format) {
-					case "html":
-					case "raw":
-						$string = '';
-						foreach($ret as $key => $values) {
-							$string .= $key . ' [';
-							$i=0;
-							foreach($values as $keyb => $value) {
-								$i++;
-								$string .= ' { ';
-								if (is_array($value)) {
-									$string .= $keyb . '::';
-									foreach($value as $keyc => $valueb) {
-										$string .= (($i>0)?' - ':'') .  $keyc . ': ' . $valueb;
-									}
-								} else {
-									$string .= $keyb . ': ' . $value;
-								}
-								$string .= ' }';
-							}
-							$string .= " ]".($format=='raw'?"\n":"<br/>");
-						}
-						return $string;
-						break;
-					default:
-						return $ret;
-				}
-				
-			}
-			exit(0);	
-		} elseif (strlen($country)==3)
-			$sql = "SELECT * FROM `countries` WHERE lower(`ISO3`) LIKE '".strtolower($country)."' ORDER BY RAND() LIMIT 1 ";
-		elseif (strlen($country)==2)
-			$sql = "SELECT * FROM `countries` WHERE lower(`ISO2`) LIKE '".strtolower($country)."' ORDER BY RAND() LIMIT 1 ";
-		if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
-			$country = $GLOBALS['DebauchDB']->fetchArray($result);
-			
-			if ($return<2&&strtolower($place)!='random')
-				$sql = "SELECT * FROM `" . $country['Table'] . "` WHERE LOWER(`RegionName`) LIKE '" . strtolower($place) . "'  ORDER BY RAND() LIMIT " . $return;
-			elseif (strtolower($place)=='random')
-				$sql = "SELECT * FROM `" . $country['Table'] . "` ORDER BY RAND() LIMIT " . $return;
-			else 
-				$sql = "SELECT * FROM `" . $country['Table'] . "` WHERE LOWER(`RegionName`) LIKE '%" . strtolower($place) . "%'  ORDER BY RAND() LIMIT " . $return;
-			
-			$country['key'] = md5($country['Table'].$country['CountryID']);
-			
-			unset($country['Table']);
-			unset($country['CountryID']);
-			
-			if ($return>1) {
-				$ret['country']=$country;
-				if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
-					while ($place = $GLOBALS['DebauchDB']->fetchArray($result)) {
-						$place['key'] = md5($place['CountryID'].$place['CordID']);
-						unset($place['CountryID']);
-						unset($place['CordID']);
-						if (strpos($place['RegionName'], ',')) {
-							$parts = explode(', ',$place['RegionName']);
-							$place['RegionName'] = $parts[1] . ' ' . $parts[0];
-						}
-						$ret['places'][$place['key']]=$place;
-					}
-				}
-			} else {
-				if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
-					$place = $GLOBALS['DebauchDB']->fetchArray($result);
-					$place['key'] = md5($place['CountryID'].$place['CordID']);
-					unset($place['CountryID']);
-					unset($place['CordID']);
-					$ret['country']=$country;
-					$ret['place']=$place;
-				} else {
-					$ret = array();
-				}	
-			}
-		} else {
-			$ret = array();
+		$numberof = 0;
+		while ($numberof < $return)
+		{
+		    $numberof++;
+    		$sql = '';
+    		$ret = array();
+    		if (strlen($country)>3&&strtolower($country)!='list'&&strtolower($country)!='random') {
+    			$sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key`  FROM `countries` WHERE lower(`Country`) LIKE '".strtolower($country)."' GROUP BY `CountryID` ORDER BY RAND() LIMIT 1";
+    			
+    		} elseif (strlen($country)>3&&strtolower($country)=='random') {
+    			$sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key`  FROM `countries` GROUP BY `CountryID` ORDER BY RAND() LIMIT 1";
+    			
+    		} elseif (strlen($country)>3&&strtolower($country)=='list') {
+    			$sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key`  FROM `countries` GROUP BY `CountryID` ORDER BY `Country` ASC ";
+	
+    		} elseif (strlen($country)==3)
+    			$sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `countries` WHERE lower(`ISO3`) LIKE '".strtolower($country)."' GROUP BY `CountryID` ORDER BY RAND() LIMIT 1 ";
+    		elseif (strlen($country)==2)
+    			$sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `countries` WHERE lower(`ISO2`) LIKE '".strtolower($country)."' GROUP BY `CountryID` ORDER BY RAND() LIMIT 1 ";
+    		if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
+    			
+			    while($country = $GLOBALS['DebauchDB']->fetchArray($result)) {
+			        $sql = "SELECT count(*) as records FROM `" . $country['Table'] . "`";
+			        if ($resultb = $GLOBALS['DebauchDB']->queryF($sql)) {
+			            $records = $GLOBALS['DebauchDB']->fetchArray($resultb);
+			            $country['records'] = $records['records'];
+			        } else
+			            $country['records'] = 0 ;
+		            $table = $country['Table'];
+		            unset($country['CountryID']);
+		            unset($country['Table']);
+		            if ($format!='xml')
+		                $ret['countries'][$country['key']]=$country;
+	                else
+	                    $ret['countries'][$table]=$country;
+    		
+        			if (strtolower($place)!='random')
+        			    $sql = "SELECT *, md5(concat(`CountryID`, `CordID`)) as `key`  FROM `" . $table . "` WHERE LOWER(`RegionName`) LIKE '" . strtolower($place) . "'  ORDER BY RAND() LIMIT 1";
+        			elseif (strtolower($place)=='random')
+        			    $sql = "SELECT *, md5(concat(`CountryID`, `CordID`)) as `key`  FROM `" . $table . "` ORDER BY RAND() LIMIT " . $return;
+        			else 
+        			    $sql = "SELECT *, md5(concat(`CountryID`, `CordID`)) as `key`  FROM `" . $table . "` WHERE LOWER(`RegionName`) LIKE '%" . strtolower($place) . "%'  ORDER BY RAND() LIMIT 1";
+        			
+    				if ($resultb = $GLOBALS['DebauchDB']->queryF($sql)) {
+    					while ($place = $GLOBALS['DebauchDB']->fetchArray($resultb)) {
+    						unset($place['CountryID']);
+    						unset($place['CordID']);
+    						$place['country-key'] = $country['key'];
+    						if (strpos($place['RegionName'], ',')) {
+    							$parts = explode(', ',$place['RegionName']);
+    							$place['RegionName'] = $parts[1] . ' ' . $parts[0];
+    						}
+    						$key = str_replace(array(" ", "'", "-", "_", "\"", "`"), "", strtolower($place['RegionName']));
+    						if ($format!='xml')
+    						  $ret['places'][$place['key']]=$place;
+    						else 
+    						  $ret['places'][$key]=$place;
+    					}
+    				}
+			    }
+    		}
 		}
-		switch ($format) {
-			case "html":
-			case "raw":
-				$string = '';
-				foreach($ret as $key => $values) {
-					$string .= $key . ' [';
-					$i=0;
-					foreach($values as $keyb => $value) {
-						$i++;
-						$string .= ' { ';
-						if (is_array($value)) {
-							$string .= $keyb . '::';
-							foreach($value as $keyc => $valueb) {
-								$string .= (($i>0)?' - ':'') .  $keyc . ': ' . $valueb;
-							}
-						} else {
-							$string .= $keyb . ': ' . $value;
-						}
-						$string .= ' }';
-					}
-					$string .= " ]".($format=='raw'?"\n":"<br/>");
-				}
-				return $string;
-				break;
-			default:
-				return $ret;
-		}
+		return $ret;
 						
 	}	
 }

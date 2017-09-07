@@ -71,7 +71,7 @@
             }
 	   } elseif (isset($_GET['country']) && $_GET['country'] == 'key') {
 			$key = trim($_GET['place']);
-			$radius = intval($_GET['number']);
+			$radius = intval($_GET['radius']);
 			if ($radius<0)
 				$radius = 0;
 			elseif ($radius>245)
@@ -93,7 +93,7 @@
 			$country = trim($_GET['country']);
 			$place = trim($_GET['place']);
 			$output = trim($_GET['output']);
-			$number = isset($_GET['number'])?(integer)$_GET['number']:1;
+			$number = isset($_GET['radius'])?(integer)$_GET['radius']:1;
 		}
 	} else {
 		$help=true;
