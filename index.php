@@ -107,7 +107,7 @@
             }
 	   } elseif (isset($inner['country']) && $inner['country'] == 'key') {
 			$key = trim($inner['place']);
-			$radius = isset($inner['radius'])?(float)$inner['radius']:1;
+			$radius = isset($inner['radius'])?(float)$inner['radius']:API_RADIUS_DEFAULT;
 			if ($radius<0)
 				$radius = 0;
 			elseif ($radius>245)
@@ -117,16 +117,26 @@
 		} elseif (isset($inner['country']) && $inner['country'] == 'nearby') {
 			$latitude = (float)$inner['latitude'];
 			$longitude = (float)$inner['longitude'];
-			$radius = isset($inner['radius'])?(float)$inner['radius']:1;
+			$radius = isset($inner['radius'])?(float)$inner['radius']:API_RADIUS_DEFAULT;
 			if ($radius<0)
 				$radius = 0;
 			elseif ($radius>245)
 				$radius = 145;
 			$output = trim($inner['output']);
 			$mode = 'nearby';
+		} elseif (isset($inner['country']) && $inner['country'] == 'exactly') {
+		    $latitude = (float)$inner['latitude'];
+		    $longitude = (float)$inner['longitude'];
+		    $radius = isset($inner['radius'])?(float)$inner['radius']:API_RADIUS_DEFAULT;
+		    if ($radius<0)
+		        $radius = 0;
+	        elseif ($radius>245)
+		        $radius = 145;
+	        $output = trim($inner['output']);
+	        $mode = 'exactly';
 		} elseif (isset($inner['country']) && $inner['country'] == 'venues') {
 		    $key = (string)$inner['place'];
-		    $radius = isset($inner['radius'])?(float)$inner['radius']:1;
+		    $radius = isset($inner['radius'])?(float)$inner['radius']:API_RADIUS_DEFAULT;
 		    if ($radius<0)
 		        $radius = 0;
 	        elseif ($radius>245)
@@ -141,7 +151,7 @@
 		} elseif (isset($inner['country']) && $inner['country'] == 'address') {
 		    $address = (string)$inner['address'];
 		    $key = (string)$inner['place'];
-		    $radius = isset($inner['radius'])?(float)$inner['radius']:1;
+		    $radius = isset($inner['radius'])?(float)$inner['radius']:API_RADIUS_DEFAULT;
 		    $output = trim($inner['output']);
 		    $type = trim($inner['type']);
 		    $mode = 'maps';
@@ -150,7 +160,7 @@
 			$country = trim($inner['country']);
 			$place = trim($inner['place']);
 			$output = trim($inner['output']);
-			$number = isset($inner['radius'])?(float)$inner['radius']:1;
+			$number = isset($inner['radius'])?(float)$inner['radius']:API_RADIUS_DEFAULT;
 		}
 	} else {
 		$help=true;
@@ -193,9 +203,9 @@
         	            unset($row['Table']);
         	            unset($row['CountryID']);
         	            if ($output!='xml')
-        	                $data[$row['key']] = $row;
+        	                $data[$row['key']] = strippedArray($row, explode("|", API_COUNTRY_FIELDS));
     	                else
-    	                    $data[$table] = $row;
+    	                    $data[$table] = strippedArray($row, explode("|", API_COUNTRY_FIELDS));
         	        }
         	        break;
         	    case 'continents':
@@ -206,9 +216,9 @@
         	            $continent = str_replace(array(" ", "'". "`", "-"), "", ucwords(strtolower($row['Continent'])));
         	            unset($row['ContinentID']);
         	            if ($output!='xml')
-        	                $data[$row['key']] = $row;
-        	            else 
-        	                $data[$continent] = $row;
+        	                $data[$row['key']] = strippedArray($row, explode("|", API_CONTINENT_FIELDS));
+        	            else
+        	                $data[$continent] = strippedArray($row, explode("|", API_CONTINENT_FIELDS));
         	        }
         	        break;
         		default:
@@ -217,6 +227,9 @@
         		case 'nearby':
         			$data = findNearby($latitude, $longitude, $radius, $output);
         			break;
+        		case 'exactly':
+        		    $data = findExactly($latitude, $longitude, $radius, $output);
+        		    break;
         		case 'key':
         			$data = findKey($key, $radius, $output);
         			break;
@@ -224,21 +237,13 @@
         		    $data = findKeyMaps($key, $radius, $output);
         		    break;
         		case 'venues':
-        		    $data = findKeyVenues($key, $radius, $output);
+        		    $data = findKeyVenues($key, $type, $radius, $output);
+        		    break;
+        		case 'address':
+        		    $data = findAddressVenues($address, $type, $radius, $output);
         		    break;
         	}
-        	foreach($data as $key => $values)
-        	    if (empty($values))
-        	        unset($data[$key]);
-    	        elseif(is_array($values))
-    	        {
-    	            $empty = true;
-    	            foreach($values as $keb => $value)
-    	                if (!empty($value))
-    	                    $empty = false;
-                    if ($empty==true)
-                        unset($data[$key]);
-                }
+
 	    }
     	if (!empty($data))
     	{
@@ -250,19 +255,6 @@
     	}
 	}
 	
-	foreach($data as $key => $values)
-	    if (empty($values))
-	        unset($data[$key]);
-        elseif(is_array($values))
-        {
-            $empty = true;
-            foreach($values as $keb => $value)
-                if (!empty($value))
-                    $empty = false;
-            if ($empty==true)
-                unset($data[$key]);
-        }
-        
  	switch ($output) {
 		default:
 			echo '<h1>' . $country . ' - ' . $place . ' (Places data)</h1>';
