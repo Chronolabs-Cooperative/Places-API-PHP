@@ -104,6 +104,9 @@
     	        case 'continents':
     	            $mode = 'continents';
     	            break;
+    	        case 'types':
+    	            $mode = 'types';
+    	            break;
             }
 	   } elseif (isset($inner['country']) && $inner['country'] == 'key') {
 			$key = trim($inner['place']);
@@ -147,7 +150,12 @@
 		} elseif (isset($inner['country']) && $inner['country'] == 'maps') {
 		    $key = (string)$inner['place'];
 		    $output = trim($inner['output']);
+		    $radius = isset($inner['radius'])?(float)$inner['radius']:API_RADIUS_DEFAULT;
 		    $mode = 'maps';
+		} elseif (isset($inner['country']) && $inner['country'] == 'details') {
+		    $key = (string)$inner['place'];
+		    $output = trim($inner['output']);
+		    $mode = 'details';
 		} elseif (isset($inner['country']) && $inner['country'] == 'address') {
 		    $address = (string)$inner['address'];
 		    $key = (string)$inner['place'];
@@ -221,6 +229,20 @@
         	                $data[$continent] = strippedArray($row, explode("|", API_CONTINENT_FIELDS));
         	        }
         	        break;
+        	    case 'types':
+        	        $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key`  FROM `$mode`  GROUP BY `CountryID` ORDER BY `Country`";
+        	        $result = $GLOBALS['DebauchDB']->queryF($sql);
+        	        while($row = $GLOBALS['DebauchDB']->fetchArray($result))
+        	        {
+        	            $table = $row['Table'];
+        	            unset($row['Table']);
+        	            unset($row['CountryID']);
+        	            if ($output!='xml')
+        	                $data[$row['key']] = strippedArray($row, explode("|", API_COUNTRY_FIELDS));
+        	                else
+        	                    $data[$table] = strippedArray($row, explode("|", API_COUNTRY_FIELDS));
+        	        }
+        	        break;
         		default:
         			$data = findPlace($country, $place, $output, $number);
         			break;
@@ -235,6 +257,9 @@
         			break;
         		case 'maps':
         		    $data = findKeyMaps($key, $radius, $output);
+        		    break;
+        		case 'details':
+        		    $data = findKeyDetails($key, $output);
         		    break;
         		case 'venues':
         		    $data = findKeyVenues($key, $type, $radius, $output);

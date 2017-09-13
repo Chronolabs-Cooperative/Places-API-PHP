@@ -126,6 +126,8 @@
         <em><strong><a href="<?php echo $source; ?>v2/exactly/<?php echo $local['latitude']; ?>/<?php echo $local['longitude']; ?>/<?php echo $distance; ?>/raw.api" target="_blank"><?php echo $source; ?>v2/exactly/<?php echo $local['latitude']; ?>/<?php echo $local['longitude']; ?>/<?php echo $distance; ?>/raw.api</a></strong></em><br/><br/>
         <font color="#009900"><strong>Reverse Key Lookup for a Map Overlay</strong> for country or place, this is for 1 result contain either the result type of country or place</font><br/>
         <em><strong><a href="<?php echo $source; ?>v2/maps/<?php echo $key; ?>/raw.api" target="_blank"><?php echo $source; ?>v2/maps/<?php echo $key; ?>/raw.api</a></strong></em><br /><br />
+        <font color="#009900"><strong>Reverse Key Lookup for a Detailed Data on Location</strong> for country or place or venue.</font><br/>
+        <em><strong><a href="<?php echo $source; ?>v2/details/<?php echo $key; ?>/raw.api" target="_blank"><?php echo $source; ?>v2/details/<?php echo $key; ?>/raw.api</a></strong></em><br /><br />
         <font color="#009900"><strong>Reverse Key Lookup</strong> for country or place, this is for 1 result contain either the result type of country or place</font><br/>
         <em><strong><a href="<?php echo $source; ?>v2/venues/all/<?php echo $key; ?>/raw.api" target="_blank"><?php echo $source; ?>v2/venues/all/<?php echo $key; ?>/raw.api</a></strong></em><br /><br />
         <font color="#009900"><strong>Reverse Key Lookup</strong> for a place with returning in this example of the nearby places and distance from that key within <?php echo $distance; ?>Km's in this example</font><br/>
@@ -199,6 +201,8 @@
         <em><strong><a href="<?php echo $source; ?>v2/exactly/<?php echo $local['latitude']; ?>/<?php echo $local['longitude']; ?>/<?php echo $distance; ?>/html.api" target="_blank"><?php echo $source; ?>v2/exactly/<?php echo $local['latitude']; ?>/<?php echo $local['longitude']; ?>/<?php echo $distance; ?>/html.api</a></strong></em><br/><br/>
         <font color="#009900"><strong>Reverse Key Lookup for a Map Overlay</strong> for country or place, this is for 1 result contain either the result type of country or place</font><br/>
         <em><strong><a href="<?php echo $source; ?>v2/maps/<?php echo $key; ?>/html.api" target="_blank"><?php echo $source; ?>v2/maps/<?php echo $key; ?>/html.api</a></strong></em><br /><br />
+        <font color="#009900"><strong>Reverse Key Lookup for a Detailed Data on Location</strong> for country or place or venue.</font><br/>
+        <em><strong><a href="<?php echo $source; ?>v2/details/<?php echo $key; ?>/html.api" target="_blank"><?php echo $source; ?>v2/details/<?php echo $key; ?>/html.api</a></strong></em><br /><br />
         <font color="#009900"><strong>Reverse Key Lookup</strong> for country or place, this is for 1 result contain either the result type of country or place</font><br/>
         <em><strong><a href="<?php echo $source; ?>v2/venues/all/<?php echo $key; ?>/html.api" target="_blank"><?php echo $source; ?>v2/venues/all/<?php echo $key; ?>/html.api</a></strong></em><br /><br />
         <font color="#009900"><strong>Reverse Key Lookup</strong> for a place with returning in this example of the nearby places and distance from that key within <?php echo $distance; ?>Km's in this example</font><br/>
@@ -272,6 +276,8 @@
         <em><strong><a href="<?php echo $source; ?>v2/exactly/<?php echo $local['latitude']; ?>/<?php echo $local['longitude']; ?>/<?php echo $distance; ?>/serial.api" target="_blank"><?php echo $source; ?>v2/exactly/<?php echo $local['latitude']; ?>/<?php echo $local['longitude']; ?>/<?php echo $distance; ?>/serial.api</a></strong></em><br/><br/>
         <font color="#009900"><strong>Reverse Key Lookup for a Map Overlay</strong> for country or place, this is for 1 result contain either the result type of country or place</font><br/>
         <em><strong><a href="<?php echo $source; ?>v2/maps/<?php echo $key; ?>/serial.api" target="_blank"><?php echo $source; ?>v2/maps/<?php echo $key; ?>/serial.api</a></strong></em><br /><br />
+        <font color="#009900"><strong>Reverse Key Lookup for a Detailed Data on Location</strong> for country or place or venue.</font><br/>
+        <em><strong><a href="<?php echo $source; ?>v2/details/<?php echo $key; ?>/serial.api" target="_blank"><?php echo $source; ?>v2/details/<?php echo $key; ?>/serial.api</a></strong></em><br /><br />
         <font color="#009900"><strong>Reverse Key Lookup</strong> for country or place, this is for 1 result contain either the result type of country or place</font><br/>
         <em><strong><a href="<?php echo $source; ?>v2/venues/all/<?php echo $key; ?>/serial.api" target="_blank"><?php echo $source; ?>v2/venues/all/<?php echo $key; ?>/serial.api</a></strong></em><br /><br />
         <font color="#009900"><strong>Reverse Key Lookup</strong> for a place with returning in this example of the nearby places and distance from that key within <?php echo $distance; ?>Km's in this example</font><br/>
@@ -345,6 +351,8 @@
         <em><strong><a href="<?php echo $source; ?>v2/exactly/<?php echo $local['latitude']; ?>/<?php echo $local['longitude']; ?>/<?php echo $distance; ?>/json.api" target="_blank"><?php echo $source; ?>v2/exactly/<?php echo $local['latitude']; ?>/<?php echo $local['longitude']; ?>/<?php echo $distance; ?>/json.api</a></strong></em><br/><br/>
         <font color="#009900"><strong>Reverse Key Lookup for a Map Overlay</strong> for country or place, this is for 1 result contain either the result type of country or place</font><br/>
         <em><strong><a href="<?php echo $source; ?>v2/maps/<?php echo $key; ?>/json.api" target="_blank"><?php echo $source; ?>v2/maps/<?php echo $key; ?>/json.api</a></strong></em><br /><br />
+        <font color="#009900"><strong>Reverse Key Lookup for a Detailed Data on Location</strong> for country or place or venue.</font><br/>
+        <em><strong><a href="<?php echo $source; ?>v2/details/<?php echo $key; ?>/json.api" target="_blank"><?php echo $source; ?>v2/details/<?php echo $key; ?>/json.api</a></strong></em><br /><br />
         <font color="#009900"><strong>Reverse Key Lookup</strong> for country or place, this is for 1 result contain either the result type of country or place</font><br/>
         <em><strong><a href="<?php echo $source; ?>v2/venues/all/<?php echo $key; ?>/json.api" target="_blank"><?php echo $source; ?>v2/venues/all/<?php echo $key; ?>/json.api</a></strong></em><br /><br />
         <font color="#009900"><strong>Reverse Key Lookup</strong> for a place with returning in this example of the nearby places and distance from that key within <?php echo $distance; ?>Km's in this example</font><br/>
@@ -418,6 +426,8 @@
         <em><strong><a href="<?php echo $source; ?>v2/exactly/<?php echo $local['latitude']; ?>/<?php echo $local['longitude']; ?>/<?php echo $distance; ?>/xml.api" target="_blank"><?php echo $source; ?>v2/exactly/<?php echo $local['latitude']; ?>/<?php echo $local['longitude']; ?>/<?php echo $distance; ?>/xml.api</a></strong></em><br/><br/>
         <font color="#009900"><strong>Reverse Key Lookup for a Map Overlay</strong> for country or place, this is for 1 result contain either the result type of country or place</font><br/>
         <em><strong><a href="<?php echo $source; ?>v2/maps/<?php echo $key; ?>/xml.api" target="_blank"><?php echo $source; ?>v2/maps/<?php echo $key; ?>/xml.api</a></strong></em><br /><br />
+        <font color="#009900"><strong>Reverse Key Lookup for a Detailed Data on Location</strong> for country or place or venue.</font><br/>
+        <em><strong><a href="<?php echo $source; ?>v2/details/<?php echo $key; ?>/xml.api" target="_blank"><?php echo $source; ?>v2/details/<?php echo $key; ?>/xml.api</a></strong></em><br /><br />
         <font color="#009900"><strong>Reverse Key Lookup</strong> for country or place, this is for 1 result contain either the result type of country or place</font><br/>
         <em><strong><a href="<?php echo $source; ?>v2/venues/all/<?php echo $key; ?>/xml.api" target="_blank"><?php echo $source; ?>v2/venues/all/<?php echo $key; ?>/xml.api</a></strong></em><br /><br />
         <font color="#009900"><strong>Reverse Key Lookup</strong> for a place with returning in this example of the nearby places and distance from that key within <?php echo $distance; ?>Km's in this example</font><br/>

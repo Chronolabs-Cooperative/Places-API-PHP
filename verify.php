@@ -161,17 +161,173 @@ if (!$timeout = PlacesCache::read(basename(__DIR__) . '--verify-timeout'))
                 KEY `SEARCH` (`DetailID`,`CountryID`,`CordID`,`Key`,`retrieve`,`updating`) USING BTREE KEY_BLOCK_SIZE=16
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8";
         }
-        if (!isset($tables[$table . "_venues_link"]))
+        $table = $country['Table'];
+        if (!isset($tables[$table . "_address"]))
         {
-            $query[] = "CREATE TABLE `" . $country['Table'] . "_venues_link` (
+            $query[] = "CREATE TABLE `" . $country['Table'] . "_address` (
+                `AddressID` mediumint(22) UNSIGNED NOT NULL AUTO_INCREMENT,
                 `CordID` int(11) DEFAULT 0,
-                `StateID` int(11) DEFAULT 0,
                 `CountryID` int(11) DEFAULT 0,
-                `VenueID` mediumint(22) UNSIGNED NOT NULL DEFAULT 0,
-                `Key` char(64) DEFAULT '',
-                `created` int(11) DEFAULT 0,
-                KEY `SEARCH` (`VenueID`,`CountryID`,`CordID`,`Key`,`StateID`,`created`) USING BTREE KEY_BLOCK_SIZE=16
+                `Types` varchar(255) NOT NULL DEFAULT '',
+                `Unit` varchar(10) NOT NULL DEFAULT '',
+                `Building` varchar(10) NOT NULL DEFAULT '',
+                `Street` varchar(64) NOT NULL DEFAULT '',
+                `Suburb` varchar(64) NOT NULL DEFAULT '',
+                `State` varchar(64) NOT NULL DEFAULT '',
+                `Country` varchar(64) NOT NULL DEFAULT '',
+                `Country_ISO2` varchar(2) NOT NULL DEFAULT '',
+                `Postcode` varchar(20) NOT NULL DEFAULT '',
+                `Council` varchar(255) NOT NULL DEFAULT '',
+                `GoogleID` varchar(255) NOT NULL DEFAULT '',
+                `Longitude` float(29,11) NOT NULL DEFAULT 0,
+                `Latitude` float(29,11) NOT NULL DEFAULT 0,
+                `View_NE_Longitude` float(29,11) NOT NULL DEFAULT 0,
+                `View_NE_Latitude` float(29,11) NOT NULL DEFAULT 0,
+                `View_SW_Longitude` float(29,11) NOT NULL DEFAULT 0,
+                `View_SW_Latitude` float(29,11) NOT NULL DEFAULT 0,
+                `Formatted` varchar(255) NOT NULL DEFAULT '',
+                `Created` int(11) DEFAULT 0,
+                PRIMARY KEY (`AddressID`),
+                KEY `SEARCH` (`AddressID`,`CordID`,`CountryID`,`Types`,`Unit`,`Suburb`,`Building`,`State`,`Postcode`,`Street`,`Longitude`,`Latitude`) USING BTREE KEY_BLOCK_SIZE=16
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8";
+        }
+        if (isset($tables[$table . "_address"]) && !in_array("Postcode", array_keys($fields[$table . "_address"])))
+        {
+            $query[] = "DROP TABLE `" . $country['Table'] . "_address`";
+            $query[] = "CREATE TABLE `" . $country['Table'] . "_address` (
+                `AddressID` mediumint(22) UNSIGNED NOT NULL AUTO_INCREMENT,
+                `CordID` int(11) DEFAULT 0,
+                `CountryID` int(11) DEFAULT 0,
+                `Types` varchar(255) NOT NULL DEFAULT '',
+                `Unit` varchar(10) NOT NULL DEFAULT '',
+                `Building` varchar(10) NOT NULL DEFAULT '',
+                `Street` varchar(64) NOT NULL DEFAULT '',
+                `Suburb` varchar(64) NOT NULL DEFAULT '',
+                `State` varchar(64) NOT NULL DEFAULT '',
+                `Country` varchar(64) NOT NULL DEFAULT '',
+                `Country_ISO2` varchar(2) NOT NULL DEFAULT '',
+                `Postcode` varchar(20) NOT NULL DEFAULT '',
+                `Council` varchar(255) NOT NULL DEFAULT '',
+                `GoogleID` varchar(255) NOT NULL DEFAULT '',
+                `Longitude` float(29,11) NOT NULL DEFAULT 0,
+                `Latitude` float(29,11) NOT NULL DEFAULT 0,
+                `View_NE_Longitude` float(29,11) NOT NULL DEFAULT 0,
+                `View_NE_Latitude` float(29,11) NOT NULL DEFAULT 0,
+                `View_SW_Longitude` float(29,11) NOT NULL DEFAULT 0,
+                `View_SW_Latitude` float(29,11) NOT NULL DEFAULT 0,
+                `Formatted` varchar(255) NOT NULL DEFAULT '',
+                `Created` int(11) DEFAULT 0,
+                PRIMARY KEY (`AddressID`),
+                KEY `SEARCH` (`AddressID`,`CordID`,`CountryID`,`Types`,`Unit`,`Suburb`,`Building`,`State`,`Postcode`,`Street`,`Longitude`,`Latitude`) USING BTREE KEY_BLOCK_SIZE=16
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8";
+        }
+        if (isset($tables[$table . "_address"]) && !in_array("Suburb", array_keys($fields[$table . "_address"])))
+        {
+            $query[] = "DROP TABLE `" . $country['Table'] . "_address`";
+            $query[] = "CREATE TABLE `" . $country['Table'] . "_address` (
+                `AddressID` mediumint(22) UNSIGNED NOT NULL AUTO_INCREMENT,
+                `CordID` int(11) DEFAULT 0,
+                `CountryID` int(11) DEFAULT 0,
+                `Types` varchar(255) NOT NULL DEFAULT '',
+                `Unit` varchar(10) NOT NULL DEFAULT '',
+                `Building` varchar(10) NOT NULL DEFAULT '',
+                `Street` varchar(64) NOT NULL DEFAULT '',
+                `Suburb` varchar(64) NOT NULL DEFAULT '',
+                `State` varchar(64) NOT NULL DEFAULT '',
+                `Country` varchar(64) NOT NULL DEFAULT '',
+                `Country_ISO2` varchar(2) NOT NULL DEFAULT '',
+                `Postcode` varchar(20) NOT NULL DEFAULT '',
+                `Council` varchar(255) NOT NULL DEFAULT '',
+                `GoogleID` varchar(255) NOT NULL DEFAULT '',
+                `Longitude` float(29,11) NOT NULL DEFAULT 0,
+                `Latitude` float(29,11) NOT NULL DEFAULT 0,
+                `View_NE_Longitude` float(29,11) NOT NULL DEFAULT 0,
+                `View_NE_Latitude` float(29,11) NOT NULL DEFAULT 0,
+                `View_SW_Longitude` float(29,11) NOT NULL DEFAULT 0,
+                `View_SW_Latitude` float(29,11) NOT NULL DEFAULT 0,
+                `Formatted` varchar(255) NOT NULL DEFAULT '',
+                `Created` int(11) DEFAULT 0,
+                PRIMARY KEY (`AddressID`),
+                KEY `SEARCH` (`AddressID`,`CordID`,`CountryID`,`Types`,`Unit`,`Suburb`,`Building`,`State`,`Postcode`,`Street`,`Longitude`,`Latitude`) USING BTREE KEY_BLOCK_SIZE=16
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8";
+        }
+        if (!isset($tables[$table . "_address_types"]))
+        {
+            $query[] = "CREATE TABLE `" . $country['Table'] . "_address_types` (
+                `TypeID` int(11) UNSIGNED NOT NULL  AUTO_INCREMENT,
+                `Type` char(64) DEFAULT '',
+                `Records` int(11) DEFAULT 0,
+                PRIMARY KEY (`TypeID`),
+                KEY `SEARCH` (`TypeID`,`Type`,`Records`) USING BTREE KEY_BLOCK_SIZE=16
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8";
+        }
+        if (!isset($tables[$table . "_address_types_links"]))
+        {
+            $query[] = "CREATE TABLE `" . $country['Table'] . "_address_types_links` (
+                `TypeID` int(11) UNSIGNED NOT NULL DEFAULT 0,
+                `AddressID` mediumint(22) UNSIGNED NOT NULL DEFAULT 0,
+                KEY `SEARCH` (`TypeID`,`AddressID`) USING BTREE KEY_BLOCK_SIZE=16
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8";
+        }
+        if (!isset($tables[$table . "_venues"]))
+        {
+            $query[] = "CREATE TABLE `" . $country['Table'] . "_venues` (
+                `VenueID` mediumint(22) UNSIGNED NOT NULL AUTO_INCREMENT,
+                `CordID` int(11) DEFAULT 0,
+                `CountryID` int(11) DEFAULT 0,
+                `Types` varchar(255) NOT NULL DEFAULT '',
+                `Name` varchar(255) NOT NULL DEFAULT '',
+                `Icon` varchar(255) NOT NULL DEFAULT '',
+                `Id` varchar(64) NOT NULL DEFAULT '',
+                `Reference` varchar(255) NOT NULL DEFAULT '',
+                `GoogleID` varchar(255) NOT NULL DEFAULT '',
+                `Longitude` float(29,11) NOT NULL DEFAULT 0,
+                `Latitude` float(29,11) NOT NULL DEFAULT 0,
+                `View_NE_Longitude` float(29,11) NOT NULL DEFAULT 0,
+                `View_NE_Latitude` float(29,11) NOT NULL DEFAULT 0,
+                `View_SW_Longitude` float(29,11) NOT NULL DEFAULT 0,
+                `View_SW_Latitude` float(29,11) NOT NULL DEFAULT 0,
+                `Vicinity` varchar(255) NOT NULL DEFAULT '',
+                `Photos` int(11) DEFAULT 0,
+                `Created` int(11) DEFAULT 0,
+                PRIMARY KEY (`VenueID`),
+                KEY `SEARCH` (`VenueID`,`CordID`,`CountryID`,`Types`,`Name`,`Longitude`,`Latitude`) USING BTREE KEY_BLOCK_SIZE=16
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8";
+        }
+        if (!isset($tables[$table . "_venues_photos"]))
+        {
+            $query[] = "CREATE TABLE `" . $country['Table'] . "_venues_photos` (
+                `PhotoID` int(11) UNSIGNED NOT NULL  AUTO_INCREMENT,
+                `VenueID` mediumint(22) UNSIGNED NOT NULL DEFAULT 0,
+                `Height` int(11) UNSIGNED NOT NULL DEFAULT 0,
+                `Width` int(11) UNSIGNED NOT NULL DEFAULT 0,
+                `Reference` varchar(255) NOT NULL DEFAULT '',
+                `HTML` tinytext,
+                PRIMARY KEY (`PhotoID`),
+                KEY `SEARCH` (`PhotoID`,`VenueID`) USING BTREE KEY_BLOCK_SIZE=16
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8";
+        }
+        if (!isset($tables[$table . "_venues_types"]))
+        {
+            $query[] = "CREATE TABLE `" . $country['Table'] . "_venues_types` (
+                `TypeID` int(11) UNSIGNED NOT NULL  AUTO_INCREMENT,
+                `Type` char(64) DEFAULT '',
+                `Records` int(11) DEFAULT 0,
+                PRIMARY KEY (`TypeID`),
+                KEY `SEARCH` (`TypeID`,`Type`,`Records`) USING BTREE KEY_BLOCK_SIZE=16
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8";
+        }
+        if (!isset($tables[$table . "_venues_types_links"]))
+        {
+            $query[] = "CREATE TABLE `" . $country['Table'] . "_venues_types_links` (
+                `TypeID` int(11) UNSIGNED NOT NULL DEFAULT 0,
+                `VenueID` mediumint(22) UNSIGNED NOT NULL DEFAULT 0,
+                KEY `SEARCH` (`TypeID`,`VenueID`) USING BTREE KEY_BLOCK_SIZE=16
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8";
+        }
+        if (isset($tables[$table . "_venues_link"]))
+        {
+            $query[] = "DROP TABLE `" . $country['Table'] . "_venues_link`";
         }
         if (!empty($table) && isset($fields[$table]) && !empty($fields[$table]))
         {

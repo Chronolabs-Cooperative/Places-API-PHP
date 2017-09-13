@@ -229,37 +229,40 @@ if (!function_exists("findPlace")) {
     		elseif (strlen($country)==2)
     			$sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `countries` WHERE lower(`ISO2`) LIKE '".strtolower($country)."' GROUP BY `CountryID` ORDER BY RAND() LIMIT 1 ";
     		if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
-			    while($cuntree = $GLOBALS['DebauchDB']->fetchArray($result)) {
-			        $sql = "SELECT count(*) as records FROM `" . $cuntree['Table'] . "`";
+			    while($country = $GLOBALS['DebauchDB']->fetchArray($result)) {
+			        $sql = "SELECT count(*) as records FROM `" . $country['Table'] . "`";
 			        if ($resultb = $GLOBALS['DebauchDB']->queryF($sql)) {
 			            $records = $GLOBALS['DebauchDB']->fetchArray($resultb);
-			            $cuntree['records'] = $records['records'];
+			            $country['records'] = $records['records'];
 			        } else
-			            $cuntree['records'] = 0 ;
-		            $table = $cuntree['Table'];
+			            $country['records'] = 0 ;
+		            $table = $country['Table'];
 		            if ($format!='xml')
-		                $ret['countries'][$table] = strippedArray($cuntree, explode('|', API_COUNTRY_FIELDS));
+		                $ret['countries'][$table] = strippedArray($country, explode('|', API_COUNTRY_FIELDS));
 	                else
-	                    $ret['countries'][$table] = strippedArray($cuntree, explode('|', API_COUNTRY_FIELDS));
+	                    $ret['countries'][$table] = strippedArray($country, explode('|', API_COUNTRY_FIELDS));
     		
         			if (strtolower($place)!='random') {
-        			    $sql = "SELECT *, concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`))) as `key`  FROM `" . $table . "` WHERE LOWER(`RegionName`) LIKE '" . strtolower($place) . "%'  ORDER BY RAND() ".(($return>1)?" LIMIT $return":"");
+        			    $sql = "SELECT *,  concat(`RegionName`, ', ', '" . $country['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`))) as `key`  FROM `" . $table . "` WHERE LOWER(`RegionName`) LIKE '" . strtolower($place) . "%'  ORDER BY RAND() ".(($return>1)?" LIMIT $return":"");
         			    $numberof = $return;
         			} elseif (strtolower($place) == 'random' && strtolower($country) == 'random')
-        			     $sql = "SELECT *, concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`))) as `key`  FROM `" . $table . "` ORDER BY RAND()".(($return>1)?" LIMIT $return":"");
+        			     $sql = "SELECT *,  concat(`RegionName`, ', ', '" . $country['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`))) as `key`  FROM `" . $table . "` ORDER BY RAND()".(($return>1)?" LIMIT $return":"");
         			elseif (strtolower($place) == 'random' && strtolower($country) != 'random') {
-        			    $sql = "SELECT *, concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`))) as `key`  FROM `" . $table . "` ORDER BY RAND()".(($return>1)?" LIMIT $return":"");
+        			    $sql = "SELECT *,  concat(`RegionName`, ', ', '" . $country['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`))) as `key`  FROM `" . $table . "` ORDER BY RAND()".(($return>1)?" LIMIT $return":"");
         			    $numberof = $return;
         			} else {
-        			    $sql = "SELECT *, concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`))) as `key`  FROM `" . $table . "` WHERE LOWER(`RegionName`) LIKE '%" . strtolower($place) . "%'  ORDER BY RAND()".(($return>1)?" LIMIT $return":"");
+        			    $sql = "SELECT *,  concat(`RegionName`, ', ', '" . $country['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`))) as `key`  FROM `" . $table . "` WHERE LOWER(`RegionName`) LIKE '%" . strtolower($place) . "%'  ORDER BY RAND()".(($return>1)?" LIMIT $return":"");
         			    $numberof = $return;
         			}
     				if ($resultb = $GLOBALS['DebauchDB']->queryF($sql)) {
     					while ($region = $GLOBALS['DebauchDB']->fetchArray($resultb)) {
-    					    if (strpos($region['RegionName'], ',')) {
-    					        $parts = explode(', ',$region['RegionName']);
-    					        $region['RegionName'] = $parts[1] . ' ' . $parts[0];
-    						}
+    					    if (strpos($place['RegionName'], ',')) {
+    					        $parts = explode(',',$place['RegionName']);
+    					        array_reverse($parts);
+    					        foreach($parts as $key => $value)
+    					            $parts[$key] = trim($value);
+    					            $place['RegionName'] = implode(' ', $parts);
+    					    }
     						$key = str_replace(array(" ", "'", "-", "_", "\"", "`" , ",", "(", ")"), "", strtolower($region['RegionName']));
     						if ($format!='xml')
     						    $ret['places'][$table][$region['key']] = strippedArray($region, explode('|', API_PLACES_FIELDS));
@@ -322,7 +325,7 @@ if (!function_exists("findNearby")) {
 					$country['records'] = $records['records'];
 				} else
 					$country['records'] = 0 ;
-				$sql = "SELECT *, concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`))) as `key`, 3956 * 2 * ASIN(SQRT(POWER(SIN((" . abs($latitude) . " - abs(`Latitude_Float`)) * pi() / 180 / 2), 2) + COS(" . abs($latitude) . " * pi() / 180 ) * COS(abs(`Latitude_Float`) *  pi() / 180) * POWER(SIN((" . $longitude . " - `Longitude_Float`) *  pi() / 180 / 2), 2) )) as distance FROM `" . $table . "` having `distance` <= ".$radius." ORDER BY `distance`";
+				$sql = "SELECT *,  concat(`RegionName`, ', ', '" . $country['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`))) as `key`, 3956 * 2 * ASIN(SQRT(POWER(SIN((" . abs($latitude) . " - abs(`Latitude_Float`)) * pi() / 180 / 2), 2) + COS(" . abs($latitude) . " * pi() / 180 ) * COS(abs(`Latitude_Float`) *  pi() / 180) * POWER(SIN((" . $longitude . " - `Longitude_Float`) *  pi() / 180 / 2), 2) )) as `Distance` FROM `" . $table . "` HAVING `Distance` <= ".$radius." ORDER BY `Distance`";
 				$ret['search']['countries']++;
 				unset($resultb);
 				if ($resultb = $GLOBALS['DebauchDB']->queryF($sql)) {
@@ -331,10 +334,13 @@ if (!function_exists("findNearby")) {
 						    $ret['results']['countries'][$table] = strippedArray($country, explode('|',API_COUNTRY_FIELDS));
 					    else 
 					        $ret['results']['countries'][$table] = strippedArray($country, explode('|',API_COUNTRY_FIELDS));
-						if (strpos($place['RegionName'], ',')) {
-							$parts = explode(', ',$place['RegionName']);
-							$place['RegionName'] = $parts[1] . ' ' . $parts[0];
-						}
+				        if (strpos($place['RegionName'], ',')) {
+				            $parts = explode(',',$place['RegionName']);
+				            array_reverse($parts);
+				            foreach($parts as $key => $value)
+				                $parts[$key] = trim($value);
+				                $place['RegionName'] = implode(' ', $parts);
+				        }
 						$key = str_replace(array(" ", "'", "-", "_", "\"", "`" , ",", "(", ")"), "", strtolower($place['RegionName']));
 						if ($format!='xml')
 						    $ret['results']['places'][$table][$place['key']] = strippedArray($place, explode('|',API_PLACES_FIELDS));
@@ -400,7 +406,7 @@ if (!function_exists("findExactly")) {
 				} else
 					$country['records'] = 0 ;
 				$ret['search']['countries']++;
-				$sql = "SELECT *, concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`))) as `key`, 3956 * 2 * ASIN(SQRT(POWER(SIN((" . abs($latitude) . " - abs(`Latitude_Float`)) * pi() / 180 / 2), 2) + COS(" . abs($latitude) . " * pi() / 180 ) * COS(abs(`Latitude_Float`) *  pi() / 180) * POWER(SIN((" . $longitude . " - `Longitude_Float`) *  pi() / 180 / 2), 2) )) as distance FROM `" . $table . "` WHERE `Latitude_Float` >= ".($latitude - (111.32 * ($radius / 1000)))." AND `Longitude_Float` >= ".($longitude - (111.32 * ($radius / 1000)))." AND `Latitude_Float` <= ".($latitude + (111.32 * ($radius / 1000)))." AND `Longitude_Float` <= ".($longitude + (111.32 * ($radius / 1000)))." ORDER BY `distance`";
+				$sql = "SELECT *,  concat(`RegionName`, ', ', '" . $country['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`))) as `key`, 3956 * 2 * ASIN(SQRT(POWER(SIN((" . abs($latitude) . " - abs(`Latitude_Float`)) * pi() / 180 / 2), 2) + COS(" . abs($latitude) . " * pi() / 180 ) * COS(abs(`Latitude_Float`) *  pi() / 180) * POWER(SIN((" . $longitude . " - `Longitude_Float`) *  pi() / 180 / 2), 2) )) as `Distance` FROM `" . $table . "` WHERE `Latitude_Float` >= ".($latitude - (111.32 * ($radius / 1000)))." AND `Longitude_Float` >= ".($longitude - (111.32 * ($radius / 1000)))." AND `Latitude_Float` <= ".($latitude + (111.32 * ($radius / 1000)))." AND `Longitude_Float` <= ".($longitude + (111.32 * ($radius / 1000)))." ORDER BY `Distance`";
 				unset($resultb);
 				if ($resultb = $GLOBALS['DebauchDB']->queryF($sql)) {
 					while ($place = $GLOBALS['DebauchDB']->fetchArray($resultb)) {
@@ -408,10 +414,13 @@ if (!function_exists("findExactly")) {
 					        $ret['results']['countries'][$table] = strippedArray($country, explode('|',API_COUNTRY_FIELDS));
 				        else
 				            $ret['results']['countries'][$table] = strippedArray($country, explode('|',API_COUNTRY_FIELDS));
-						if (strpos($place['RegionName'], ',')) {
-							$parts = explode(', ',$place['RegionName']);
-							$place['RegionName'] = $parts[1] . ' ' . $parts[0];
-						}
+			            if (strpos($place['RegionName'], ',')) {
+			                $parts = explode(',',$place['RegionName']);
+			                array_reverse($parts);
+			                foreach($parts as $key => $value)
+			                    $parts[$key] = trim($value);
+			                $place['RegionName'] = implode(' ', $parts);
+			            }
 						$key = str_replace(array(" ", "'", "-", "_", "\"", "`" , ",", "(", ")"), "", strtolower($place['RegionName']));
 						if ($format!='xml')
 						    $ret['results']['places'][$table][$place['key']] = strippedArray($place, explode('|',API_PLACES_FIELDS));
@@ -485,12 +494,12 @@ if (!function_exists("findKey")) {
 		
 		if (strpos($key, ":")>0)
 		{
-		    $cuntryid = substr($key, 0, strpos($key, ":") );
+		    $countryid = substr($key, 0, strpos($key, ":") );
 		    $key = substr($key, strpos($key, ":") + 1);
 		} else 
-		    $cuntryid = false;
+		    $countryid = false;
 		
-	    if (empty($cuntryid) && $cuntryid == false)
+	    if (empty($countryid) && $countryid == false)
 	    {
     		$sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `countries` WHERE md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) LIKE '".$key."' GROUP BY `CountryID` ORDER BY RAND() ";
     		if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
@@ -502,8 +511,6 @@ if (!function_exists("findKey")) {
     					$country['records'] = $records['records'];
     				} else
     					$country['records'] = 0;
-    				unset($country['Table']);
-    				unset($country['CountryID']);
     				if ($format!='xml')
     				    $ret['results']['countries'][$table] = strippedArray($country, explode('|',API_COUNTRY_FIELDS));
     			    else
@@ -518,12 +525,12 @@ if (!function_exists("findKey")) {
     		}
 	    }
 	    
-		if (empty($cuntryid) && $cuntryid == false && $found==false) {
+		if (empty($countryid) && $countryid == false && $found==false) {
 			$sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `countries` GROUP BY `CountryID` ORDER BY RAND() ";
 			if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
 				while(($country = $GLOBALS['DebauchDB']->fetchArray($result)) && $found == false) {
 				    $table = $country['Table'];
-					$sql = "SELECT *, concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`))) as `key`, concat(`RegionName`, ', ', '".$country['Country']."') as `address` FROM `" . $table . "` WHERE md5(concat(`CountryID`, `CordID`)) LIKE '" . $key . "' ORDER BY RAND() LIMIT 1";
+					$sql = "SELECT *, concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`))) as `key`, concat(`RegionName`, ', ', '".$country['Country']."') as `Address` FROM `" . $table . "` WHERE md5(concat(`CountryID`, `CordID`)) LIKE '" . $key . "' ORDER BY RAND() LIMIT 1";
 					if ($resultb = $GLOBALS['DebauchDB']->queryF($sql)) {
 						while (($place = $GLOBALS['DebauchDB']->fetchArray($resultb)) && $found == false) {
 							$table = $country['Table'];
@@ -533,18 +540,17 @@ if (!function_exists("findKey")) {
 								$country['records'] = $records['records'];
 							} else
 								$country['records'] = 0 ;
-							unset($country['Table']);
-							unset($country['CountryID']);
 							if ($format!='xml')
 							    $ret['results']['countries'][$table] = strippedArray($country, explode('|',API_COUNTRY_FIELDS));
 						    else
 						        $ret['results']['countries'][$table] = strippedArray($country, explode('|',API_COUNTRY_FIELDS));
-							unset($place['CountryID']);
-							unset($place['CordID']);
-							if (strpos($place['RegionName'], ',')) {
-								$parts = explode(', ',$place['RegionName']);
-								$place['RegionName'] = $parts[1] . ' ' . $parts[0];
-							}
+					        if (strpos($place['RegionName'], ',')) {
+					            $parts = explode(',',$place['RegionName']);
+					            array_reverse($parts);
+					            foreach($parts as $key => $value)
+					                $parts[$key] = trim($value);
+					                $place['RegionName'] = implode(' ', $parts);
+					        }
 							$key = str_replace(array(" ", "'", "-", "_", "\"", "`" , ",", "(", ")"), "", strtolower($place['RegionName']));
 							if ($format!='xml')
 							    $ret['results']['places'][$table][$place['key']] = strippedArray($place, explode('|',API_PLACES_FIELDS));
@@ -559,12 +565,12 @@ if (!function_exists("findKey")) {
 					}	
 				}
 			}
-		} elseif ($found==false && !empty($cuntryid)) {
-	        $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `countries` WHERE `CountryID` = '$cuntryid' ORDER BY RAND() ";
+		} elseif ($found==false && !empty($countryid)) {
+	        $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `countries` WHERE `CountryID` = '$countryid' ORDER BY RAND() ";
 	        if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
 	            while(($country = $GLOBALS['DebauchDB']->fetchArray($result)) && $found == false) {
 	                $table = $country['Table'];
-	                $sql = "SELECT *, concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`))) as `key`, concat(`RegionName`, ', ', '".$country['Country']."') as `address`  FROM `" . $table . "` WHERE md5(concat(`CountryID`, `CordID`)) LIKE '" . $key . "' ORDER BY RAND() LIMIT 1";
+	                $sql = "SELECT *,  concat(`RegionName`, ', ', '" . $country['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`))) as `key`, concat(`RegionName`, ', ', '".$country['Country']."') as `Address`  FROM `" . $table . "` WHERE md5(concat(`CountryID`, `CordID`)) LIKE '" . $key . "' ORDER BY RAND() LIMIT 1";
 	                if ($resultb = $GLOBALS['DebauchDB']->queryF($sql)) {
 	                    while (($place = $GLOBALS['DebauchDB']->fetchArray($resultb)) && $found == false) {
 	                        $table = $country['Table'];
@@ -574,17 +580,16 @@ if (!function_exists("findKey")) {
 	                            $country['records'] = $records['records'];
 	                        } else
 	                            $country['records'] = 0 ;
-                            unset($country['Table']);
-                            unset($country['CountryID']);
                             if ($format!='xml')
                                $ret['results']['countries'][$table] = strippedArray($country, explode('|',API_COUNTRY_FIELDS));
                             else
                                 $ret['results']['countries'][$table] = strippedArray($country, explode('|',API_COUNTRY_FIELDS));
-                            unset($place['CountryID']);
-                            unset($place['CordID']);
                             if (strpos($place['RegionName'], ',')) {
-                                $parts = explode(', ',$place['RegionName']);
-                                $place['RegionName'] = $parts[1] . ' ' . $parts[0];
+                                $parts = explode(',',$place['RegionName']);
+                                array_reverse($parts);
+                                foreach($parts as $key => $value)
+                                    $parts[$key] = trim($value);
+                                    $place['RegionName'] = implode(' ', $parts);
                             }
                             $key = str_replace(array(" ", "'", "-", "_", "\"", "`" , ",", "(", ")"), "", strtolower($place['RegionName']));
                             if ($format!='xml')
@@ -604,36 +609,37 @@ if (!function_exists("findKey")) {
 	    if ($radius <= 0 || $radius == API_RADIUS_DEFAULT)
 	        return $ret;
 	    
-	    if ($found == true && $radius > 0 && count($ret['results']['places']) || count($ret['results']['place'])) {
+	    if ($found == true && $radius > 0) {
 	        if (isset($ret['results']['places']))
 	            $places = $ret['results']['places'];
 	        elseif (isset($ret['results']['place']))
 	            $places = $ret['results']['place'];
             foreach($places as $table => $values) {
                 foreach($values as $key => $place) {
-                    $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `countries` WHERE `Table` = '$table' ORDER BY RAND() ";
-                    if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
-                        while(($country = $GLOBALS['DebauchDB']->fetchArray($result)) && $found == false) {
-                            $sql = "SELECT *, concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`))) as `key`, 3956 * 2 * ASIN(SQRT(POWER(SIN((" . abs($place['Latitude_Float']) . " - abs(`Latitude_Float`)) * pi() / 180 / 2), 2) + COS(" . abs($place['Latitude_Float']) . " * pi() / 180 ) * COS(abs(`Latitude_Float`) *  pi() / 180) * POWER(SIN((" . $place['Longitude_Float'] . " - `Longitude_Float`) *  pi() / 180 / 2), 2) )) as distance, concat(`RegionName`, ', ', '".$country['Country']."') as `address`  FROM `" . $table . "` having `distance` <= ".$radius." ORDER BY `distance`";
-        					if ($resultb = $GLOBALS['DebauchDB']->queryF($sql)) {
-        						while ($place = $GLOBALS['DebauchDB']->fetchArray($resultb)) {
-        						    if ($format!='xml')
-        						        $ret['results']['nearby']['countries'][$table] = strippedArray($country, explode('|',API_COUNTRY_FIELDS));
-        						    else
-        						        $ret['results']['nearby']['countries'][$table] = strippedArray($country, explode('|',API_COUNTRY_FIELDS));
-        							if (strpos($place['RegionName'], ',')) {
-        								$parts = explode(', ',$place['RegionName']);
-        								$place['RegionName'] = $parts[1] . ' ' . $parts[0];
-        							}
-        							$key = str_replace(array(" ", "'", "-", "_", "\"", "`" , ",", "(", ")"), "", strtolower($place['RegionName']));
-        							if ($format!='xml')
-        							    $ret['results']['nearby']['places'][$table][$place['key']] = strippedArray($place, explode('|',API_PLACES_FIELDS));
-        						    else
-        						        $ret['results']['nearby']['places'][$table][$key] = strippedArray($place, explode('|',API_PLACES_FIELDS));
-        						    $ret['search']['result']['count']++;
-        						}
-        					}
-                        }
+                    $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `countries` WHERE `Table` LIKE '$table' GROUP BY `CountryID` ORDER BY RAND() ";
+                    $result = $GLOBALS['DebauchDB']->queryF($sql);
+                    while($country = $GLOBALS['DebauchDB']->fetchArray($result)) {
+                        $sql = "SELECT *, concat(`RegionName`, ', ', '" . $country['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`))) as `key`, 3956 * 2 * ASIN(SQRT(POWER(SIN((" . abs($place['Latitude_Float']) . " - abs(`Latitude_Float`)) * pi() / 180 / 2), 2) + COS(" . abs($place['Latitude_Float']) . " * pi() / 180 ) * COS(abs(`Latitude_Float`) *  pi() / 180) * POWER(SIN((" . $place['Longitude_Float'] . " - `Longitude_Float`) *  pi() / 180 / 2), 2) )) as `Distance`, concat(`RegionName`, ', ', '".$country['Country']."') as `Address`  FROM `" . $table . "` HAVING `Distance` <= ".$radius." ORDER BY `Distance`";
+    					$resultb = $GLOBALS['DebauchDB']->queryF($sql);
+						while ($place = $GLOBALS['DebauchDB']->fetchArray($resultb)) {
+						    if ($format!='xml')
+						        $ret['results']['nearby']['countries'][$table] = strippedArray($country, explode('|',API_COUNTRY_FIELDS));
+						    else
+						        $ret['results']['nearby']['countries'][$table] = strippedArray($country, explode('|',API_COUNTRY_FIELDS));
+					        if (strpos($place['RegionName'], ',')) {
+					            $parts = explode(',',$place['RegionName']);
+					            array_reverse($parts);
+					            foreach($parts as $key => $value)
+					                $parts[$key] = trim($value);
+					                $place['RegionName'] = implode(' ', $parts);
+					        }
+							$key = str_replace(array(" ", "'", "-", "_", "\"", "`" , ",", "(", ")"), "", strtolower($place['RegionName']));
+							if ($format!='xml')
+							    $ret['results']['nearby']['places'][$table][$place['key']] = strippedArray($place, explode('|',API_PLACES_FIELDS));
+						    else
+						        $ret['results']['nearby']['places'][$table][$key] = strippedArray($place, explode('|',API_PLACES_FIELDS));
+						    $ret['search']['result']['nearby']++;
+						}
                     }
 				}
 			}
