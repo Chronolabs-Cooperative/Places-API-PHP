@@ -1,10 +1,10 @@
 <?php
 /**
- * Chronolabs REST Geospatial Plaves Services API
+ * Chronolabs REST Geospatial Places Services API
  *
  * You may not change or alter any portion of this comment or credits
  * of supporting developers from this source code or any supporting source code
- * which is considered copyrighted (c) material of the original comment or credit <?php echo $place['iso2']; ?>thors.
+ * which is considered copyrighted (c) material of the original comment or credit authors.
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
@@ -13,20 +13,21 @@
  * @license         GNU GPL 3 (http://www.gnu.org/licenses/old-licenses/gpl-2.0.html)
  * @package         api
  * @since           2.0.1
- * @<?php echo $place['iso2']; ?>thor          Simon Roberts <wishcraft@users.sourceforge.net>
+ * @author          Simon Roberts <wishcraft@users.sourceforge.net>
  * @subpackage		places
- * @description		Geospatial Plaves Services API
+ * @description		Geospatial Places Services API
  * @see			    http://internetfounder.wordpress.com
  * @see			    http://sourceoforge.net/projects/chronolabsapis
  * @see			    https://github.com/Chronolabs-Cooperative/Places-API-PHP
  */
 
 
+
 	
 	global $domain, $protocol, $business, $entity, $contact, $referee, $peerings, $source, $DebauchDB;
 	
 	$key = randomPlacesKey();
-	$distance = mt_rand(6,24);
+	$distance = mt_rand(2,69) / mt_rand(3,9);
 	$local = randomGeoLocation();
 	$place = randomGeoPlace();
 	

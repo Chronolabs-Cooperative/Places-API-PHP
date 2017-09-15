@@ -1,6 +1,6 @@
 <?php
 /**
- * XOOPS MySQL utility
+ * Chronolabs REST Geospatial Places Services API
  *
  * You may not change or alter any portion of this comment or credits
  * of supporting developers from this source code or any supporting source code
@@ -9,22 +9,19 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * @copyright       (c) 2000-2016 XOOPS Project (www.xoops.org)
- * @license             GNU GPL 2 (http://www.gnu.org/licenses/gpl-2.0.html)
- * @package             kernel
- * @subpackage          database
- * @author              Kazumi Ono <onokazu@xoops.org>
+ * @copyright       Chronolabs Cooperative http://snails.email
+ * @license         GNU GPL 3 (http://www.gnu.org/licenses/old-licenses/gpl-2.0.html)
+ * @package         api
+ * @since           2.0.1
+ * @author          Simon Roberts <wishcraft@users.sourceforge.net>
+ * @subpackage		places
+ * @description		Geospatial Places Services API
+ * @see			    http://internetfounder.wordpress.com
+ * @see			    http://sourceoforge.net/projects/chronolabsapis
+ * @see			    https://github.com/Chronolabs-Cooperative/Places-API-PHP
  */
 
-defined('XOOPS_ROOT_PATH') || exit('Restricted access');
 
-/**
- * provide some utility methods for databases
- *
- * @author     Kazumi Ono <onokazu@xoops.org>
- * @package    kernel
- * @subpackage database
- */
 class SqlUtility
 {
     /**
