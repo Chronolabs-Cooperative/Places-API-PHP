@@ -57,6 +57,7 @@ while($country = $GLOBALS["DebauchDB"]->fetchArray($result))
             elseif (in_array('locality', $values['types']))
                 $region['RegionName'] = $values['long_name'];
         }
+        $region['RegionName'] = $locality['name'];
         $region['CordID'] = $cordid;
         $region['CountryID'] = $country['CountryID'];
         $region['GoogleID'] = $locality['place_id'];
@@ -78,6 +79,111 @@ while($country = $GLOBALS["DebauchDB"]->fetchArray($result))
         $sql = "INSERT INTO `$table` (`" . implode('`, `', array_keys($insert)) . "`) VALUES('" . implode("', '", $insert) . "')";
         if (!$GLOBALS['DebauchDB']->queryF($sql))
             die("SQL Failed: $sql;");
+    
+        $table = $country['Table'];
+        $sql = "SELECT * FROM `" . $country['Table'] . "` WHERE `Next` < UNIX_TIMESTAMP() LIMIT " . API_CRON_NUMBER_REGIONS . " ORDER BY RAND()";
+        $regions = $GLOBALS["DebauchDB"]->query($sql);
+        while($region = $GLOBALS["DebauchDB"]->fetchArray($regions))
+        {
+            $results = array();
+            require_once dirname(__DIR__) . DIRECTORY_SEPARATOR . 'class' . DIRECTORY_SEPARATOR . 'google' . DIRECTORY_SEPARATOR . 'places.php';
+            $places = new GooglePlaces(API_GOOGLE_KEY);
+            $places->location = array($region['Latitude_Float'], $region['Longitude_Float']);
+            $places->rankby   = 'distance';
+            $places->radius   = mt_rand(69, 99) * 1000;
+            $places->types    = 'locality'; // Requires keyword, name or types
+            if (!$results[]   = $places->nearbySearch())
+                $found = $results = false;
+            else
+                $found = true;
+            if (count($results)>0)
+            {
+                while (!empty($results[count($results)-1]['next_page_token']) && count($results) <= API_GOOGLE_PAGES_RESULTS)
+                {
+                    $places->pagetoken = $results[count($results)-1]['next_page_token'];
+                    $results[]         = $places->nearbySearch();
+                }
+                
+                foreach($results as $page => $pageresults)
+                    foreach ($pageresults['results'] as $id => $values)
+                    {
+                        if (in_array('locality', $values['types']) && !empty($table))
+                        {
+                            $sql = "SELECT count(*) FROM `" . $table . "` WHERE `RegionName` LIKE '".getLikedWildcard($values['name'])."'";
+                            list($countb) = $GLOBALS['DebauchDB']->fetchRow($GLOBALS['DebauchDB']->queryF($sql));
+                            $sql = "SELECT *, concat(`RegionName`, ', ', '" . $country['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`))) as `key`, concat(`RegionName`, ', ', '".$country['Country']."') as `Address`  FROM `" . $table . "` WHERE `RegionName` LIKE '".getLikedWildcard($values['name'])."'";
+                            $resultr = $GLOBALS['DebauchDB']->queryF($sql);
+                            if ($countb!=0)
+                            {
+                                while($region = $GLOBALS['DebauchDB']->fetchArray($resultr))
+                                {
+                                    if (number_format($region['Latitude_Float'],3)==number_format($values['geometry']['location']['lat'],3) && number_format($region['Longitude_Float'],3)==number_format($values['geometry']['location']['lng'],3))
+                                    {
+                                        $region['RegionName'] = $values['name'];
+                                        $region['GoogleID'] = $values['place_id'];
+                                        $region['Longitude_Float'] = $values['geometry']['location']['lng'];
+                                        $region['Latitude_Float'] = $values['geometry']['location']['lat'];
+                                        $region['mapref_longitude'] = floor(abs($values['geometry']['location']['lng'])) . ($values['geometry']['location']['lng'] > 0? "E":"W");
+                                        $region['mapref_latitude'] = floor(abs($values['geometry']['location']['lat'])) . ($values['geometry']['location']['lat'] > 0? "N":"S");
+                                        $region['Last'] = $region['Next'];
+                                        $region['Next'] = time() + ($count>1000?(3600*24*7*4*mt_rand(7,11)):0);
+                                        $region['Action'] = time();
+                                        $update = array();
+                                        foreach(array_keys($region) as $field)
+                                            if (!empty($region[$field]))
+                                                if (!is_array($region[$field]))
+                                                    $update[$field] = "`$field` = '" . mysqli_real_escape_string($GLOBALS['DebauchDB']->conn, $region[$field]) . "'";
+                                                else
+                                                    $update[$field] = "`$field` = '" . mysqli_real_escape_string($GLOBALS['DebauchDB']->conn, json_encode($region[$field])) . "'";
+                                        $sql = "UPDATE `$table` SET " . implode(', ', $update) . " WHERE `CordID` = '" . mysqli_real_escape_string($GLOBALS['DebauchDB']->conn, $region['CordID']) . "'";
+                                        if (!$GLOBALS['DebauchDB']->queryF($sql))
+                                            die("SQL Failed: $sql;");
+                                    }
+                                }
+                            } else {
+                                if ($values['geometry']['location']['lat'] > $country['min_latitude'] && $values['geometry']['location']['lat'] < $country['max_latitude'] && $values['geometry']['location']['lng'] > $country['min_longitude'] && $values['geometry']['location']['lng'] < $country['max_longitude'])
+                                {
+                                    $sql = "SELECT MAX(`CordID`) + 1 as CordID  FROM `" . $table . "` GROUP BY `CountryID`";
+                                    list($cordid) = $GLOBALS['DebauchDB']->fetchRow($GLOBALS['DebauchDB']->queryF($sql));
+                                    
+                                    $locality = json_decode(getURIData("https://maps.googleapis.com/maps/api/geocode/json?address=".urlencode($values['name'].", ".$country['Country'])."&sensor=false"));
+                                    foreach($locality['results'][0]['address_components'] as $values)
+                                    {
+                                        if (in_array('country', $values['types']) && in_array('political', $values['types']))
+                                            $cnty = $values['long_name'];
+                                    }
+                                    
+                                    if (strtolower($cnty) == strtolower($country['Country']))
+                                    {
+                                        $region = array();
+                                        $region['CordID'] = $cordid;
+                                        $region['CountryID'] = $country['CountryID'];
+                                        $region['RegionName'] = $values['name'];
+                                        $region['GoogleID'] = $values['place_id'];
+                                        $region['Longitude_Float'] = $values['geometry']['location']['lng'];
+                                        $region['Latitude_Float'] = $values['geometry']['location']['lat'];
+                                        $region['mapref_longitude'] = floor(abs($values['geometry']['location']['lng'])) . ($values['geometry']['location']['lng'] > 0? "E":"W");
+                                        $region['mapref_latitude'] = floor(abs($values['geometry']['location']['lat'])) . ($values['geometry']['location']['lat'] > 0? "N":"S");
+                                        $region['Last'] = 0;
+                                        $region['Next'] = time();
+                                        $region['Action'] = time();
+                                        
+                                        $insert = array();
+                                        foreach(array_keys($region) as $field)
+                                            if (!empty($region[$field]))
+                                                if (!is_array($region[$field]))
+                                                    $insert[$field] = mysqli_real_escape_string($GLOBALS['DebauchDB']->conn, $region[$field]);
+                                                else
+                                                    $insert[$field] = mysqli_real_escape_string($GLOBALS['DebauchDB']->conn, json_encode($region[$field]));
+                                        $sql = "INSERT INTO `$table` (`" . implode('`, `', array_keys($insert)) . "`) VALUES('" . implode("', '", $insert) . "')";
+                                        if (!$GLOBALS['DebauchDB']->queryF($sql))
+                                            die("SQL Failed: $sql;");
+                                    }
+                                }
+                            }
+            }
+        }
+            
     } else {
         $table = $country['Table'];
         $sql = "SELECT * FROM `" . $country['Table'] . "` WHERE `Next` < UNIX_TIMESTAMP() LIMIT " . API_CRON_NUMBER_REGIONS . " ORDER BY RAND()";
@@ -140,32 +246,43 @@ while($country = $GLOBALS["DebauchDB"]->fetchArray($result))
                                     }
                                 }
                             } else {
+                            
                                 $sql = "SELECT MAX(`CordID`) + 1 as CordID  FROM `" . $table . "` GROUP BY `CountryID`";
                                 list($cordid) = $GLOBALS['DebauchDB']->fetchRow($GLOBALS['DebauchDB']->queryF($sql));
                                 
-                                $region = array();
-                                $region['CordID'] = $cordid;
-                                $region['CountryID'] = $countryid;
-                                $region['RegionName'] = $values['name'];
-                                $region['GoogleID'] = $values['place_id'];
-                                $region['Longitude_Float'] = $values['geometry']['location']['lng'];
-                                $region['Latitude_Float'] = $values['geometry']['location']['lat'];
-                                $region['mapref_longitude'] = floor(abs($values['geometry']['location']['lng'])) . ($values['geometry']['location']['lng'] > 0? "E":"W");
-                                $region['mapref_latitude'] = floor(abs($values['geometry']['location']['lat'])) . ($values['geometry']['location']['lat'] > 0? "N":"S");
-                                $region['Last'] = 0;
-                                $region['Next'] = time();
-                                $region['Action'] = time();
+                                $locality = json_decode(getURIData("https://maps.googleapis.com/maps/api/geocode/json?address=".urlencode($values['name'].", ".$country['Country'])."&sensor=false"));
+                                foreach($locality['results'][0]['address_components'] as $values)
+                                {
+                                    if (in_array('country', $values['types']) && in_array('political', $values['types']))
+                                        $cnty = $values['long_name'];
+                                }
                                 
-                                $insert = array();
-                                foreach(array_keys($region) as $field)
-                                    if (!empty($region[$field]))
-                                        if (!is_array($region[$field]))
-                                            $insert[$field] = mysqli_real_escape_string($GLOBALS['DebauchDB']->conn, $region[$field]);
-                                        else
-                                            $insert[$field] = mysqli_real_escape_string($GLOBALS['DebauchDB']->conn, json_encode($region[$field]));
-                                $sql = "INSERT INTO `$table` (`" . implode('`, `', array_keys($insert)) . "`) VALUES('" . implode("', '", $insert) . "')";
-                                if (!$GLOBALS['DebauchDB']->queryF($sql))
-                                    die("SQL Failed: $sql;");
+                                if (strtolower($cnty) == strtolower($country['Country']))
+                                {
+                                    $region = array();
+                                    $region['CordID'] = $cordid;
+                                    $region['CountryID'] = $country['CountryID'];
+                                    $region['RegionName'] = $values['name'];
+                                    $region['GoogleID'] = $values['place_id'];
+                                    $region['Longitude_Float'] = $values['geometry']['location']['lng'];
+                                    $region['Latitude_Float'] = $values['geometry']['location']['lat'];
+                                    $region['mapref_longitude'] = floor(abs($values['geometry']['location']['lng'])) . ($values['geometry']['location']['lng'] > 0? "E":"W");
+                                    $region['mapref_latitude'] = floor(abs($values['geometry']['location']['lat'])) . ($values['geometry']['location']['lat'] > 0? "N":"S");
+                                    $region['Last'] = 0;
+                                    $region['Next'] = time();
+                                    $region['Action'] = time();
+                                    
+                                    $insert = array();
+                                    foreach(array_keys($region) as $field)
+                                        if (!empty($region[$field]))
+                                            if (!is_array($region[$field]))
+                                                $insert[$field] = mysqli_real_escape_string($GLOBALS['DebauchDB']->conn, $region[$field]);
+                                            else
+                                                $insert[$field] = mysqli_real_escape_string($GLOBALS['DebauchDB']->conn, json_encode($region[$field]));
+                                    $sql = "INSERT INTO `$table` (`" . implode('`, `', array_keys($insert)) . "`) VALUES('" . implode("', '", $insert) . "')";
+                                    if (!$GLOBALS['DebauchDB']->queryF($sql))
+                                        die("SQL Failed: $sql;");
+                                }
                             }
                         }
                     }
