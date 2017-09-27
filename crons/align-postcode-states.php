@@ -52,7 +52,7 @@ while($country = $GLOBALS["DebauchDB"]->fetchArray($result))
                     $postcode = $values['long_name'];
             }
             
-            $sql = "UPDATE `" . $country['Table'] . "` SET `Updates` = `Updates` + 1, `Postcode` = '" . mysqli_real_escape_string($GLOBALS['DebauchDB']->conn, $postcode) . "',  `State` = '" . mysqli_real_escape_string($GLOBALS['DebauchDB']->conn, $state) . "', `GoogleID` = '" . mysqli_real_escape_string($GLOBALS['DebauchDB']->conn, $geo['results'][0]['place_id']) . "', `action` = UNIX_TIMESTAMP() WHERE `CordID` = '" . $region['CordID'] . "' AND `CountryID` = '" . $region['CountryID'] . "'";
+            $sql = "UPDATE `" . $country['Table'] . "` SET `Updates` = `Updates` + 1, `Postcode` = '" . mysqli_real_escape_string($GLOBALS['DebauchDB']->conn, $postcode) . "',  `State` = '" . mysqli_real_escape_string($GLOBALS['DebauchDB']->conn, $state) . "', `GoogleID` = '" . mysqli_real_escape_string($GLOBALS['DebauchDB']->conn, $geo['results'][0]['place_id']) . "', `Action` = UNIX_TIMESTAMP() WHERE `CordID` = '" . $region['CordID'] . "' AND `CountryID` = '" . $region['CountryID'] . "'";
             if (!$GLOBALS["DebauchDB"]->query($sql))
                 die("SQL Failed: $sql;");
         }
