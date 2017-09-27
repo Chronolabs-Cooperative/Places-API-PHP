@@ -34,6 +34,12 @@ define('API_CACHE_PATH', DIRECTORY_SEPARATOR . 'tmp' . DIRECTORY_SEPARATOR . 'pl
 define('API_TMP_PATH', DIRECTORY_SEPARATOR . 'tmp' . DIRECTORY_SEPARATOR . 'places');
 
 /**
+ * Cronjob Constants and Defines
+ */
+define('API_CRON_NUMBER_COUNTRIES', 7);
+define('API_CRON_NUMBER_REGIONS', 250);
+
+/**
  * Times && Limits
  */
 define('API_RADIUS_DEFAULT', 0.469);
@@ -49,6 +55,9 @@ define('API_GOOGLE_KEY','AIzaSyD0tstaeCtH0gugLJUeYcUSUT_TdXL24Uo');    // Get fr
 define('API_PLACES_FIELDS', 'Address|Distance|RegionName|mapref_latitude|mapref_longitude|Latitude_Float|Longitude_Float|Altitude_Feet|Altitude_Meters|key');
 define('API_COUNTRY_FIELDS', 'Country|ISO2|FIPS104|ISO3|ISON|TLD|Capital|Continent|NationalitySingular|NationalityPlural|Currency|CurrencyCode|Population|Records|Updates|Places|Details|key|distance');
 define('API_CONTINENT_FIELDS', 'Continent|key|Population|Records|Places|Details|Updates');
+define('API_VENUE_FIELDS','key|Name|Icon|Id|Reference|Longitude|Latitude|View_NE_Longitude|View_NE_Latitude|View_SW_Longitude|View_SW_Latitude|Vicinity');
+define('API_ADDRESS_FIELDS','key|Unit|Building|Street|Suburb|State|Country|Country_ISO2|Postcode|Council|Longitude|Latitude|View_NE_Longitude|View_NE_Latitude|View_SW_Longitude|View_SW_Latitude|Formatted');
+
 /**
  * Include libraries
  */

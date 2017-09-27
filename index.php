@@ -157,12 +157,11 @@
 		    $output = trim($inner['output']);
 		    $mode = 'details';
 		} elseif (isset($inner['country']) && $inner['country'] == 'address') {
-		    $address = (string)$inner['address'];
-		    $key = (string)$inner['place'];
+		    $address = (string)(!isset($inner['place'])?$inner['address']:$inner['place']);
 		    $radius = isset($inner['radius'])?(float)$inner['radius']:API_RADIUS_DEFAULT;
 		    $output = trim($inner['output']);
 		    $type = trim($inner['type']);
-		    $mode = 'maps';
+		    $mode = 'address';
 		} else {
 			$mode = 'place';
 			$country = trim($inner['country']);
@@ -243,7 +242,7 @@
         	                    $data[$table] = strippedArray($row, explode("|", API_COUNTRY_FIELDS));
         	        }
         	        break;
-        		default:
+        	    case 'place':
         			$data = findPlace($country, $place, $output, $number);
         			break;
         		case 'nearby':
