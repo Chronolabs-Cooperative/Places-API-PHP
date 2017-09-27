@@ -181,8 +181,8 @@ while($country = $GLOBALS["DebauchDB"]->fetchArray($result))
                                     }
                                 }
                             }
-            }
-        }
+                        }
+                    }
             
     } else {
         $table = $country['Table'];
@@ -286,6 +286,7 @@ while($country = $GLOBALS["DebauchDB"]->fetchArray($result))
                             }
                         }
                     }
+                }
             }
         }
     }
