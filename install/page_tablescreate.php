@@ -65,13 +65,17 @@ if (count($files)==0) {
                 success: function(data) {
                     $('#dbreport').html(data.dbreport);
                     $('#buttons').html(data.buttons);
+                    $('#leftsql').html(data.leftsql);
+                    $('#totalsql').html(data.totalsql);
+                    $('#endmsg').html(data.endmsg);
                 }             
             });              
         }
         updateDiv();
-        setInterval(updateDiv, 442);
+        setInterval(updateDiv, 24);
     });
 </script>
+<div class=\"alert alert-success\"><h2><span class=\"fa fa-check text-success\" id='leftsql'>&nbsp;</span> / <span class=\"fa fa-check text-success\" id='totalsql'>&nbsp;</span> ~ <span class=\"text-success\" id='endmsg'>&nbsp;</span></h2></div>
 <div class=\"alert alert-success\"><span class=\"fa fa-check text-success\"></span> " . API_TABLES_CREATED
         . "</div><div class=\"well\" id=\"dbreport\">&nbsp;</div>";
 }

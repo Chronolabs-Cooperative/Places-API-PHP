@@ -123,15 +123,15 @@ class Db_manager
                 } elseif ($prefixed_query[1] === 'INSERT INTO') {
                     if ($this->db->query($prefixed_query[0]) != false) {
                         if (!isset($this->s_tables['insert'][$table])) {
-                            $this->s_tables['insert'][$table] = 1;
+                            $this->f_tables['insert'][$table] = $this->db->getAffectedRows();
                         } else {
-                            $this->s_tables['insert'][$table]++;
+                            $this->f_tables['insert'][$table]=$this->f_tables['insert'][$table]+$this->db->getAffectedRows();
                         }
                     } else {
                         if (!isset($this->f_tables['insert'][$table])) {
-                            $this->f_tables['insert'][$table] = 1;
+                            $this->f_tables['insert'][$table] = $this->db->getAffectedRows();
                         } else {
-                            $this->f_tables['insert'][$table]++;
+                            $this->f_tables['insert'][$table]=$this->f_tables['insert'][$table]+$this->db->getAffectedRows();
                         }
                     }
                 } elseif ($prefixed_query[1] === 'ALTER TABLE') {
@@ -180,7 +180,7 @@ class Db_manager
         $commands = array('create', 'insert', 'alter', 'drop');
         $content  = '<ul class="log">';
         foreach ($commands as $cmd) {
-            if (!@empty($this->s_tables[$cmd])) {
+            if (isset($this->s_tables[$cmd])) {
                 foreach ($this->s_tables[$cmd] as $key => $val) {
                     $content .= '<li class="success">';
                     $content .= ($cmd !== 'insert') ? sprintf($this->successStrings[$cmd], $key) : sprintf($this->successStrings[$cmd], $val, $key);

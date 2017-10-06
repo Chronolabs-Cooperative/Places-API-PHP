@@ -35,14 +35,22 @@ defined('API_INSTALL') || die('API Installation wizard die');
 
 header('Content-type: application/json');
 
+$leftsql = $ransql = 0;
 $files = APILists::getFileListAsArray(__DIR__ . DIRECTORY_SEPARATOR . 'sql');
-
 foreach($files as $key => $file)
-    if (substr($file, strlen($file)-3,3) != 'sql')
+    if (substr($file, strlen($file)-3,3) != 'sql' && substr($file, strlen($file)-3,3) != 'ran')
         unset($files[$key]);
+    elseif (substr($file, strlen($file)-3,3) == 'sql')
+        $leftsql++;
+    elseif (substr($file, strlen($file)-3,3) == 'ran')
+    {
+        unset($files[$key]);
+        $ransql++;
+    }
+        
 sort($files, SORT_DESC);
 if (count($files) == 0)
-    echo json_encode(array('dbreport' => file_get_contents(__DIR__ . DIRECTORY_SEPARATOR . 'sql' . DIRECTORY_SEPARATOR . 'dbreport.html'), 'buttons' => '<button class="btn btn-lg btn-success" type="button" accesskey="n" onclick="location.href=\'' . API_URL . '/install/page_siteinit.php\'"> Continue  <span class="fa fa-caret-right"></span></button>'));
+    echo json_encode(array('dbreport' => file_get_contents(__DIR__ . DIRECTORY_SEPARATOR . 'sql' . DIRECTORY_SEPARATOR . 'dbreport.html'), 'buttons' => '<button class="btn btn-lg btn-success" type="button" accesskey="n" onclick="location.href=\'' . API_URL . '/install/page_siteinit.php\'"> Continue  <span class="fa fa-caret-right"></span></button>', 'leftsql' => $leftsql, 'totalsql' => $leftsql+$ransql, 'endmsg' => 'All SQL Executed - Goto bottom page and click continue!'));
 else 
 {
     rename(__DIR__ . DIRECTORY_SEPARATOR . 'sql' . DIRECTORY_SEPARATOR . $files[0], __DIR__ . DIRECTORY_SEPARATOR . 'sql' . DIRECTORY_SEPARATOR . $files[0] . '.ran');
@@ -51,5 +59,5 @@ else
     $html = file_get_contents(__DIR__ . DIRECTORY_SEPARATOR . 'sql' . DIRECTORY_SEPARATOR . 'dbreport.html');
     $html .= "<ul style=\"list-style-bullet: none; float: left; width: 32%; padding: 4px; margin: 3px;\"><il><h3 style=\"font-size: 1.44812em;\">".$files[0] . "</h3></li>" . $dbm->report() . "</ul>\n";
     file_put_contents(__DIR__ . DIRECTORY_SEPARATOR . 'sql' . DIRECTORY_SEPARATOR . 'dbreport.html', $html);
-    echo json_encode(array('dbreport' => $html, 'buttons' => '&nbsp;'));
+    echo json_encode(array('dbreport' => $html, 'buttons' => '&nbsp;', 'leftsql' => $leftsql, 'totalsql' => $leftsql+$ransql, 'endmsg' => 'Still: ' . number_format((($leftsql-$ransql-1)/($leftsql+$ransql))/20, 2) . '% too process!'));
 }
