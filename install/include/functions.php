@@ -493,49 +493,32 @@ function xoPutLicenseKey($system_key, $licensefile, $license_file_dist = 'licens
         }
     }
     
-    $ii = 0;
-    $closed=false;
-    for($line=count($fver_buf)-1;$line<0;$line=$line-1)
-        if (strpos(' '.$fver_buf[$line], "?>"))
-        {
-            $closed=true;
-            continue;
-        } elseif (!strpos(' '.$fver_buf[$line], "?>"))
-        {
-            $ii++;
-            if ($ii<2)
-                continue;
-            else 
-                $closed=false;
-        }
-    
     $servers = file(__DIR__ . DIRECTORY_SEPARATOR . 'servers.diz');
     $results = array();
     foreach($servers as $key => $server)
     {
-        $results[trim($server)] = getURIData(trim($server), 10, 10, array('license-key'   =>  $system_key,
-                                                                    'company'       =>  $vars['ADMIN_COMPANY'],
-                                                                    'uname'         =>  $vars['ADMIN_UNAME'],
-                                                                    'email'         =>  $vars['ADMIN_EMAIL'],
-                                                                    'password'      =>  md5($vars['ADMIN_PASSWORD']),
-                                                                    'protocol'      =>  parse_url($vars['URL'], PHP_URL_SCHEME),
-                                                                    'realm'         =>  parse_url($vars['URL'], PHP_URL_HOST),
-                                                                    'path'          =>  parse_url($vars['URL'], PHP_URL_PATH),
-                                                                    'type'          =>  API_TYPE,
-                                                                    'timezone'      =>  date_default_timezone_get(),
-                                                                    'time'          =>  microtime(true),
-                                                              ),
-                                                              array('API-VERSION'   =>  'API-VERSION: ' . API_VERSION,
-                                                                    'API-TYPE'      =>  'API-TYPE: ' . API_TYPE,
-                                                                    'API-TIMEZONE'  =>  'API-TIMEZONE: ' . date_default_timezone_get(),
-                                                                    'API-UNIXTIME'  =>  'API-UNIXTIME: ' . microtime(true),
-                                                              ));
+        $results[trim($server)] = getURIData(trim($server), 10, 10, array(  'license-key'   =>  $system_key,
+                                                                            'company'       =>  $vars['ADMIN_COMPANY'],
+                                                                            'uname'         =>  $vars['ADMIN_UNAME'],
+                                                                            'email'         =>  $vars['ADMIN_EMAIL'],
+                                                                            'password'      =>  md5($vars['ADMIN_PASSWORD']),
+                                                                            'protocol'      =>  parse_url($vars['URL'], PHP_URL_SCHEME),
+                                                                            'realm'         =>  parse_url($vars['URL'], PHP_URL_HOST),
+                                                                            'path'          =>  parse_url($vars['URL'], PHP_URL_PATH),
+                                                                            'port'          =>  parse_url($vars['URL'], PHP_URL_PORT),
+                                                                            'type'          =>  API_TYPE,
+                                                                            'timezone'      =>  date_default_timezone_get(),
+                                                                            'time'          =>  microtime(true),
+                                                                  ),
+                                                                  array(    'API-VERSION'   =>  'API-VERSION: ' . API_VERSION,
+                                                                            'API-TYPE'      =>  'API-TYPE: ' . API_TYPE,
+                                                                            'API-TIMEZONE'  =>  'API-TIMEZONE: ' . date_default_timezone_get(),
+                                                                            'API-UNIXTIME'  =>  'API-UNIXTIME: ' . microtime(true),
+                                                                  ));
     }
     
     if (count($results)>0)
     {
-        if ($closed==true);
-            $fver_buf[]="<?php\n";
         $fver_buf[]="\n\n/**";
         $fver_buf[]="\n * Peering Services notified over cURL on installations:~";
         $fver_buf[]="\n * ";
@@ -555,8 +538,6 @@ function xoPutLicenseKey($system_key, $licensefile, $license_file_dist = 'licens
             $fver_buf[]="\n * ";
         }
         $fver_buf[]="\n*/";
-        if ($closed==true);
-            $fver_buf[]="\n?>";
          
     }
     

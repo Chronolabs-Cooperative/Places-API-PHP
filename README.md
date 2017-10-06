@@ -19,13 +19,11 @@ This goes in your API_ROOT_PATH/.htaccess file
     RewriteRule ^v([0-9]{1,2})/(venues)/([0-9a-z\-\,\ ]+)/([0-9a-zA-Z\ \(\)\-\,\:]+)/([0-9\.]+)/(raw|html|serial|json|xml).api ./index.php?version=$1&country=$2&type=$3&place=$4&radius=$5&output=$6 [L,NC,QSA]
     RewriteRule ^v([0-9]{1,2})/(venues)/([0-9a-z\-\,\ ]+)/([0-9a-zA-Z\ \(\)\-\,\:]+)/(raw|html|serial|json|xml).api ./index.php?version=$1&country=$2&type=$3&place=$4&output=$5 [L,NC,QSA]
    
-# Importing Database & Configuring
+# Installing API
 
-Creating and importing the database is quite easy, first you need to create an empty database and complete the fields for Database one in class/debauchosity.php for the database name, password, host name etc. 
+Copy the contents of this distribution to your visually routable path via http(s) etc. Then poll the path required and run the install;
 
-You now need to import the SQL templates for the database there is a script in sql/import.php to do this which is done simply by going to your shell bash and executing the following:
-
-    $ /usr/bin/php -q /var/www/places.xortify.com/sql/import.php
+it requires apache2, nixi, iis etc and best with php5+;
    
 # Cronjobs/Scheduled Tasks
 

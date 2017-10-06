@@ -33,8 +33,6 @@ include_once '../class/logger/apilogger.php';
 
 $_SESSION = array();
 setcookie('xo_install_user', '', null, null, null);
-$key = \Xmf\Jwt\KeyFactory::build('install');
-$key->kill();
 defined('API_INSTALL') || die('API Installation wizard die');
 
 $install_rename_suffix = uniqid(substr(md5($x = mt_rand()) . $x, -10));
