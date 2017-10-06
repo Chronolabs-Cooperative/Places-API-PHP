@@ -72,7 +72,8 @@ if (count($files)==0) {
             });              
         }
         updateDiv();
-        setInterval(updateDiv, 24);
+        setInterval(updateDiv, 169);
+        $('#buttons').html('&nbsp;');
     });
 </script>
 <div class=\"alert alert-success\"><h2><span class=\"fa fa-check text-success\" id='leftsql'>&nbsp;</span> / <span class=\"fa fa-check text-success\" id='totalsql'>&nbsp;</span> ~ <span class=\"text-success\" id='endmsg'>&nbsp;</span></h2></div>
