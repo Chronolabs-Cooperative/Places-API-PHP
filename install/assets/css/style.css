@@ -7,6 +7,8 @@
 /* Global Styles */
 
 body {
+	font-family: "LHF Matthews Thin" !important;
+	font-size: 1.12234em;
     margin-top: 100px;
     background-color: #fff;
 }
@@ -29,7 +31,8 @@ body {
 }
 
 .huge {
-    font-size: 50px;
+    font-family: "Labtop Superwide Boldish" !important;
+	font-size: 2.911112em;
     line-height: normal;
 }
 
@@ -46,6 +49,8 @@ body {
 /* Top Navigation */
 
 .top-nav {
+	font-family: "Life BT Bold" !important;
+	font-size: 1.32234em;
     padding: 0 15px;
 }
 
@@ -69,6 +74,8 @@ body {
 }
 
 .top-nav>.open>.dropdown-menu {
+	font-family: "Life BT Bold" !important;
+	font-size: 1.14567em;
     float: left;
     position: absolute;
     margin-top: 0;
@@ -88,6 +95,8 @@ body {
 
 @media(min-width:768px) {
     .side-nav {
+    	font-family: "Labtop" !important;
+		font-size: 1.5846749823em;
         position: fixed;
         top: 51px;
         left: 225px;
@@ -103,14 +112,30 @@ body {
     }
 
     .side-nav>li>a {
+        font-family: "Labtop" !important;
+		font-size: 1.5846749823em;
         width: 225px;
     }
 
     .side-nav li a:hover,
     .side-nav li a:focus {
+        font-family: "Labtop Bold" !important;
+		font-size: 1.6946749823em;
         outline: none;
         background-color: #000 !important;
     }
+}
+
+.col-xs-9>div
+{
+	    font-family: "Labtop Bold" !important;
+		font-size: 2.1146749823em;
+}
+
+.text-primary, .panel-footer
+{
+		font-family: "Labtop Bold" !important;
+		font-size: 2.45823em;
 }
 
 .side-nav>li>ul {
@@ -131,74 +156,118 @@ body {
 /* Custom Colored Panels */
 
 .huge {
-    font-size: 40px;
+	font-family: "Labtop Superwide Boldish" !important;
+	font-size: 2.68234em;
 }
 
 .panel-green {
+	font-family: "Labtop Thin" !important;
+	font-size: 1.012234em;
     border-color: #5cb85c;
 }
 
 .panel-green > .panel-heading {
+	font-family: "Labtop Bold" !important;
+	font-size: 1.8975631134em;
     border-color: #5cb85c;
     color: #fff;
     background-color: #5cb85c;
 }
 
 .panel-green > a {
+	font-family: "Labtop Italic" !important;
+	font-size: 1.12234em;
     color: #5cb85c;
 }
 
 .panel-green > a:hover {
+	font-family: "Labtop Italic" !important;
+	font-weight: bold;
+	font-size: 1.45334em;
     color: #3d8b3d;
 }
 
 .panel-red {
+	font-family: "Labtop Thin" !important;
+	font-size: 1.012234em;
     border-color: #d9534f;
 }
 
 .panel-red > .panel-heading {
+	font-family: "Labtop Bold" !important;
+	font-size: 1.8975631134em;
     border-color: #d9534f;
     color: #fff;
     background-color: #d9534f;
 }
 
 .panel-red > a {
+	font-family: "Labtop Italic" !important;
+	font-size: 1.12234em;
     color: #d9534f;
 }
 
 .panel-red > a:hover {
+	font-family: "Labtop Italic" !important;
+	font-weight: bold;
+	font-size: 1.45334em;
     color: #b52b27;
 }
 
 .panel-yellow {
+	font-family: "Labtop Thin" !important;
+	font-size: 1.012234em;
     border-color: #f0ad4e;
 }
 
 .panel-yellow > .panel-heading {
+	font-family: "Labtop Bold" !important;
+	font-size: 1.8975631134em;
     border-color: #f0ad4e;
     color: #fff;
     background-color: #f0ad4e;
 }
 
 .panel-yellow > a {
+	font-family: "Labtop Italic" !important;
+	font-size: 1.12234em;
     color: #f0ad4e;
 }
 
 .panel-yellow > a:hover {
+	font-family: "Labtop Italic" !important;
+	font-weight: bold;
+	font-size: 1.45334em;
     color: #df8a13;
 }
 
 #wizard {
+	font-family: "LHF Matthews Thin" !important;
+	font-size: 2.89765234em;
     margin: 0 2em;
 }
+
+
+.form-control, .diags, .table-hover, .prestige {
+	font-family: "Prestige Elite" !important;
+	font-size: 0.674114em !important;
+	padding: 2px;
+}
+
 /* Password strength */
 #passwordmeter label, #passwordgenerator {
+	font-family: "Prestige Elite Bold" !important;
+	font-size: 1.12234em;
     text-align: center;
 }
 #passwordgenerator {
+	font-family: "Prestige Elite Bold" !important;
+	font-size: 1.12234em;
     margin-top: 1em;
 }
 #passwordDescription {
+	font-family: "Prestige Elite Bold" !important;
+	font-size: 1.12234em;
     text-align: center;
     position: relative;
     top: 2px;
@@ -206,6 +275,8 @@ body {
 }
 
 #passwordStrength {
+	font-family: "Prestige Elite Bold" !important;
+	font-size: 1.12234em;
     text-align: center;
     display: block;
     font-weight: bold;
@@ -215,42 +286,56 @@ body {
 }
 
 .strength0 {
+	font-family: "Prestige Elite Bold" !important;
+	font-size: 1.4322234em;
     width: auto;
     background: #ec3e40;
     color: #000;
 }
 
 .strength1 {
-    width: auto;
+ 	font-family: "Prestige Elite Bold" !important;
+	font-size: 1.4322234em;
+	width: auto;
     background: #ff9b2b;
     color: #000;
 }
 
 .strength2 {
-    width: auto;
+    font-family: "Prestige Elite Bold" !important;
+	font-size: 1.4322234em;
+	width: auto;
     background: #f5d800;
     color: #000;
 }
 
 .strength3 {
-    width: auto;
+    font-family: "Prestige Elite Bold" !important;
+	font-size: 1.4322234em;
+	width: auto;
     background: #337ab7;
     color: #fff;
 }
 
 .strength4 {
-    width: auto;
+    font-family: "Prestige Elite Bold" !important;
+	font-size: 1.4322234em;
+	width: auto;
     background: #5cb85c;
     color: #fff;
 }
 
 .module-row {
+	font-family: "LHF Matthews Thin" !important;
+	font-size: 1.12234em;
     border: 1px solid #ebf0ff;
     border-radius: 4px;
     margin: 0.25em;
 }
 
 #xo-logger-output {
+	font-family: "LHF Matthews Thin" !important;
+	font-size: 1.12234em;
     margin-left: 260px;
 }
 

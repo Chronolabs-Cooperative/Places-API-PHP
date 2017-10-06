@@ -1,6 +1,6 @@
 <?php
 /**
- * Chronolabs REST Geospatial Places Services API
+ * Chronolabs REST Geospatial API Services API
  *
  * You may not change or alter any portion of this comment or credits
  * of supporting developers from this source code or any supporting source code
@@ -15,10 +15,10 @@
  * @since           2.0.1
  * @author          Simon Roberts <wishcraft@users.sourceforge.net>
  * @subpackage		places
- * @description		Geospatial Places Services API
+ * @description		Geospatial API Services API
  * @see			    http://internetfounder.wordpress.com
  * @see			    http://sourceoforge.net/projects/chronolabsapis
- * @see			    https://github.com/Chronolabs-Cooperative/Places-API-PHP
+ * @see			    https://github.com/Chronolabs-Cooperative/API-API-PHP
  */
 
 
@@ -31,13 +31,14 @@ global $domain, $protocol, $business, $entity, $contact, $referee, $peerings, $s
 require_once dirname(__DIR__) . DIRECTORY_SEPARATOR . 'apiconfig.php';
 require_once dirname(__DIR__) . DIRECTORY_SEPARATOR . 'verify.php';
 
-$sql = "SELECT * FROM `countries` LIMIT " . API_CRON_NUMBER_COUNTRIES . " ORDER BY RAND()";
-$result = $GLOBALS["DebauchDB"]->query($sql);
-while($country = $GLOBALS["DebauchDB"]->fetchArray($result))
+$sql = "SELECT * FROM `" . $GLOBALS["APIDB"]->prefix('countries') . "` LIMIT " . API_CRON_NUMBER_COUNTRIES . " ORDER BY RAND()";
+$result = $GLOBALS["APIDB"]->query($sql);
+while($country = $GLOBALS["APIDB"]->fetchArray($result))
 {
-    $sql = "SELECT * FROM `" . $country['Table'] . "` WHERE LENGTH(`State`) = 0 OR LENGTH(`Postcode`) = 0 OR LENGTH(`GoogleID`) = 0 OR `GoogleID` = '0' LIMIT " . API_CRON_NUMBER_REGIONS . " ORDER BY RAND()";
-    $regions = $GLOBALS["DebauchDB"]->query($sql);
-    while($region = $GLOBALS["DebauchDB"]->fetchArray($regions))
+    $table = $country['Table'];
+    $sql = "SELECT * FROM `" . $GLOBALS["APIDB"]->prefix($table) . "` WHERE LENGTH(`State`) = 0 OR LENGTH(`Postcode`) = 0 OR LENGTH(`GoogleID`) = 0 OR `GoogleID` = '0' LIMIT " . API_CRON_NUMBER_REGIONS . " ORDER BY RAND()";
+    $regions = $GLOBALS["APIDB"]->query($sql);
+    while($region = $GLOBALS["APIDB"]->fetchArray($regions))
     {
         $geo = json_decode(getURIData("https://maps.googleapis.com/maps/api/geocode/json?address=" . $region['RegionName'] . ", " . $country['Country']), true);
         if ($geo['status'] == 'OK') {
@@ -52,8 +53,8 @@ while($country = $GLOBALS["DebauchDB"]->fetchArray($result))
                     $postcode = $values['long_name'];
             }
             
-            $sql = "UPDATE `" . $country['Table'] . "` SET `Updates` = `Updates` + 1, `Postcode` = '" . mysqli_real_escape_string($GLOBALS['DebauchDB']->conn, $postcode) . "',  `State` = '" . mysqli_real_escape_string($GLOBALS['DebauchDB']->conn, $state) . "', `GoogleID` = '" . mysqli_real_escape_string($GLOBALS['DebauchDB']->conn, $geo['results'][0]['place_id']) . "', `Action` = UNIX_TIMESTAMP() WHERE `CordID` = '" . $region['CordID'] . "' AND `CountryID` = '" . $region['CountryID'] . "'";
-            if (!$GLOBALS["DebauchDB"]->query($sql))
+            $sql = "UPDATE `" . $GLOBALS["APIDB"]->prefix($table) . "` SET `Updates` = `Updates` + 1, `Postcode` = '" . mysqli_real_escape_string($GLOBALS['APIDB']->conn, $postcode) . "',  `State` = '" . mysqli_real_escape_string($GLOBALS['APIDB']->conn, $state) . "', `GoogleID` = '" . mysqli_real_escape_string($GLOBALS['APIDB']->conn, $geo['results'][0]['place_id']) . "', `Action` = UNIX_TIMESTAMP() WHERE `CordID` = '" . $region['CordID'] . "' AND `CountryID` = '" . $region['CountryID'] . "'";
+            if (!$GLOBALS["APIDB"]->query($sql))
                 die("SQL Failed: $sql;");
         }
     }

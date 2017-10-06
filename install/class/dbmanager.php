@@ -123,9 +123,9 @@ class Db_manager
                 } elseif ($prefixed_query[1] === 'INSERT INTO') {
                     if ($this->db->query($prefixed_query[0]) != false) {
                         if (!isset($this->s_tables['insert'][$table])) {
-                            $this->f_tables['insert'][$table] = $this->db->getAffectedRows();
+                            $this->s_tables['insert'][$table] = $this->db->getAffectedRows();
                         } else {
-                            $this->f_tables['insert'][$table]=$this->f_tables['insert'][$table]+$this->db->getAffectedRows();
+                            $this->s_tables['insert'][$table]=$this->f_tables['insert'][$table]+$this->db->getAffectedRows();
                         }
                     } else {
                         if (!isset($this->f_tables['insert'][$table])) {
@@ -182,7 +182,7 @@ class Db_manager
         foreach ($commands as $cmd) {
             if (isset($this->s_tables[$cmd])) {
                 foreach ($this->s_tables[$cmd] as $key => $val) {
-                    $content .= '<li class="success">';
+                    $content .= '<li class="success prestige">';
                     $content .= ($cmd !== 'insert') ? sprintf($this->successStrings[$cmd], $key) : sprintf($this->successStrings[$cmd], $val, $key);
                     $content .= "</li>\n";
                 }
@@ -191,7 +191,7 @@ class Db_manager
         foreach ($commands as $cmd) {
             if (!@empty($this->f_tables[$cmd])) {
                 foreach ($this->f_tables[$cmd] as $key => $val) {
-                    $content .= '<li class="failure">';
+                    $content .= '<li class="failure prestige">';
                     $content .= ($cmd !== 'insert') ? sprintf($this->failureStrings[$cmd], $key) : sprintf($this->failureStrings[$cmd], $val, $key);
                     $content .= "</li>\n";
                 }

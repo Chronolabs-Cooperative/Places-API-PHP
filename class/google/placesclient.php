@@ -1,6 +1,6 @@
 <?php
 /**
- * Chronolabs REST Geospatial Places Services API
+ * Chronolabs REST Geospatial API Services API
  *
  * You may not change or alter any portion of this comment or credits
  * of supporting developers from this source code or any supporting source code
@@ -15,15 +15,15 @@
  * @since           2.0.1
  * @author          Simon Roberts <wishcraft@users.sourceforge.net>
  * @subpackage		places
- * @description		Geospatial Places Services API
+ * @description		Geospatial API Services API
  * @see			    http://internetfounder.wordpress.com
  * @see			    http://sourceoforge.net/projects/chronolabsapis
- * @see			    https://github.com/Chronolabs-Cooperative/Places-API-PHP
+ * @see			    https://github.com/Chronolabs-Cooperative/API-API-PHP
  */
 
 
 
-class GooglePlacesClient
+class GoogleAPIClient
 {
     public function get($url)
     {

@@ -1,6 +1,6 @@
 <?php
 /**
- * Chronolabs REST Geospatial Places Services API
+ * Chronolabs REST Geospatial API Services API
  *
  * You may not change or alter any portion of this comment or credits
  * of supporting developers from this source code or any supporting source code
@@ -15,10 +15,10 @@
  * @since           2.0.1
  * @author          Simon Roberts <wishcraft@users.sourceforge.net>
  * @subpackage		places
- * @description		Geospatial Places Services API
+ * @description		Geospatial API Services API
  * @see			    http://internetfounder.wordpress.com
  * @see			    http://sourceoforge.net/projects/chronolabsapis
- * @see			    https://github.com/Chronolabs-Cooperative/Places-API-PHP
+ * @see			    https://github.com/Chronolabs-Cooperative/API-API-PHP
  */
 
 /**
@@ -26,18 +26,18 @@
  */
 require_once __DIR__ . DIRECTORY_SEPARATOR . 'apiconfig.php';
 
-if (!$timeout = PlacesCache::read(basename(__DIR__) . '--verify-timeout'))
+if (!$timeout = APICache::read(basename(__DIR__) . '--verify-timeout'))
 {
     
     $query = $timeout = array();
     $timeout['start'] = microtime(true);
-    PlacesCache::write(basename(__DIR__) . '--verify-timeout', $timeout, API_CACHE_SECONDS * API_CACHE_SECONDS);
+    APICache::write(basename(__DIR__) . '--verify-timeout', $timeout, API_CACHE_SECONDS * API_CACHE_SECONDS);
     
     $query[] = "START TRANSACTION";
     $sql = "SHOW TABLES FROM `" . DB_DEBAUCH_NAME . "` ";
-    $results = $GLOBALS['DebauchDB']->query($sql);
+    $results = $GLOBALS['APIDB']->query($sql);
     $tables = array();
-    while(list($table) = $GLOBALS['DebauchDB']->fetchRow($results))
+    while(list($table) = $GLOBALS['APIDB']->fetchRow($results))
         if (!empty($table))
             $tables[$table] = $table;
     
@@ -45,21 +45,21 @@ if (!$timeout = PlacesCache::read(basename(__DIR__) . '--verify-timeout'))
     foreach($tables as $table)
     {
         $sql = "SHOW FIELDS FROM `" . DB_DEBAUCH_NAME . "`.`$table` ";
-        $results = $GLOBALS['DebauchDB']->query($sql);
+        $results = $GLOBALS['APIDB']->query($sql);
         $fields[$table] = array();
-        while($row = $GLOBALS['DebauchDB']->fetchArray($results))
+        while($row = $GLOBALS['APIDB']->fetchArray($results))
             if (!empty($row))
                 $fields[$table][$row['Field']] = $row;
     }
     
-    $sql = "SELECT * FROM `countries` WHERE `Table` NOT IN ('" . implode("', '", $tables) . "')";
-    $results = $GLOBALS['DebauchDB']->query($sql);
-    while($country = $GLOBALS['DebauchDB']->fetchArray($results))
+    $sql = "SELECT * FROM `" . $GLOBALS['APIDB']->prefix('countries') . "` WHERE `Table` NOT IN ('" . implode("', '", $tables) . "')";
+    $results = $GLOBALS['APIDB']->query($sql);
+    while($country = $GLOBALS['APIDB']->fetchArray($results))
     {
         $table = $country['Table'];
-        if (!isset($tables["$table"]))
+        if (!isset($tables[$GLOBALS['APIDB']->prefix($table)]))
         {
-            $query[] = "CREATE TABLE `$table` (
+            $query[] = "CREATE TABLE `" . $GLOBALS['APIDB']->prefix($table) . "` (
                 `CordID` int(11) UNSIGNED NOT NULL,
                 `CountryID` int(11) DEFAULT NULL,
                 `RegionName` char(44) DEFAULT NULL,
@@ -87,19 +87,19 @@ if (!$timeout = PlacesCache::read(basename(__DIR__) . '--verify-timeout'))
                 KEY `NAMING-FIFTHTEEN` (`CordID`,`CountryID`,`RegionName`(15)) USING BTREE KEY_BLOCK_SIZE=8,
                 KEY `ALPHABET` (`CordID`,`CountryID`,`RegionName`,`Latitude_Float`,`Longitude_Float`,`Altitude_Feet`,`Altitude_Meters`,`mapref_latitude`,`mapref_longitude`) USING BTREE KEY_BLOCK_SIZE=16
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8";
-            if (!$GLOBALS['DebauchDB']->query($sql))
+            if (!$GLOBALS['APIDB']->query($sql))
                 die("SQL Failed: $sql;");
         }
     }
     
-    $sql = "SELECT * FROM `countries` WHERE LENGTH(`Table`) > 0 ORDER BY RAND()";
-    $results = $GLOBALS['DebauchDB']->query($sql);
-    while($country = $GLOBALS['DebauchDB']->fetchArray($results))
+    $sql = "SELECT * FROM `" . $GLOBALS['APIDB']->prefix('countries') . "` WHERE LENGTH(`Table`) > 0 ORDER BY RAND()";
+    $results = $GLOBALS['APIDB']->query($sql);
+    while($country = $GLOBALS['APIDB']->fetchArray($results))
     {
         $table = $country['Table'];
-        if (!isset($tables[$table . "_states"]))
+        if (!isset($tables[$GLOBALS['APIDB']->prefix($table."_states")]))
         {
-            $query[] = "CREATE TABLE `" . $country['Table'] . "_states` (
+            $query[] = "CREATE TABLE `" . $GLOBALS['APIDB']->prefix($table."_states") . "` (
                 `StateID` int(11) UNSIGNED NOT NULL  AUTO_INCREMENT,
                 `CountryID` int(11) DEFAULT 0,
                 `State` char(64) DEFAULT '',
@@ -146,9 +146,9 @@ if (!$timeout = PlacesCache::read(basename(__DIR__) . '--verify-timeout'))
                 KEY `ALPHABET` (`StateID`,`CountryID`,`State`,`max_latitude`,`max_longitude`,`min_latitude`,`min_longitude`) USING BTREE KEY_BLOCK_SIZE=16
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8";
         }
-        if (!isset($tables[$table . "_details"]))
+        if (!isset($tables[$GLOBALS['APIDB']->prefix($table."_details")]))
         {
-            $query[] = "CREATE TABLE `" . $country['Table'] . "_details` (
+            $query[] = "CREATE TABLE `" . $GLOBALS['APIDB']->prefix($country['Table']. "_details") . "` (
                 `DetailID` mediumint(22) UNSIGNED NOT NULL  AUTO_INCREMENT,
                 `CordID` int(11) DEFAULT 0,
                 `StateID` int(11) DEFAULT 0,
@@ -162,9 +162,9 @@ if (!$timeout = PlacesCache::read(basename(__DIR__) . '--verify-timeout'))
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8";
         }
         $table = $country['Table'];
-        if (!isset($tables[$table . "_address"]))
+        if (!isset($tables[$GLOBALS['APIDB']->prefix($table."_address")]))
         {
-            $query[] = "CREATE TABLE `" . $country['Table'] . "_address` (
+            $query[] = "CREATE TABLE `" . $GLOBALS['APIDB']->prefix($country['Table']. "_address") . "` (
                 `AddressID` mediumint(22) UNSIGNED NOT NULL AUTO_INCREMENT,
                 `CordID` int(11) DEFAULT 0,
                 `CountryID` int(11) DEFAULT 0,
@@ -191,10 +191,10 @@ if (!$timeout = PlacesCache::read(basename(__DIR__) . '--verify-timeout'))
                 KEY `SEARCH` (`AddressID`,`CordID`,`CountryID`,`Types`,`Unit`,`Suburb`,`Building`,`State`,`Postcode`,`Street`,`Longitude`,`Latitude`) USING BTREE KEY_BLOCK_SIZE=16
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8";
         }
-        if (isset($tables[$table . "_address"]) && !in_array("Postcode", array_keys($fields[$table . "_address"])))
+        if (isset($tables[$GLOBALS['APIDB']->prefix($table."_address")]) && !in_array("Postcode", array_keys($fields[$GLOBALS['APIDB']->prefix($table."_address")])))
         {
-            $query[] = "DROP TABLE `" . $country['Table'] . "_address`";
-            $query[] = "CREATE TABLE `" . $country['Table'] . "_address` (
+            $query[] = "DROP TABLE `" . $GLOBALS['APIDB']->prefix($country['Table']. "_address") . "`";
+            $query[] = "CREATE TABLE `" . $GLOBALS['APIDB']->prefix($country['Table']. "_address") . "` (
                 `AddressID` mediumint(22) UNSIGNED NOT NULL AUTO_INCREMENT,
                 `CordID` int(11) DEFAULT 0,
                 `CountryID` int(11) DEFAULT 0,
@@ -221,10 +221,10 @@ if (!$timeout = PlacesCache::read(basename(__DIR__) . '--verify-timeout'))
                 KEY `SEARCH` (`AddressID`,`CordID`,`CountryID`,`Types`,`Unit`,`Suburb`,`Building`,`State`,`Postcode`,`Street`,`Longitude`,`Latitude`) USING BTREE KEY_BLOCK_SIZE=16
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8";
         }
-        if (isset($tables[$table . "_address"]) && !in_array("Suburb", array_keys($fields[$table . "_address"])))
+        if (isset($tables[$GLOBALS['APIDB']->prefix($table."_address")]) && !in_array("Suburb", array_keys($fields[$GLOBALS['APIDB']->prefix($table."_address")])))
         {
-            $query[] = "DROP TABLE `" . $country['Table'] . "_address`";
-            $query[] = "CREATE TABLE `" . $country['Table'] . "_address` (
+            $query[] = "DROP TABLE `" . $GLOBALS['APIDB']->prefix($country['Table']. "_address") . "`";
+            $query[] = "CREATE TABLE `" . $GLOBALS['APIDB']->prefix($country['Table']. "_address") . "` (
                 `AddressID` mediumint(22) UNSIGNED NOT NULL AUTO_INCREMENT,
                 `CordID` int(11) DEFAULT 0,
                 `CountryID` int(11) DEFAULT 0,
@@ -251,9 +251,9 @@ if (!$timeout = PlacesCache::read(basename(__DIR__) . '--verify-timeout'))
                 KEY `SEARCH` (`AddressID`,`CordID`,`CountryID`,`Types`,`Unit`,`Suburb`,`Building`,`State`,`Postcode`,`Street`,`Longitude`,`Latitude`) USING BTREE KEY_BLOCK_SIZE=16
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8";
         }
-        if (!isset($tables[$table . "_address_types"]))
+        if (!isset($tables[$GLOBALS['APIDB']->prefix($table."_address_types")]))
         {
-            $query[] = "CREATE TABLE `" . $country['Table'] . "_address_types` (
+            $query[] = "CREATE TABLE `" . $GLOBALS['APIDB']->prefix($country['Table']. "_address_types") . "` (
                 `TypeID` int(11) UNSIGNED NOT NULL  AUTO_INCREMENT,
                 `Type` char(64) DEFAULT '',
                 `Records` int(11) DEFAULT 0,
@@ -261,17 +261,17 @@ if (!$timeout = PlacesCache::read(basename(__DIR__) . '--verify-timeout'))
                 KEY `SEARCH` (`TypeID`,`Type`,`Records`) USING BTREE KEY_BLOCK_SIZE=16
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8";
         }
-        if (!isset($tables[$table . "_address_types_links"]))
+        if (!isset($tables[$GLOBALS['APIDB']->prefix($table."_address_types_links")]))
         {
-            $query[] = "CREATE TABLE `" . $country['Table'] . "_address_types_links` (
+            $query[] = "CREATE TABLE `" . $GLOBALS['APIDB']->prefix($country['Table']. "_address_types_links") . "` (
                 `TypeID` int(11) UNSIGNED NOT NULL DEFAULT 0,
                 `AddressID` mediumint(22) UNSIGNED NOT NULL DEFAULT 0,
                 KEY `SEARCH` (`TypeID`,`AddressID`) USING BTREE KEY_BLOCK_SIZE=16
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8";
         }
-        if (!isset($tables[$table . "_venues"]))
+        if (!isset($tables[$GLOBALS['APIDB']->prefix($table."_venues")]))
         {
-            $query[] = "CREATE TABLE `" . $country['Table'] . "_venues` (
+            $query[] = "CREATE TABLE `" . $GLOBALS['APIDB']->prefix($country['Table']. "_venues") . "` (
                 `VenueID` mediumint(22) UNSIGNED NOT NULL AUTO_INCREMENT,
                 `CordID` int(11) DEFAULT 0,
                 `CountryID` int(11) DEFAULT 0,
@@ -294,9 +294,9 @@ if (!$timeout = PlacesCache::read(basename(__DIR__) . '--verify-timeout'))
                 KEY `SEARCH` (`VenueID`,`CordID`,`CountryID`,`Types`,`Name`,`Longitude`,`Latitude`) USING BTREE KEY_BLOCK_SIZE=16
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8";
         }
-        if (!isset($tables[$table . "_venues_photos"]))
+        if (!isset($tables[$GLOBALS['APIDB']->prefix($table."_venues_photos")]))
         {
-            $query[] = "CREATE TABLE `" . $country['Table'] . "_venues_photos` (
+            $query[] = "CREATE TABLE `" . $GLOBALS['APIDB']->prefix($country['Table']. "_venues_photos") . "` (
                 `PhotoID` int(11) UNSIGNED NOT NULL  AUTO_INCREMENT,
                 `VenueID` mediumint(22) UNSIGNED NOT NULL DEFAULT 0,
                 `Height` int(11) UNSIGNED NOT NULL DEFAULT 0,
@@ -307,9 +307,9 @@ if (!$timeout = PlacesCache::read(basename(__DIR__) . '--verify-timeout'))
                 KEY `SEARCH` (`PhotoID`,`VenueID`) USING BTREE KEY_BLOCK_SIZE=16
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8";
         }
-        if (!isset($tables[$table . "_venues_types"]))
+        if (!isset($tables[$GLOBALS['APIDB']->prefix($table."_venues_types")]))
         {
-            $query[] = "CREATE TABLE `" . $country['Table'] . "_venues_types` (
+            $query[] = "CREATE TABLE `" . $GLOBALS['APIDB']->prefix($country['Table']. "_venues_types") . "` (
                 `TypeID` int(11) UNSIGNED NOT NULL  AUTO_INCREMENT,
                 `Type` char(64) DEFAULT '',
                 `Records` int(11) DEFAULT 0,
@@ -317,157 +317,157 @@ if (!$timeout = PlacesCache::read(basename(__DIR__) . '--verify-timeout'))
                 KEY `SEARCH` (`TypeID`,`Type`,`Records`) USING BTREE KEY_BLOCK_SIZE=16
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8";
         }
-        if (!isset($tables[$table . "_venues_types_links"]))
+        if (!isset($tables[$GLOBALS['APIDB']->prefix($table."_venues_types_links")]))
         {
-            $query[] = "CREATE TABLE `" . $country['Table'] . "_venues_types_links` (
+            $query[] = "CREATE TABLE `" . $GLOBALS['APIDB']->prefix($country['Table']. "_venues_types_links") . "` (
                 `TypeID` int(11) UNSIGNED NOT NULL DEFAULT 0,
                 `VenueID` mediumint(22) UNSIGNED NOT NULL DEFAULT 0,
                 KEY `SEARCH` (`TypeID`,`VenueID`) USING BTREE KEY_BLOCK_SIZE=16
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8";
         }
-        if (isset($tables[$table . "_venues_link"]))
+        if (isset($tables[$GLOBALS['APIDB']->prefix($table."_venues_link")]))
         {
-            $query[] = "DROP TABLE `" . $country['Table'] . "_venues_link`";
+            $query[] = "DROP TABLE `" . $GLOBALS['APIDB']->prefix($table."_venues_link") . "`";
         }
         if (!empty($table) && isset($fields[$table]) && !empty($fields[$table]))
         {
             $query[] = "START TRANSACTION";
             if (in_array("typal", array_keys($fields[$table])))
-                $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`" . $table . "` CHANGE COLUMN `typal` `Typal` ENUM('city', 'suburb', 'town', 'village', 'camp', 'military', 'mountain', 'unknown') NOT NULL DEFAULT 'unknown' AFTER `CountryID`";
+                $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`" . $GLOBALS['APIDB']->prefix($table) . "` CHANGE COLUMN `typal` `Typal` ENUM('city', 'suburb', 'town', 'village', 'camp', 'military', 'mountain', 'unknown') NOT NULL DEFAULT 'unknown' AFTER `CountryID`";
             elseif (!in_array("Typal", array_keys($fields[$table])))
-                $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`" . $table . "` ADD COLUMN `Typal` ENUM('city', 'suburb', 'town', 'village', 'camp', 'military', 'mountain', 'unknown') NOT NULL DEFAULT 'unknown' AFTER `CountryID`";
+                $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`" . $GLOBALS['APIDB']->prefix($table) . "` ADD COLUMN `Typal` ENUM('city', 'suburb', 'town', 'village', 'camp', 'military', 'mountain', 'unknown') NOT NULL DEFAULT 'unknown' AFTER `CountryID`";
             if (!in_array("Postcode", array_keys($fields[$table])))
-                $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`" . $table . "` ADD COLUMN `Postcode` VARCHAR(15) NOT NULL DEFAULT '' AFTER `Altitude_Meters`";
+                $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`" . $GLOBALS['APIDB']->prefix($table) . "` ADD COLUMN `Postcode` VARCHAR(15) NOT NULL DEFAULT '' AFTER `Altitude_Meters`";
             if (!in_array("State", array_keys($fields[$table])))
-                $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`" . $table . "` ADD COLUMN `State` VARCHAR(64) NOT NULL DEFAULT '' AFTER `Postcode`";
+                $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`" . $GLOBALS['APIDB']->prefix($table) . "` ADD COLUMN `State` VARCHAR(64) NOT NULL DEFAULT '' AFTER `Postcode`";
             if (!in_array("Population", array_keys($fields[$table])))
-                $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`" . $table . "` ADD COLUMN `Population` MEDIUMINT(21) NOT NULL DEFAULT 0 AFTER `State`";
+                $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`" . $GLOBALS['APIDB']->prefix($table) . "` ADD COLUMN `Population` MEDIUMINT(21) NOT NULL DEFAULT 0 AFTER `State`";
             if (!in_array("Venues", array_keys($fields[$table])))
-                $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`" . $table . "` ADD COLUMN `Venues` MEDIUMINT(21) NOT NULL DEFAULT 0 AFTER `Population`";
+                $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`" . $GLOBALS['APIDB']->prefix($table) . "` ADD COLUMN `Venues` MEDIUMINT(21) NOT NULL DEFAULT 0 AFTER `Population`";
             if (!in_array("Details", array_keys($fields[$table])))
-                $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`" . $table . "` ADD COLUMN `Details` MEDIUMINT(21) NOT NULL DEFAULT 0 AFTER `Venues`";
+                $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`" . $GLOBALS['APIDB']->prefix($table) . "` ADD COLUMN `Details` MEDIUMINT(21) NOT NULL DEFAULT 0 AFTER `Venues`";
             if (!in_array("Updates", array_keys($fields[$table])))
-                $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`" . $table . "` ADD COLUMN `Updates` MEDIUMINT(21) NOT NULL DEFAULT 0 AFTER `Details`";
+                $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`" . $GLOBALS['APIDB']->prefix($table) . "` ADD COLUMN `Updates` MEDIUMINT(21) NOT NULL DEFAULT 0 AFTER `Details`";
             if (!in_array("Hits", array_keys($fields[$table])))
-                $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`" . $table . "` ADD COLUMN `Hits` MEDIUMINT(21) NOT NULL DEFAULT 0 AFTER `Updates`";
+                $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`" . $GLOBALS['APIDB']->prefix($table) . "` ADD COLUMN `Hits` MEDIUMINT(21) NOT NULL DEFAULT 0 AFTER `Updates`";
             if (!in_array("GoogleID", array_keys($fields[$table])))
-                $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`" . $table . "` ADD COLUMN `GoogleID` VARCHAR(196) NOT NULL DEFAULT '' AFTER `Hits`";
+                $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`" . $GLOBALS['APIDB']->prefix($table) . "` ADD COLUMN `GoogleID` VARCHAR(196) NOT NULL DEFAULT '' AFTER `Hits`";
             if (!in_array("PagesNumber", array_keys($fields[$table])))
-                $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`" . $table . "` ADD COLUMN `PagesNumber` INT(12) NOT NULL DEFAULT 0 AFTER `GoogleID`";
+                $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`" . $GLOBALS['APIDB']->prefix($table) . "` ADD COLUMN `PagesNumber` INT(12) NOT NULL DEFAULT 0 AFTER `GoogleID`";
             if (!in_array("Last", array_keys($fields[$table])))
-                $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`" . $table . "` ADD COLUMN `Last` INT(12) NOT NULL DEFAULT 0 AFTER `PagesNumber`";
+                $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`" . $GLOBALS['APIDB']->prefix($table) . "` ADD COLUMN `Last` INT(12) NOT NULL DEFAULT 0 AFTER `PagesNumber`";
             if (!in_array("Next", array_keys($fields[$table])))
-                $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`" . $table . "` ADD COLUMN `Next` INT(12) NOT NULL DEFAULT 0 AFTER `Last`";
+                $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`" . $GLOBALS['APIDB']->prefix($table) . "` ADD COLUMN `Next` INT(12) NOT NULL DEFAULT 0 AFTER `Last`";
             if (!in_array("Action", array_keys($fields[$table])))
-                $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`" . $table . "` ADD COLUMN `Action` INT(12) NOT NULL DEFAULT 0 AFTER `Next`";
+                $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`" . $GLOBALS['APIDB']->prefix($table) . "` ADD COLUMN `Action` INT(12) NOT NULL DEFAULT 0 AFTER `Next`";
             if (!in_array("data", array_keys($fields[$table])))
-                $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`" . $table . "` ADD COLUMN `data` tinytext AFTER `Action`";
+                $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`" . $GLOBALS['APIDB']->prefix($table) . "` ADD COLUMN `data` tinytext AFTER `Action`";
             $query[] = "COMMIT";
         }
     }
     
     if (!in_array("Records", array_keys($fields['countries'])))
-        $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`countries` ADD COLUMN `Records` MEDIUMINT(21) NOT NULL DEFAULT 0 AFTER `Population`";
+        $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`" . $GLOBALS['APIDB']->prefix('countries') . "` ADD COLUMN `Records` MEDIUMINT(21) NOT NULL DEFAULT 0 AFTER `Population`";
     if (!in_array("Updates", array_keys($fields['countries'])))
-        $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`countries` ADD COLUMN `Updates` MEDIUMINT(21) NOT NULL DEFAULT 0 AFTER `Records`";
+        $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`" . $GLOBALS['APIDB']->prefix('countries') . "` ADD COLUMN `Updates` MEDIUMINT(21) NOT NULL DEFAULT 0 AFTER `Records`";
     if (!in_array("Venues", array_keys($fields['countries'])))
-        $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`countries` ADD COLUMN `Venues` MEDIUMINT(21) NOT NULL DEFAULT 0 AFTER `Updates`";
+        $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`" . $GLOBALS['APIDB']->prefix('countries') . "` ADD COLUMN `Venues` MEDIUMINT(21) NOT NULL DEFAULT 0 AFTER `Updates`";
     if (!in_array("Details", array_keys($fields['countries'])))
-        $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`countries` ADD COLUMN `Details` MEDIUMINT(21) NOT NULL DEFAULT 0 AFTER `Venues`";
+        $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`" . $GLOBALS['APIDB']->prefix('countries') . "` ADD COLUMN `Details` MEDIUMINT(21) NOT NULL DEFAULT 0 AFTER `Venues`";
     if (!in_array("Next", array_keys($fields['countries'])))
-        $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`countries` ADD COLUMN `Next` INT(11) NOT NULL DEFAULT 0 AFTER `Details`";
+        $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`" . $GLOBALS['APIDB']->prefix('countries') . "` ADD COLUMN `Next` INT(11) NOT NULL DEFAULT 0 AFTER `Details`";
     if (!in_array("max_longitude", array_keys($fields['countries'])))
-        $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`countries` ADD COLUMN `max_longitude` FLOAT(21,9) NOT NULL DEFAULT 0 AFTER `Next`";
+        $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`" . $GLOBALS['APIDB']->prefix('countries') . "` ADD COLUMN `max_longitude` FLOAT(21,9) NOT NULL DEFAULT 0 AFTER `Next`";
     if (!in_array("max_latitude", array_keys($fields['countries'])))
-        $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`countries` ADD COLUMN `max_latitude` FLOAT(21,9) NOT NULL DEFAULT 0 AFTER `max_longitude`";
+        $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`" . $GLOBALS['APIDB']->prefix('countries') . "` ADD COLUMN `max_latitude` FLOAT(21,9) NOT NULL DEFAULT 0 AFTER `max_longitude`";
     if (!in_array("min_longitude", array_keys($fields['countries'])))
-        $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`countries` ADD COLUMN `min_longitude` FLOAT(21,9) NOT NULL DEFAULT 0 AFTER `max_latitude`";
+        $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`" . $GLOBALS['APIDB']->prefix('countries') . "` ADD COLUMN `min_longitude` FLOAT(21,9) NOT NULL DEFAULT 0 AFTER `max_latitude`";
     if (!in_array("min_latitude", array_keys($fields['countries'])))
-        $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`countries` ADD COLUMN `min_latitude` FLOAT(21,9) NOT NULL DEFAULT 0 AFTER `min_longitude`";
+        $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`" . $GLOBALS['APIDB']->prefix('countries') . "` ADD COLUMN `min_latitude` FLOAT(21,9) NOT NULL DEFAULT 0 AFTER `min_longitude`";
     if (!in_array("data", array_keys($fields['countries'])))
-        $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`countries` ADD COLUMN `data` longtext AFTER `min_latitude`";
+        $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`" . $GLOBALS['APIDB']->prefix('countries') . "` ADD COLUMN `data` longtext AFTER `min_latitude`";
         
     if (!in_array("Population", array_keys($fields['continents'])))
-        $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`continents` ADD COLUMN `Population` INT(19) NOT NULL DEFAULT 0 AFTER `Continent`";
+        $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`" . $GLOBALS['APIDB']->prefix('contients') . "` ADD COLUMN `Population` INT(19) NOT NULL DEFAULT 0 AFTER `Continent`";
     if (!in_array("Records", array_keys($fields['continents'])))
-        $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`continents` ADD COLUMN `Records` MEDIUMINT(21) NOT NULL DEFAULT 0 AFTER `Population`";
+        $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`" . $GLOBALS['APIDB']->prefix('contients') . "` ADD COLUMN `Records` MEDIUMINT(21) NOT NULL DEFAULT 0 AFTER `Population`";
     if (!in_array("Updates", array_keys($fields['continents'])))
-        $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`continents` ADD COLUMN `Updates` MEDIUMINT(21) NOT NULL DEFAULT 0 AFTER `Records`";
+        $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`" . $GLOBALS['APIDB']->prefix('contients') . "` ADD COLUMN `Updates` MEDIUMINT(21) NOT NULL DEFAULT 0 AFTER `Records`";
     if (!in_array("Venues", array_keys($fields['continents'])))
-        $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`continents` ADD COLUMN `Venues` MEDIUMINT(21) NOT NULL DEFAULT 0 AFTER `Updates`";
+        $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`" . $GLOBALS['APIDB']->prefix('contients') . "` ADD COLUMN `Venues` MEDIUMINT(21) NOT NULL DEFAULT 0 AFTER `Updates`";
     if (!in_array("Details", array_keys($fields['continents'])))
-        $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`continents` ADD COLUMN `Details` MEDIUMINT(21) NOT NULL DEFAULT 0 AFTER `Venues`";
+        $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`" . $GLOBALS['APIDB']->prefix('contients') . "` ADD COLUMN `Details` MEDIUMINT(21) NOT NULL DEFAULT 0 AFTER `Venues`";
     if (!in_array("Next", array_keys($fields['continents'])))
-        $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`continents` ADD COLUMN `Next` INT(11) NOT NULL DEFAULT 0 AFTER `Details`";
+        $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`" . $GLOBALS['APIDB']->prefix('contients') . "` ADD COLUMN `Next` INT(11) NOT NULL DEFAULT 0 AFTER `Details`";
     if (!in_array("max_longitude", array_keys($fields['continents'])))
-        $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`continents` ADD COLUMN `max_longitude` FLOAT(21,9) NOT NULL DEFAULT 0 AFTER `Next`";
+        $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`" . $GLOBALS['APIDB']->prefix('contients') . "` ADD COLUMN `max_longitude` FLOAT(21,9) NOT NULL DEFAULT 0 AFTER `Next`";
     if (!in_array("max_latitude", array_keys($fields['continents'])))
-        $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`continents` ADD COLUMN `max_latitude` FLOAT(21,9) NOT NULL DEFAULT 0 AFTER `max_longitude`";
+        $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`" . $GLOBALS['APIDB']->prefix('contients') . "` ADD COLUMN `max_latitude` FLOAT(21,9) NOT NULL DEFAULT 0 AFTER `max_longitude`";
     if (!in_array("min_longitude", array_keys($fields['continents'])))
-        $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`continents` ADD COLUMN `min_longitude` FLOAT(21,9) NOT NULL DEFAULT 0 AFTER `max_latitude`";
+        $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`" . $GLOBALS['APIDB']->prefix('contients') . "` ADD COLUMN `min_longitude` FLOAT(21,9) NOT NULL DEFAULT 0 AFTER `max_latitude`";
     if (!in_array("min_latitude", array_keys($fields['continents'])))
-        $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`continents` ADD COLUMN `min_latitude` FLOAT(21,9) NOT NULL DEFAULT 0 AFTER `min_longitude`";
+        $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`" . $GLOBALS['APIDB']->prefix('contients') . "` ADD COLUMN `min_latitude` FLOAT(21,9) NOT NULL DEFAULT 0 AFTER `min_longitude`";
     if (!in_array("data", array_keys($fields['continents'])))
-        $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`continents` ADD COLUMN `data` longtext AFTER `min_latitude`";
+        $query[] = "ALTER TABLE `" . DB_DEBAUCH_NAME . "`.`" . $GLOBALS['APIDB']->prefix('contients') . "` ADD COLUMN `data` longtext AFTER `min_latitude`";
     
     $query[] = "COMMIT";
     $query[] = "START TRANSACTION";
             
-    $sql = "SELECT * FROM `countries` WHERE LENGTH(`Table`) > 0 ORDER BY RAND()";
-    $results = $GLOBALS['DebauchDB']->query($sql);
-    while($country = $GLOBALS['DebauchDB']->fetchArray($results))
+    $sql = "SELECT * FROM `" . $GLOBALS['APIDB']->prefix('countries') . "` WHERE LENGTH(`Table`) > 0 ORDER BY RAND()";
+    $results = $GLOBALS['APIDB']->query($sql);
+    while($country = $GLOBALS['APIDB']->fetchArray($results))
     {
         if (!empty($country['Table']))
         {
-            $sql = 'SELECT count(*) as `Records` FROM `' . $country['Table'] . '`';
-            list($count) = $GLOBALS['DebauchDB']->fetchRow($GLOBALS['DebauchDB']->query($sql));
-            $query[] = 'UPDATE `countries` SET `Records` = ' . $count . ' WHERE `CountryID` = ' . $country['CountryID'];
+            $sql = 'SELECT count(*) as `Records` FROM `' . $GLOBALS['APIDB']->prefix($country['Table']) . '`';
+            list($count) = $GLOBALS['APIDB']->fetchRow($GLOBALS['APIDB']->query($sql));
+            $query[] = 'UPDATE `' . $GLOBALS['APIDB']->prefix('countries') . '` SET `Records` = ' . $count . ' WHERE `CountryID` = ' . $country['CountryID'];
         }
     }
        
-    $sql = "SELECT * FROM `countries` WHERE LENGTH(`Table`) > 0 ORDER BY RAND()";
-    $results = $GLOBALS['DebauchDB']->query($sql);
-    while($country = $GLOBALS['DebauchDB']->fetchArray($results))
+    $sql = "SELECT * FROM `" . $GLOBALS['APIDB']->prefix('countries') . "` WHERE LENGTH(`Table`) > 0 ORDER BY RAND()";
+    $results = $GLOBALS['APIDB']->query($sql);
+    while($country = $GLOBALS['APIDB']->fetchArray($results))
     {
         if (!empty($country['Table']))
         {
-            $sql = 'SELECT count(*) as `Records` FROM `' . $country['Table'] . '_Venues`';
-            list($count) = $GLOBALS['DebauchDB']->fetchRow($GLOBALS['DebauchDB']->query($sql));
-            $query[] = 'UPDATE `countries` SET `Venues` = ' . $count . ' WHERE `CountryID` = ' . $country['CountryID'];
+            $sql = 'SELECT count(*) as `Records` FROM `' . $GLOBALS['APIDB']->prefix($country['Table']. '_venues') . '`';
+            list($count) = $GLOBALS['APIDB']->fetchRow($GLOBALS['APIDB']->query($sql));
+            $query[] = 'UPDATE `' . $GLOBALS['APIDB']->prefix('countries') . '` SET `Venues` = ' . $count . ' WHERE `CountryID` = ' . $country['CountryID'];
         }
     }
     
-    $sql = "SELECT * FROM `countries` WHERE LENGTH(`Table`) > 0 ORDER BY RAND()";
-    $results = $GLOBALS['DebauchDB']->query($sql);
-    while($country = $GLOBALS['DebauchDB']->fetchArray($results))
+    $sql = "SELECT * FROM `" . $GLOBALS['APIDB']->prefix('countries') . "` WHERE LENGTH(`Table`) > 0 ORDER BY RAND()";
+    $results = $GLOBALS['APIDB']->query($sql);
+    while($country = $GLOBALS['APIDB']->fetchArray($results))
     {
         if (!empty($country['Table']))
         {
-            $sql = 'SELECT count(*) as `Records` FROM `' . $country['Table'] . '_details`';
-            list($count) = $GLOBALS['DebauchDB']->fetchRow($GLOBALS['DebauchDB']->query($sql));
-            $query[] = 'UPDATE `countries` SET `Details` = ' . $count . ' WHERE `CountryID` = ' . $country['CountryID'];
-        }
-    }
-    
-    
-    $sql = "SELECT * FROM `countries` WHERE LENGTH(`Table`) > 0 ORDER BY RAND()";
-    $results = $GLOBALS['DebauchDB']->query($sql);
-    while($country = $GLOBALS['DebauchDB']->fetchArray($results))
-    {
-        if (!empty($country['Table']))
-        {
-            $sql = 'SELECT MAX(`Longitude_float`) as `max_longitude`, MAX(`Latitude_float`) as `max_latitude`, MIN(`Longitude_float`) as `min_longitude`, MIN(`Latitude_float`) as `min_latitude`  FROM `' . $country['Table'] . '` GROUP BY `CountryID`';
-            list($max_longitude, $max_latitude, $min_longitude, $min_latitude) = $GLOBALS['DebauchDB']->fetchRow($GLOBALS['DebauchDB']->query($sql));
-            $query[] = 'UPDATE `countries` SET `max_latitude` = ' . $max_latitude . ', `max_longitude` = ' . $max_longitude . ', `min_latitude` = ' . $min_latitude . ', `min_longitude` = ' . $min_longitude . ' WHERE `CountryID` = ' . $country['CountryID'];
+            $sql = 'SELECT count(*) as `Records` FROM `' . $GLOBALS['APIDB']->prefix($country['Table']. '_details') . '`';
+            list($count) = $GLOBALS['APIDB']->fetchRow($GLOBALS['APIDB']->query($sql));
+            $query[] = 'UPDATE `' . $GLOBALS['APIDB']->prefix('countries') . '` SET `Details` = ' . $count . ' WHERE `CountryID` = ' . $country['CountryID'];
         }
     }
     
     
-    $sql = 'SELECT DISTINCT `Continent`, sum(`Population`) as `Population`, sum(`Records`) as `Records`, sum(`Venues`) as `Venues`, sum(`Details`) as `Details`, sum(`Updates`) as `Updates`, max(`max_longitude`) as `max_longitude`, max(`max_latitude`) as `max_latitude`, min(`min_longitude`) as `min_longitude`, max(`min_latitude`) as `min_latitude` FROM `countries` WHERE LENGTH(`Continent`) > 0 GROUP BY `Continent`';
-    $results = $GLOBALS['DebauchDB']->query($sql);
-    while($continent = $GLOBALS['DebauchDB']->fetchArray($results))
+    $sql = "SELECT * FROM `" . $GLOBALS['APIDB']->prefix('countries') . "` WHERE LENGTH(`Table`) > 0 ORDER BY RAND()";
+    $results = $GLOBALS['APIDB']->query($sql);
+    while($country = $GLOBALS['APIDB']->fetchArray($results))
     {
-        $query[] = 'UPDATE `continents` SET `Population` = "'.$continent['Population'].'", `Records` = "'.$continent['Records'].'", `Venues` = "'.$continent['Venues'].'", `Details` = "'.$continent['Details'].'", `Updates` = "'.$continent['Updates'].'",  `max_longitude` = "'.$continent['max_longitude'].'",  `max_latitude` = "'.$continent['max_latitude'].'",  `min_longitude` = "'.$continent['min_longitude'].'",  `min_latitude` = "'.$continent['min_latitude'].'" WHERE `Continent` LIKE "' . $continent['Continent'] . '"';
+        if (!empty($country['Table']))
+        {
+            $sql = 'SELECT MAX(`Longitude_float`) as `max_longitude`, MAX(`Latitude_float`) as `max_latitude`, MIN(`Longitude_float`) as `min_longitude`, MIN(`Latitude_float`) as `min_latitude`  FROM `' . $GLOBALS['APIDB']->prefix($country['Table']) . '` GROUP BY `CountryID`';
+            list($max_longitude, $max_latitude, $min_longitude, $min_latitude) = $GLOBALS['APIDB']->fetchRow($GLOBALS['APIDB']->query($sql));
+            $query[] = 'UPDATE `' . $GLOBALS['APIDB']->prefix('countries') . '` SET `max_latitude` = ' . $max_latitude . ', `max_longitude` = ' . $max_longitude . ', `min_latitude` = ' . $min_latitude . ', `min_longitude` = ' . $min_longitude . ' WHERE `CountryID` = ' . $country['CountryID'];
+        }
+    }
+    
+    
+    $sql = 'SELECT DISTINCT `Continent`, sum(`Population`) as `Population`, sum(`Records`) as `Records`, sum(`Venues`) as `Venues`, sum(`Details`) as `Details`, sum(`Updates`) as `Updates`, max(`max_longitude`) as `max_longitude`, max(`max_latitude`) as `max_latitude`, min(`min_longitude`) as `min_longitude`, max(`min_latitude`) as `min_latitude` FROM `' . $GLOBALS['APIDB']->prefix('countries') . '` WHERE LENGTH(`Continent`) > 0 GROUP BY `Continent`';
+    $results = $GLOBALS['APIDB']->query($sql);
+    while($continent = $GLOBALS['APIDB']->fetchArray($results))
+    {
+        $query[] = 'UPDATE `' . $GLOBALS['APIDB']->prefix('contients') . '` SET `Population` = "'.$continent['Population'].'", `Records` = "'.$continent['Records'].'", `Venues` = "'.$continent['Venues'].'", `Details` = "'.$continent['Details'].'", `Updates` = "'.$continent['Updates'].'",  `max_longitude` = "'.$continent['max_longitude'].'",  `max_latitude` = "'.$continent['max_latitude'].'",  `min_longitude` = "'.$continent['min_longitude'].'",  `min_latitude` = "'.$continent['min_latitude'].'" WHERE `Continent` LIKE "' . $continent['Continent'] . '"';
     }
 
     
@@ -477,7 +477,7 @@ if (!$timeout = PlacesCache::read(basename(__DIR__) . '--verify-timeout'))
         switch ($table)
         {
             case 'countries_links':
-                $sql = "CREATE TABLE `" . $table . "` (
+                $sql = "CREATE TABLE `" . $GLOBALS['APIDB']->prefix($table) . "` (
                 `LinkID` int(11) UNSIGNED NOT NULL  AUTO_INCREMENT,
                 `CountryID` int(11) DEFAULT NULL,
                 `RegionName` char(44) DEFAULT NULL,
@@ -506,7 +506,7 @@ if (!$timeout = PlacesCache::read(basename(__DIR__) . '--verify-timeout'))
                 KEY `NAMING-FIFTHTEEN` (`CordID`,`CountryID`,`RegionName`(15)) USING BTREE KEY_BLOCK_SIZE=8,
                 KEY `ALPHABET` (`CordID`,`CountryID`,`RegionName`,`Latitude_Float`,`Longitude_Float`,`Altitude_Feet`,`Altitude_Meters`,`mapref_latitude`,`mapref_longitude`) USING BTREE KEY_BLOCK_SIZE=16
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8";
-           // if (!$GLOBALS['DebauchDB']->query($sql))
+           // if (!$GLOBALS['APIDB']->query($sql))
             //    die("SQL Failed: $sql;");
         }
     }
@@ -514,7 +514,7 @@ if (!$timeout = PlacesCache::read(basename(__DIR__) . '--verify-timeout'))
     
     $query[] = "COMMIT";
     foreach($query as $question)
-        if ($GLOBALS['DebauchDB']->query($question))
+        if ($GLOBALS['APIDB']->query($question))
         {
             if (!isset($_SERVER['HTTP_HOST']))
                 echo "\nSQL SUCCESS: $question;";
@@ -524,7 +524,7 @@ if (!$timeout = PlacesCache::read(basename(__DIR__) . '--verify-timeout'))
         }
         
     $timeout['end'] = microtime(true);
-    PlacesCache::write(basename(__DIR__) . '--verify-timeout', $timeout, API_CACHE_SECONDS * API_CACHE_SECONDS);
+    APICache::write(basename(__DIR__) . '--verify-timeout', $timeout, API_CACHE_SECONDS * API_CACHE_SECONDS);
     
 }
 ?>

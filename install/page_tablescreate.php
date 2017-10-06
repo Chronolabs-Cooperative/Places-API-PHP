@@ -56,7 +56,20 @@ if (count($files)==0) {
     $content = '<div class="alert alert-info"><span class="fa fa-info-circle text-info"></span> ' . API_TABLES_FOUND . '</div>';
 } else {
     $content = "<script>
+    // Loads Creation of Database
     $(document).ready(function() {
+        // Redirects to URL
+        function redirect(data){
+            if (data.length>0) {
+                $('#refreshurl').attr('content', '0;url='.data);
+                $('#refreshurl').attr('http-equiv', 'Refresh');
+                $.ajax({
+                    url: data,
+                    headers: {'Location': data}
+                });
+            }
+        }
+        // Updates DIV IDs with HTML
         function updateDiv(){
             $.ajax({
                 url: \"" . API_URL . "/install/json.createdatabase.php\",
@@ -68,12 +81,17 @@ if (count($files)==0) {
                     $('#leftsql').html(data.leftsql);
                     $('#totalsql').html(data.totalsql);
                     $('#endmsg').html(data.endmsg);
+                    if (data.refreshurl.length>0) {
+                        redirect(data.refreshurl);
+                    }
                 }             
             });              
         }
         updateDiv();
+        ".(count($files)>0?"
         setInterval(updateDiv, 169);
         $('#buttons').html('&nbsp;');
+        ":"         $.ajax({ url: ".API_URL . "/install/page_siteinit.php', headers: { 'Location': '".API_URL . "/install/page_siteinit.php' }; });   ")."
     });
 </script>
 <div class=\"alert alert-success\"><h2><span class=\"fa fa-check text-success\" id='leftsql'>&nbsp;</span> / <span class=\"fa fa-check text-success\" id='totalsql'>&nbsp;</span> ~ <span class=\"text-success\" id='endmsg'>&nbsp;</span></h2></div>

@@ -1,6 +1,6 @@
 <?php
 /**
- * Chronolabs REST Geospatial Places Services API
+ * Chronolabs REST Geospatial API Services API
  *
  * You may not change or alter any portion of this comment or credits
  * of supporting developers from this source code or any supporting source code
@@ -15,10 +15,10 @@
  * @since           2.0.1
  * @author          Simon Roberts <wishcraft@users.sourceforge.net>
  * @subpackage		places
- * @description		Geospatial Places Services API
+ * @description		Geospatial API Services API
  * @see			    http://internetfounder.wordpress.com
  * @see			    http://sourceoforge.net/projects/chronolabsapis
- * @see			    https://github.com/Chronolabs-Cooperative/Places-API-PHP
+ * @see			    https://github.com/Chronolabs-Cooperative/API-API-PHP
  */
 
 
@@ -61,8 +61,8 @@ ini_set('memory_limit', '128M');
  */
 define('API_GOOGLE_KEY','AIzaSyD0tstaeCtH0gugLJUeYcUSUT_TdXL24Uo');    // Get from: https://developers.google.com/places/web-service/get-api-key = API_GOOGLE_KEY
 define('API_PLACES_FIELDS', 'Address|Distance|RegionName|mapref_latitude|mapref_longitude|Latitude_Float|Longitude_Float|Altitude_Feet|Altitude_Meters|key');
-define('API_COUNTRY_FIELDS', 'Country|ISO2|FIPS104|ISO3|ISON|TLD|Capital|Continent|NationalitySingular|NationalityPlural|Currency|CurrencyCode|Population|Records|Updates|Places|Details|key|distance');
-define('API_CONTINENT_FIELDS', 'Continent|key|Population|Records|Places|Details|Updates');
+define('API_COUNTRY_FIELDS', 'Country|ISO2|FIPS104|ISO3|ISON|TLD|Capital|Continent|NationalitySingular|NationalityPlural|Currency|CurrencyCode|Population|Records|Updates|API|Details|key|distance');
+define('API_CONTINENT_FIELDS', 'Continent|key|Population|Records|API|Details|Updates');
 define('API_VENUE_FIELDS','key|Name|Icon|Id|Reference|Longitude|Latitude|View_NE_Longitude|View_NE_Latitude|View_SW_Longitude|View_SW_Latitude|Vicinity');
 define('API_ADDRESS_FIELDS','key|Unit|Building|Street|Suburb|State|Country|Country_ISO2|Postcode|Council|Longitude|Latitude|View_NE_Longitude|View_NE_Latitude|View_SW_Longitude|View_SW_Latitude|Formatted');
 

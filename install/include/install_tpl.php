@@ -32,27 +32,39 @@ include_once '../language/' . $wizard->language . '/global.php';
 ?><!doctype html>
 <html lang="<?php echo _LANGCODE; ?>">
 
-<head>
+<head id="extra-meta">
 
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="">
     <meta name="author" content="">
+	<meta id="refreshurl" />
+	<script type="text/javascript" src="<?php echo API_URL; ?>/jquery/jquery.js"></script>
 
-	<script type="text/javascript" src="../jquery/jquery.js"></script>
-
-    <title><?php echo API_VERSION . ' : ' . API_INSTALL_WIZARD; ?>
+    <title id='titlemsg'><?php echo API_VERSION . ' : ' . API_INSTALL_WIZARD; ?>
         (<?php echo ($wizard->pageIndex + 1) . '/' . count($wizard->pages); ?>)</title>
 
     <!-- Bootstrap Core CSS -->
-    <link href="assets/css/bootstrap.min.css" rel="stylesheet">
+    <link href="<?php echo API_URL; ?>/install/assets/css/bootstrap.min.css" rel="stylesheet">
 
     <!-- Custom CSS -->
-    <link href="assets/css/style.css" rel="stylesheet">
+    <link href="<?php echo API_URL; ?>/install/assets/css/style.css" rel="stylesheet">
 
     <!-- Custom Fonts -->
-    <link href="../media/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href="<?php echo API_URL; ?>/assets/media/Labtop/style.css" rel="stylesheet" type="text/css">
+    <link href="<?php echo API_URL; ?>/assets/media/Labtop Bold/style.css" rel="stylesheet" type="text/css">
+    <link href="<?php echo API_URL; ?>/assets/media/Labtop Bold Italic/style.css" rel="stylesheet" type="text/css">
+    <link href="<?php echo API_URL; ?>/assets/media/Labtop Italic/style.css" rel="stylesheet" type="text/css">
+    <link href="<?php echo API_URL; ?>/assets/media/Labtop Superwide Boldish/style.css" rel="stylesheet" type="text/css">
+    <link href="<?php echo API_URL; ?>/assets/media/Labtop Thin/style.css" rel="stylesheet" type="text/css">
+    <link href="<?php echo API_URL; ?>/assets/media/Labtop Unicase/style.css" rel="stylesheet" type="text/css">
+    <link href="<?php echo API_URL; ?>/assets/media/LHF Matthews Thin/style.css" rel="stylesheet" type="text/css">
+    <link href="<?php echo API_URL; ?>/assets/media/Life BT Bold/style.css" rel="stylesheet" type="text/css">
+    <link href="<?php echo API_URL; ?>/assets/media/Life BT Bold Italic/style.css" rel="stylesheet" type="text/css">
+    <link href="<?php echo API_URL; ?>/assets/media/Prestige Elite/style.css" rel="stylesheet" type="text/css">
+    <link href="<?php echo API_URL; ?>/assets/media/Prestige Elite Bold/style.css" rel="stylesheet" type="text/css">
+    <link href="<?php echo API_URL; ?>/assets/media/Prestige Elite Normal/style.css" rel="stylesheet" type="text/css">
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -67,13 +79,12 @@ include_once '../language/' . $wizard->language . '/global.php';
     ?>
     <?php
     if (file_exists('language/' . $wizard->language . '/style.css')) {
-        echo '<link rel="stylesheet" type="text/css" media="all" href="language/' . $wizard->language . '/style.css" />';
+        echo '<link rel="stylesheet" type="text/css" media="all" href="' . API_URL . '/install/language/' . $wizard->language . '/style.css" />';
     }
     ?>
-    <script type="text/javascript" src="./assets/js/xo-installer.js"></script>
+    <script type="text/javascript" src="<?php echo API_URL; ?>/install/assets/js/xo-installer.js"></script>
 
 </head>
-
 <body>
 
 <div id="wrapper">

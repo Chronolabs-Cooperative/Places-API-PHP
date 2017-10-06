@@ -43,6 +43,65 @@ function install_acceptUser($hash = '')
     return true;
 }
 
+
+/**
+ * Function to redirect a user to certain pages
+ * @param        $url
+ * @param int    $time
+ * @param string $message
+ * @param bool   $addredirect
+ * @param bool   $allowExternalLink
+ */
+function redirect_header($url, $time = 3, $message = '')
+{
+    if (preg_match("/[\\0-\\31]|about:|script:/i", $url)) {
+        if (!preg_match('/^\b(java)?script:([\s]*)history\.go\(-\d*\)([\s]*[;]*[\s]*)$/si', $url)) {
+            $url = XOOPS_URL;
+        }
+    }
+    if (!$allowExternalLink && $pos = strpos($url, '://')) {
+        $xoopsLocation = substr(XOOPS_URL, strpos(XOOPS_URL, '://') + 3);
+        if (strcasecmp(substr($url, $pos + 3, strlen($xoopsLocation)), $xoopsLocation)) {
+            $url = XOOPS_URL;
+        }
+    }
+    
+    if (!empty($_SERVER['REQUEST_URI']) && $addredirect && false !== strpos($url, 'user.php')) {
+        if (false === strpos($url, '?')) {
+            $url .= '?xoops_redirect=' . urlencode($_SERVER['REQUEST_URI']);
+        } else {
+            $url .= '&amp;xoops_redirect=' . urlencode($_SERVER['REQUEST_URI']);
+        }
+    }
+    if (defined('SID') && SID && (!isset($_COOKIE[session_name()]) || ($xoopsConfig['use_mysession'] && $xoopsConfig['session_name'] != '' && !isset($_COOKIE[$xoopsConfig['session_name']])))) {
+        if (false === strpos($url, '?')) {
+            $url .= '?' . SID;
+        } else {
+            $url .= '&amp;' . SID;
+        }
+    }
+    $url = preg_replace('/&amp;/i', '&', htmlspecialchars($url, ENT_QUOTES));
+    $message = trim($message) != '' ? $message : _TAKINGBACK;
+    
+    return "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">
+<html>
+<head>
+    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=en\"/>
+    <meta http-equiv=\"Refresh\" content=\"$time; url=$url\"/>
+    <meta name=\"generator\" content=\"XOOPS\"/>
+    <link rel=\"shortcut icon\" type=\"image/ico\" href=\"".API_URL . "/favicon.ico\"/>
+    <title>".API_VERSION."</title>
+</head>
+<body>
+<div class=\"center bold\" style=\"background-color: #ebebeb; border: 1px solid #fff;border-right-color: #aaa;border-bottom-color: #aaa;\">
+    <h4>$message</h4>
+    <p>".sprintf(_IFNOTRELOAD, $url)."</p>
+</div>
+</body>
+</html>";
+    exit();
+}
+
 /**
  * @param $installer_modified
  */

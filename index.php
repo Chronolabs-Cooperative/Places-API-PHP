@@ -1,6 +1,6 @@
 <?php
 /**
- * Chronolabs REST Geospatial Places Services API
+ * Chronolabs REST Geospatial API Services API
  *
  * You may not change or alter any portion of this comment or credits
  * of supporting developers from this source code or any supporting source code
@@ -15,12 +15,15 @@
  * @since           2.0.1
  * @author          Simon Roberts <wishcraft@users.sourceforge.net>
  * @subpackage		places
- * @description		Geospatial Places Services API
+ * @description		Geospatial API Services API
  * @see			    http://internetfounder.wordpress.com
  * @see			    http://sourceoforge.net/projects/chronolabsapis
- * @see			    https://github.com/Chronolabs-Cooperative/Places-API-PHP
+ * @see			    https://github.com/Chronolabs-Cooperative/API-API-PHP
  */
 
+    define('_API_FATAL_MESSAGE', 'Fatal: %s!');
+    
+    include_once __DIR__ . DIRECTORY_SEPARATOR . 'mainfile.ph';
     error_reporting(E_ERROR);
     ini_set('display_errors', true);
     ini_set('log_errors', true);
@@ -37,17 +40,6 @@
 	global $domain, $protocol, $business, $entity, $contact, $referee, $peerings, $source;
 	require_once __DIR__ . DIRECTORY_SEPARATOR . 'apiconfig.php';
 	require_once __DIR__ . DIRECTORY_SEPARATOR . 'verify.php';
-	
-	/**
-	 * Global API Configurations and Setting from file Constants!
-	 */
-	$domain = getDomainSupportism('domain', $_SERVER["HTTP_HOST"]);
-	$protocol = getDomainSupportism('protocol', $_SERVER["HTTP_HOST"]);
-	$business = getDomainSupportism('business', $_SERVER["HTTP_HOST"]);
-	$entity = getDomainSupportism('entity', $_SERVER["HTTP_HOST"]);
-	$contact = getDomainSupportism('contact', $_SERVER["HTTP_HOST"]);
-	$referee = getDomainSupportism('referee', $_SERVER["HTTP_HOST"]);
-	$peerings = getPeersSupporting();
 	
 	/**
 	 * URI Path Finding of API URL Source Locality
@@ -176,15 +168,15 @@
 	if ($help==true) {
 		http_response_code(400);
 		include dirname(__FILE__).'/help.php';
-		if ($sessions = PlacesCache::read('sessions-'.md5($_SERVER['HTTP_HOST'])))
+		if ($sessions = APICache::read('sessions-'.md5($_SERVER['HTTP_HOST'])))
 		{
 		    foreach($sessions as $key => $seconds)
 		        if ($seconds<time())
 		        {
-		            PlacesCache::delete($key);
+		            APICache::delete($key);
 		            unset ($sessions[$key]);
 		        }
-		    PlacesCache::write('sessions-'.md5($_SERVER['HTTP_HOST']), $sessions, API_CACHE_SECONDS * API_CACHE_SECONDS * API_CACHE_SECONDS);
+		    APICache::write('sessions-'.md5($_SERVER['HTTP_HOST']), $sessions, API_CACHE_SECONDS * API_CACHE_SECONDS * API_CACHE_SECONDS);
 		}
 		exit;
 	}
@@ -193,7 +185,7 @@
 	    $keyname = md5(whitelistGetIP(true) . '___' . $_SERVER['HTTP_HOST'] . '___' . $_SERVER['REQUEST_URI']);
 	else 
 	    $keyname = md5($_SERVER['REQUEST_URI']);
-	if (!$data = PlacesCache::read($keyname))
+	if (!$data = APICache::read($keyname))
 	{
 	    $retries = 0;
 	    $data = array();
@@ -271,17 +263,17 @@
 	    }
     	if (!empty($data))
     	{
-    	    PlacesCache::write($keyname, $data, API_CACHE_SECONDS);
-    	    if (!$sessions = PlacesCache::read('sessions-'.md5($_SERVER['HTTP_HOST'])))
+    	    APICache::write($keyname, $data, API_CACHE_SECONDS);
+    	    if (!$sessions = APICache::read('sessions-'.md5($_SERVER['HTTP_HOST'])))
     	        $sessions = array();
     	    $sessions[$keyname] = time() + API_CACHE_SECONDS;
-	        PlacesCache::write('sessions-'.md5($_SERVER['HTTP_HOST']), $sessions, API_CACHE_SECONDS * API_CACHE_SECONDS * API_CACHE_SECONDS);
+	        APICache::write('sessions-'.md5($_SERVER['HTTP_HOST']), $sessions, API_CACHE_SECONDS * API_CACHE_SECONDS * API_CACHE_SECONDS);
     	}
 	}
 	
  	switch ($output) {
 		default:
-			echo '<h1>' . $country . ' - ' . $place . ' (Places data)</h1>';
+			echo '<h1>' . $country . ' - ' . $place . ' (API data)</h1>';
 			echo '<pre style="font-family: \'Courier New\', Courier, Terminal; font-size: 0.77em;">';
 			echo print_r($data, true);
 			echo '</pre>';
@@ -305,14 +297,14 @@
 			break;
 	}
 	
-	if ($sessions = PlacesCache::read('sessions-'.md5($_SERVER['HTTP_HOST'])))
+	if ($sessions = APICache::read('sessions-'.md5($_SERVER['HTTP_HOST'])))
 	{
 	    foreach($sessions as $key => $seconds)
 	        if ($seconds<time())
 	        {
-	            PlacesCache::delete($key);
+	            APICache::delete($key);
 	            unset ($sessions[$key]);
 	        }
-	    PlacesCache::write('sessions-'.md5($_SERVER['HTTP_HOST']), $sessions, API_CACHE_SECONDS * API_CACHE_SECONDS * API_CACHE_SECONDS);
+	    APICache::write('sessions-'.md5($_SERVER['HTTP_HOST']), $sessions, API_CACHE_SECONDS * API_CACHE_SECONDS * API_CACHE_SECONDS);
 	}
 ?>		

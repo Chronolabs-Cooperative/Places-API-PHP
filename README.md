@@ -1,4 +1,4 @@
-# Chronolabs Cooperative ~ GeoSpatial Places Lookups API 
+# Chronolabs Cooperative ~ GeoSpatial API Lookups API 
 
 ## Author: Simon Antony Roberts <wishcraft@users.sourceforge.net>
 

@@ -1,6 +1,6 @@
 <?php
 /**
- * Chronolabs REST Geospatial Places Services API
+ * Chronolabs REST Geospatial API Services API
  *
  * You may not change or alter any portion of this comment or credits
  * of supporting developers from this source code or any supporting source code
@@ -15,10 +15,10 @@
  * @since           2.0.1
  * @author          Simon Roberts <wishcraft@users.sourceforge.net>
  * @subpackage		places
- * @description		Geospatial Places Services API
+ * @description		Geospatial API Services API
  * @see			    http://internetfounder.wordpress.com
  * @see			    http://sourceoforge.net/projects/chronolabsapis
- * @see			    https://github.com/Chronolabs-Cooperative/Places-API-PHP
+ * @see			    https://github.com/Chronolabs-Cooperative/API-API-PHP
  */
 
 
@@ -31,19 +31,19 @@ global $domain, $protocol, $business, $entity, $contact, $referee, $peerings, $s
 require_once dirname(__DIR__) . DIRECTORY_SEPARATOR . 'apiconfig.php';
 require_once dirname(__DIR__) . DIRECTORY_SEPARATOR . 'verify.php';
 
-$GLOBALS["DebauchDB"]->query("START TRANSACTION");
+$GLOBALS["APIDB"]->query("START TRANSACTION");
 
-$sql = "SELECT * FROM `countries` LIMIT " . API_CRON_NUMBER_COUNTRIES . " ORDER BY RAND()";
-$result = $GLOBALS["DebauchDB"]->query($sql);
-while($country = $GLOBALS["DebauchDB"]->fetchArray($result))
+$sql = "SELECT * FROM `".$GLOBALS["APIDB"]->prefix('countries') . "` LIMIT " . API_CRON_NUMBER_COUNTRIES . " ORDER BY RAND()";
+$result = $GLOBALS["APIDB"]->query($sql);
+while($country = $GLOBALS["APIDB"]->fetchArray($result))
 {
-    $sql = "SELECT count(*) as `count` FROM `" . $country['Table'] . "`";
-    list($count) = $GLOBALS["DebauchDB"]->fetchRow($GLOBALS["DebauchDB"]->query($sql));
+    $sql = "SELECT count(*) as `count` FROM `" . $GLOBALS["APIDB"]->prefix($country['Table']) . "`";
+    list($count) = $GLOBALS["APIDB"]->fetchRow($GLOBALS["APIDB"]->query($sql));
     if ($count == 0)
     {
         $locality = json_decode(getURIData("https://maps.googleapis.com/maps/api/geocode/json?address=".urlencode($country['Captial'].", ".$country['Country'])."&sensor=false"));
-        $sql = "SELECT MAX(`CordID`) + 1 as CordID  FROM `" . $table . "` GROUP BY `CountryID`";
-        list($cordid) = $GLOBALS['DebauchDB']->fetchRow($GLOBALS['DebauchDB']->queryF($sql));
+        $sql = "SELECT MAX(`CordID`) + 1 as CordID  FROM `" . $GLOBALS["APIDB"]->prefix($table) . "` GROUP BY `CountryID`";
+        list($cordid) = $GLOBALS['APIDB']->fetchRow($GLOBALS['APIDB']->queryF($sql));
         
         $region = array();
         foreach($locality['results'][0]['address_components'] as $values)
@@ -72,22 +72,22 @@ while($country = $GLOBALS["DebauchDB"]->fetchArray($result))
         foreach(array_keys($region) as $field)
             if (!empty($region[$field]))
                 if (!is_array($region[$field]))
-                    $insert[$field] = mysqli_real_escape_string($GLOBALS['DebauchDB']->conn, $region[$field]);
+                    $insert[$field] = mysqli_real_escape_string($GLOBALS['APIDB']->conn, $region[$field]);
                 else
-                    $insert[$field] = mysqli_real_escape_string($GLOBALS['DebauchDB']->conn, json_encode($region[$field]));
+                    $insert[$field] = mysqli_real_escape_string($GLOBALS['APIDB']->conn, json_encode($region[$field]));
         
-        $sql = "INSERT INTO `$table` (`" . implode('`, `', array_keys($insert)) . "`) VALUES('" . implode("', '", $insert) . "')";
-        if (!$GLOBALS['DebauchDB']->queryF($sql))
+        $sql = "INSERT INTO `" . $GLOBALS["APIDB"]->prefix($table) . "` (`" . implode('`, `', array_keys($insert)) . "`) VALUES('" . implode("', '", $insert) . "')";
+        if (!$GLOBALS['APIDB']->queryF($sql))
             die("SQL Failed: $sql;");
     
         $table = $country['Table'];
-        $sql = "SELECT * FROM `" . $country['Table'] . "` WHERE `Next` < UNIX_TIMESTAMP() LIMIT " . API_CRON_NUMBER_REGIONS . " ORDER BY RAND()";
-        $regions = $GLOBALS["DebauchDB"]->query($sql);
-        while($region = $GLOBALS["DebauchDB"]->fetchArray($regions))
+        $sql = "SELECT * FROM `" . $GLOBALS["APIDB"]->prefix($table) . "` WHERE `Next` < UNIX_TIMESTAMP() LIMIT " . API_CRON_NUMBER_REGIONS . " ORDER BY RAND()";
+        $regions = $GLOBALS["APIDB"]->query($sql);
+        while($region = $GLOBALS["APIDB"]->fetchArray($regions))
         {
             $results = array();
             require_once dirname(__DIR__) . DIRECTORY_SEPARATOR . 'class' . DIRECTORY_SEPARATOR . 'google' . DIRECTORY_SEPARATOR . 'places.php';
-            $places = new GooglePlaces(API_GOOGLE_KEY);
+            $places = new GoogleAPI(API_GOOGLE_KEY);
             $places->location = array($region['Latitude_Float'], $region['Longitude_Float']);
             $places->rankby   = 'distance';
             $places->radius   = mt_rand(69, 99) * 1000;
@@ -109,13 +109,13 @@ while($country = $GLOBALS["DebauchDB"]->fetchArray($result))
                     {
                         if (in_array('locality', $values['types']) && !empty($table))
                         {
-                            $sql = "SELECT count(*) FROM `" . $table . "` WHERE `RegionName` LIKE '".getLikedWildcard($values['name'])."'";
-                            list($countb) = $GLOBALS['DebauchDB']->fetchRow($GLOBALS['DebauchDB']->queryF($sql));
-                            $sql = "SELECT *, concat(`RegionName`, ', ', '" . $country['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`))) as `key`, concat(`RegionName`, ', ', '".$country['Country']."') as `Address`  FROM `" . $table . "` WHERE `RegionName` LIKE '".getLikedWildcard($values['name'])."'";
-                            $resultr = $GLOBALS['DebauchDB']->queryF($sql);
+                            $sql = "SELECT count(*) FROM `" . $GLOBALS["APIDB"]->prefix($table) . "` WHERE `RegionName` LIKE '".getLikedWildcard($values['name'])."'";
+                            list($countb) = $GLOBALS['APIDB']->fetchRow($GLOBALS['APIDB']->queryF($sql));
+                            $sql = "SELECT *, concat(`RegionName`, ', ', '" . $country['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`))) as `key`, concat(`RegionName`, ', ', '".$country['Country']."') as `Address`  FROM `" . $GLOBALS["APIDB"]->prefix($table) . "` WHERE `RegionName` LIKE '".getLikedWildcard($values['name'])."'";
+                            $resultr = $GLOBALS['APIDB']->queryF($sql);
                             if ($countb!=0)
                             {
-                                while($region = $GLOBALS['DebauchDB']->fetchArray($resultr))
+                                while($region = $GLOBALS['APIDB']->fetchArray($resultr))
                                 {
                                     if (number_format($region['Latitude_Float'],3)==number_format($values['geometry']['location']['lat'],3) && number_format($region['Longitude_Float'],3)==number_format($values['geometry']['location']['lng'],3))
                                     {
@@ -132,19 +132,19 @@ while($country = $GLOBALS["DebauchDB"]->fetchArray($result))
                                         foreach(array_keys($region) as $field)
                                             if (!empty($region[$field]))
                                                 if (!is_array($region[$field]))
-                                                    $update[$field] = "`$field` = '" . mysqli_real_escape_string($GLOBALS['DebauchDB']->conn, $region[$field]) . "'";
+                                                    $update[$field] = "`$field` = '" . mysqli_real_escape_string($GLOBALS['APIDB']->conn, $region[$field]) . "'";
                                                 else
-                                                    $update[$field] = "`$field` = '" . mysqli_real_escape_string($GLOBALS['DebauchDB']->conn, json_encode($region[$field])) . "'";
-                                        $sql = "UPDATE `$table` SET " . implode(', ', $update) . " WHERE `CordID` = '" . mysqli_real_escape_string($GLOBALS['DebauchDB']->conn, $region['CordID']) . "'";
-                                        if (!$GLOBALS['DebauchDB']->queryF($sql))
+                                                    $update[$field] = "`$field` = '" . mysqli_real_escape_string($GLOBALS['APIDB']->conn, json_encode($region[$field])) . "'";
+                                        $sql = "UPDATE `" . $GLOBALS["APIDB"]->prefix($table) . "` SET " . implode(', ', $update) . " WHERE `CordID` = '" . mysqli_real_escape_string($GLOBALS['APIDB']->conn, $region['CordID']) . "'";
+                                        if (!$GLOBALS['APIDB']->queryF($sql))
                                             die("SQL Failed: $sql;");
                                     }
                                 }
                             } else {
                                 if ($values['geometry']['location']['lat'] > $country['min_latitude'] && $values['geometry']['location']['lat'] < $country['max_latitude'] && $values['geometry']['location']['lng'] > $country['min_longitude'] && $values['geometry']['location']['lng'] < $country['max_longitude'])
                                 {
-                                    $sql = "SELECT MAX(`CordID`) + 1 as CordID  FROM `" . $table . "` GROUP BY `CountryID`";
-                                    list($cordid) = $GLOBALS['DebauchDB']->fetchRow($GLOBALS['DebauchDB']->queryF($sql));
+                                    $sql = "SELECT MAX(`CordID`) + 1 as CordID  FROM `" . $GLOBALS["APIDB"]->prefix($table) . "` GROUP BY `CountryID`";
+                                    list($cordid) = $GLOBALS['APIDB']->fetchRow($GLOBALS['APIDB']->queryF($sql));
                                     
                                     $locality = json_decode(getURIData("https://maps.googleapis.com/maps/api/geocode/json?address=".urlencode($values['name'].", ".$country['Country'])."&sensor=false"));
                                     foreach($locality['results'][0]['address_components'] as $values)
@@ -172,11 +172,11 @@ while($country = $GLOBALS["DebauchDB"]->fetchArray($result))
                                         foreach(array_keys($region) as $field)
                                             if (!empty($region[$field]))
                                                 if (!is_array($region[$field]))
-                                                    $insert[$field] = mysqli_real_escape_string($GLOBALS['DebauchDB']->conn, $region[$field]);
+                                                    $insert[$field] = mysqli_real_escape_string($GLOBALS['APIDB']->conn, $region[$field]);
                                                 else
-                                                    $insert[$field] = mysqli_real_escape_string($GLOBALS['DebauchDB']->conn, json_encode($region[$field]));
-                                        $sql = "INSERT INTO `$table` (`" . implode('`, `', array_keys($insert)) . "`) VALUES('" . implode("', '", $insert) . "')";
-                                        if (!$GLOBALS['DebauchDB']->queryF($sql))
+                                                    $insert[$field] = mysqli_real_escape_string($GLOBALS['APIDB']->conn, json_encode($region[$field]));
+                                        $sql = "INSERT INTO `" . $GLOBALS["APIDB"]->prefix($table) . "` (`" . implode('`, `', array_keys($insert)) . "`) VALUES('" . implode("', '", $insert) . "')";
+                                        if (!$GLOBALS['APIDB']->queryF($sql))
                                             die("SQL Failed: $sql;");
                                     }
                                 }
@@ -186,13 +186,13 @@ while($country = $GLOBALS["DebauchDB"]->fetchArray($result))
                 
         } else {
             $table = $country['Table'];
-            $sql = "SELECT * FROM `" . $country['Table'] . "` WHERE `Next` < UNIX_TIMESTAMP() LIMIT " . API_CRON_NUMBER_REGIONS . " ORDER BY RAND()";
-            $regions = $GLOBALS["DebauchDB"]->query($sql);
-            while($region = $GLOBALS["DebauchDB"]->fetchArray($regions))
+            $sql = "SELECT * FROM `" . $GLOBALS["APIDB"]->prefix($table) . "` WHERE `Next` < UNIX_TIMESTAMP() LIMIT " . API_CRON_NUMBER_REGIONS . " ORDER BY RAND()";
+            $regions = $GLOBALS["APIDB"]->query($sql);
+            while($region = $GLOBALS["APIDB"]->fetchArray($regions))
             {
                 $results = array();
                 require_once dirname(__DIR__) . DIRECTORY_SEPARATOR . 'class' . DIRECTORY_SEPARATOR . 'google' . DIRECTORY_SEPARATOR . 'places.php';
-                $places = new GooglePlaces(API_GOOGLE_KEY);
+                $places = new GoogleAPI(API_GOOGLE_KEY);
                 $places->location = array($region['Latitude_Float'], $region['Longitude_Float']);
                 $places->rankby   = 'distance';
                 $places->radius   = mt_rand(69, 99) * 1000;
@@ -214,13 +214,13 @@ while($country = $GLOBALS["DebauchDB"]->fetchArray($result))
                         {
                             if (in_array('locality', $values['types']) && !empty($table))
                             {
-                                $sql = "SELECT count(*) FROM `" . $table . "` WHERE `RegionName` LIKE '".getLikedWildcard($values['name'])."'";
-                                list($countb) = $GLOBALS['DebauchDB']->fetchRow($GLOBALS['DebauchDB']->queryF($sql));
-                                $sql = "SELECT *, concat(`RegionName`, ', ', '" . $country['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`))) as `key`, concat(`RegionName`, ', ', '".$country['Country']."') as `Address`  FROM `" . $table . "` WHERE `RegionName` LIKE '".getLikedWildcard($values['name'])."'";
-                                $resultr = $GLOBALS['DebauchDB']->queryF($sql);
+                                $sql = "SELECT count(*) FROM `" . $GLOBALS["APIDB"]->prefix($table) . "` WHERE `RegionName` LIKE '".getLikedWildcard($values['name'])."'";
+                                list($countb) = $GLOBALS['APIDB']->fetchRow($GLOBALS['APIDB']->queryF($sql));
+                                $sql = "SELECT *, concat(`RegionName`, ', ', '" . $country['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`))) as `key`, concat(`RegionName`, ', ', '".$country['Country']."') as `Address`  FROM `" . $GLOBALS["APIDB"]->prefix($table) . "` WHERE `RegionName` LIKE '".getLikedWildcard($values['name'])."'";
+                                $resultr = $GLOBALS['APIDB']->queryF($sql);
                                 if ($countb!=0)
                                 {
-                                    while($region = $GLOBALS['DebauchDB']->fetchArray($resultr))
+                                    while($region = $GLOBALS['APIDB']->fetchArray($resultr))
                                     {
                                         if (number_format($region['Latitude_Float'],3)==number_format($values['geometry']['location']['lat'],3) && number_format($region['Longitude_Float'],3)==number_format($values['geometry']['location']['lng'],3))
                                         {
@@ -237,18 +237,18 @@ while($country = $GLOBALS["DebauchDB"]->fetchArray($result))
                                             foreach(array_keys($region) as $field)
                                                 if (!empty($region[$field]))
                                                     if (!is_array($region[$field]))
-                                                        $update[$field] = "`$field` = '" . mysqli_real_escape_string($GLOBALS['DebauchDB']->conn, $region[$field]) . "'";
+                                                        $update[$field] = "`$field` = '" . mysqli_real_escape_string($GLOBALS['APIDB']->conn, $region[$field]) . "'";
                                                         else
-                                                            $update[$field] = "`$field` = '" . mysqli_real_escape_string($GLOBALS['DebauchDB']->conn, json_encode($region[$field])) . "'";
-                                            $sql = "UPDATE `$table` SET " . implode(', ', $update) . " WHERE `CordID` = '" . mysqli_real_escape_string($GLOBALS['DebauchDB']->conn, $region['CordID']) . "'";
-                                            if (!$GLOBALS['DebauchDB']->queryF($sql))
+                                                            $update[$field] = "`$field` = '" . mysqli_real_escape_string($GLOBALS['APIDB']->conn, json_encode($region[$field])) . "'";
+                                            $sql = "UPDATE `" . $GLOBALS["APIDB"]->prefix($table) . "` SET " . implode(', ', $update) . " WHERE `CordID` = '" . mysqli_real_escape_string($GLOBALS['APIDB']->conn, $region['CordID']) . "'";
+                                            if (!$GLOBALS['APIDB']->queryF($sql))
                                                 die("SQL Failed: $sql;");
                                         }
                                     }
                                 } else {
                                 
-                                    $sql = "SELECT MAX(`CordID`) + 1 as CordID  FROM `" . $table . "` GROUP BY `CountryID`";
-                                    list($cordid) = $GLOBALS['DebauchDB']->fetchRow($GLOBALS['DebauchDB']->queryF($sql));
+                                    $sql = "SELECT MAX(`CordID`) + 1 as CordID  FROM `" . $GLOBALS["APIDB"]->prefix($table) . "` GROUP BY `CountryID`";
+                                    list($cordid) = $GLOBALS['APIDB']->fetchRow($GLOBALS['APIDB']->queryF($sql));
                                     
                                     $locality = json_decode(getURIData("https://maps.googleapis.com/maps/api/geocode/json?address=".urlencode($values['name'].", ".$country['Country'])."&sensor=false"));
                                     foreach($locality['results'][0]['address_components'] as $values)
@@ -276,11 +276,11 @@ while($country = $GLOBALS["DebauchDB"]->fetchArray($result))
                                         foreach(array_keys($region) as $field)
                                             if (!empty($region[$field]))
                                                 if (!is_array($region[$field]))
-                                                    $insert[$field] = mysqli_real_escape_string($GLOBALS['DebauchDB']->conn, $region[$field]);
+                                                    $insert[$field] = mysqli_real_escape_string($GLOBALS['APIDB']->conn, $region[$field]);
                                                 else
-                                                    $insert[$field] = mysqli_real_escape_string($GLOBALS['DebauchDB']->conn, json_encode($region[$field]));
-                                        $sql = "INSERT INTO `$table` (`" . implode('`, `', array_keys($insert)) . "`) VALUES('" . implode("', '", $insert) . "')";
-                                        if (!$GLOBALS['DebauchDB']->queryF($sql))
+                                                    $insert[$field] = mysqli_real_escape_string($GLOBALS['APIDB']->conn, json_encode($region[$field]));
+                                        $sql = "INSERT INTO `" . $GLOBALS["APIDB"]->prefix($table) . "` (`" . implode('`, `', array_keys($insert)) . "`) VALUES('" . implode("', '", $insert) . "')";
+                                        if (!$GLOBALS['APIDB']->queryF($sql))
                                             die("SQL Failed: $sql;");
                                     }
                                 }
@@ -293,4 +293,4 @@ while($country = $GLOBALS["DebauchDB"]->fetchArray($result))
     }
 }
 
-$GLOBALS["DebauchDB"]->query("COMMIT");
+$GLOBALS["APIDB"]->query("COMMIT");

@@ -25,7 +25,7 @@
  * @author           DuGris (aka L. JEN) <dugris@frapi.org>
  */
 
-require_once __DIR__ . '/include/common.php';
+require_once __DIR__ . '/include/common.inc.php';
 defined('API_INSTALL') || die('API Installation wizard die');
 
 $pageHasForm = false;

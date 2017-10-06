@@ -1,6 +1,6 @@
 <?php
 /**
- * Chronolabs REST Geospatial Places Services API
+ * Chronolabs REST Geospatial API Services API
  *
  * You may not change or alter any portion of this comment or credits
  * of supporting developers from this source code or any supporting source code
@@ -15,10 +15,10 @@
  * @since           2.0.1
  * @author          Simon Roberts <wishcraft@users.sourceforge.net>
  * @subpackage		places
- * @description		Geospatial Places Services API
+ * @description		Geospatial API Services API
  * @see			    http://internetfounder.wordpress.com
  * @see			    http://sourceoforge.net/projects/chronolabsapis
- * @see			    https://github.com/Chronolabs-Cooperative/Places-API-PHP
+ * @see			    https://github.com/Chronolabs-Cooperative/API-API-PHP
  */
 
 
@@ -101,16 +101,16 @@ if (!function_exists("whitelistGetIP")) {
 	}
 }
 
-if (!function_exists("randomPlacesKey")) {
+if (!function_exists("randomAPIKey")) {
 
-	/* function randomPlacesKey()
+	/* function randomAPIKey()
 	 *
 	 * 	Get a random forensic identify key for a place from the database
 	 * @author 		Simon Roberts (Chronolabs) simon@snails.email
 	 *
 	 * @return 		string(32)
 	 */
-	function randomPlacesKey()
+	function randomAPIKey()
 	{
 	    $sql = "SELECT * FROM `".$GLOBALS['APIDB']->prefix("countries") . "` WHERE `Records` > 1000 ORDER BY RAND() LIMIT 1 ";
 		if ($result = $GLOBALS['APIDB']->queryF($sql)) {
@@ -127,7 +127,7 @@ if (!function_exists("randomPlacesKey")) {
 
 if (!function_exists("randomGeoPlace")) {
     
-    /* function randomPlacesKey()
+    /* function randomAPIKey()
      *
      * 	Get a random forensic identify key for a place from the database
      * @author 		Simon Roberts (Chronolabs) simon@snails.email
@@ -1044,7 +1044,7 @@ google.maps.event.addDomListener(window, 'load', initialize);
 
         $results = array();
         require_once __DIR__ . DIRECTORY_SEPARATOR . 'class' . DIRECTORY_SEPARATOR . 'google' . DIRECTORY_SEPARATOR . 'places.php';
-        $places = new GooglePlaces(API_GOOGLE_KEY);
+        $places = new GoogleAPI(API_GOOGLE_KEY);
         if ($radius>0 && $type == 'all')
         {
             $places->location = array($geo['latitude'], $geo['longitude']);
@@ -1338,7 +1338,7 @@ if (!function_exists("findKeyVenues")) {
             
                 $results = array();
                 require_once __DIR__ . DIRECTORY_SEPARATOR . 'class' . DIRECTORY_SEPARATOR . 'google' . DIRECTORY_SEPARATOR . 'places.php';
-                $places = new GooglePlaces(API_GOOGLE_KEY);
+                $places = new GoogleAPI(API_GOOGLE_KEY);
                 if ($radius>0 && $type == 'all')
                 {
                     $places->location = array($place['Latitude_Float'], $place['Longitude_Float']);
