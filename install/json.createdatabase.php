@@ -49,7 +49,7 @@ else
     $dbm = new Db_manager();
     $result  = $dbm->queryFromFile(__DIR__ . DIRECTORY_SEPARATOR . 'sql' . DIRECTORY_SEPARATOR . $files[0] . '.ran');
     $html = file_get_contents(__DIR__ . DIRECTORY_SEPARATOR . 'sql' . DIRECTORY_SEPARATOR . 'dbreport.html');
-    $html .= "<h3>".$file . "</h3>" . $dbm->report() . "<br />";
+    $html .= "<ul style=\"list-style-bullet: none; float: left; width: 32%; padding: 4px; margin: 3px;\"><il><h3 style=\"font-size: 0.88em;\">".$file . "</h3></li>" . $dbm->report() . "</ul>\n";
     file_put_contents(__DIR__ . DIRECTORY_SEPARATOR . 'sql' . DIRECTORY_SEPARATOR . 'dbreport.html', $html);
     echo json_encode(array('dbreport' => $html, 'buttons' => '&nbsp;'));
 }
