@@ -25,7 +25,9 @@
  * @author           DuGris (aka L. JEN) <dugris@frapi.org>
  **/
 
-require_once './include/common.inc.php';
+
+define('_API_FATAL_MESSAGE', 'Fatal:~ %s!');
+require_once __DIR__ . '/include/common.inc.php';
 defined('API_INSTALL') || die('API Installation wizard die');
 
 $pageHasForm = false;
@@ -34,7 +36,8 @@ $pageHasHelp = false;
 $vars =& $_SESSION['settings'];
 
 include_once '../mainfile.php';
-include_once './class/dbmanager.php';
+
+require_once __DIR__ . '/class/dbmanager.php';
 $dbm = new Db_manager();
 
 if (!$dbm->isConnectable()) {
@@ -42,7 +45,14 @@ if (!$dbm->isConnectable()) {
     exit();
 }
 
-if ($dbm->tableExists('users')) {
+require_once API_ROOT_PATH . '/class/apilists.php';
+$files = APILists::getFileListAsArray(__DIR__ . DIRECTORY_SEPARATOR . 'sql');
+foreach($files as $key => $file)
+    if (substr($file, strlen($file)-3,3) != 'sql')
+        unset($files[$key]);
+sort($files, SORT_DESC);
+
+if (count($files)==0) {
     $content = '<div class="alert alert-info"><span class="fa fa-info-circle text-info"></span> ' . API_TABLES_FOUND . '</div>';
 } else {
     $content = "<script>
@@ -59,10 +69,11 @@ if ($dbm->tableExists('users')) {
             });              
         }
         updateDiv();
-        setInterval(updateDiv, 1459);
+        setInterval(updateDiv, 442);
     });
 </script>
 <div class=\"alert alert-success\"><span class=\"fa fa-check text-success\"></span> " . API_TABLES_CREATED
         . "</div><div class=\"well\" id=\"dbreport\">&nbsp;</div>";
 }
+
 include './include/install_tpl.php';

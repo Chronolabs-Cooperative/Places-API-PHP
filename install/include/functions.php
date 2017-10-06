@@ -22,7 +22,6 @@ function install_acceptUser($hash = '')
     $assertClaims = array(
         'sub' => 'apiinstall',
     );
-    $claims = \Xmf\Jwt\TokenReader::fromCookie('install', 'xo_install_user', $assertClaims);
     if (false === $claims || empty($claims->uname)) {
         return false;
     }

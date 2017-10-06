@@ -23,12 +23,15 @@
 //  along with this program; if not, write to the Free Software              //
 //  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA //
 //  ------------------------------------------------------------------------ //
-include_once API_ROOT_PATH . '/class/logger/apilogger.php';
-include_once API_ROOT_PATH . '/class/apiload.php';
-include_once API_ROOT_PATH . '/class/preload.php';
-include_once API_ROOT_PATH . '/class/database/databasefactory.php';
-include_once API_ROOT_PATH . '/class/database/' . API_DB_TYPE . 'database.php';
-include_once API_ROOT_PATH . '/class/database/sqlutility.php';
+include_once dirname(dirname(__DIR__)) . '/mainfile.php';
+require_once dirname(dirname(__DIR__)) . '/class/logger/apilogger.php';
+require_once dirname(dirname(__DIR__)) . '/class/apiload.php';
+require_once dirname(dirname(__DIR__)) . '/class/preload.php';
+require_once dirname(dirname(__DIR__)) . '/class/database/databasefactory.php';
+require_once dirname(dirname(__DIR__)) . '/class/database/mysqldatabase.php';
+require_once dirname(dirname(__DIR__)) . '/class/database/mysqlidatabase.php';
+require_once dirname(dirname(__DIR__)) . '/class/database/sqlutility.php';
+require_once dirname(dirname(__DIR__)) . '/include/dbconfig.php';
 
 /**
  * database manager for API installer

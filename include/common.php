@@ -32,34 +32,34 @@ include_once API_ROOT_PATH . DS . 'include' . DS . 'license.php';
  * Include APILoad
  */
 require_once API_ROOT_PATH . DS . 'class' . DS . 'apiload.php';
+require_once API_ROOT_PATH . DS . 'class' . DS . 'preload.php';
 
 /**
- * Create Instance of APISecurity Object and check Supergolbals
+ * Create Instance of apiSecurity Object and check Supergolbals
  */
 APILoad::load('apisecurity');
-$APISecurity = new APISecurity();
-$APISecurity->checkSuperglobals();
+$apiSecurity = new APISecurity();
+$apiSecurity->checkSuperglobals();
 
 /**
  * Create Instantance APILogger Object
  */
 APILoad::load('apilogger');
-$APILogger       = APILogger::getInstance();
-$APIErrorHandler = APILogger::getInstance();
-$APILogger->startTime();
-$APILogger->startTime('API Boot');
+$apiLogger       = APILogger::getInstance();
+$apiErrorHandler = APILogger::getInstance();
+$apiLogger->startTime();
+$apiLogger->startTime('XOOPS Boot');
 
 /**
  * Include Required Files
  */
-include_once API_ROOT_PATH . 'kernel' . DS . 'object.php';
-include_once API_ROOT_PATH . 'class' . DS . 'criteria.php';
-include_once API_ROOT_PATH . 'class' . DS . 'module.textsanitizer.php';
-include_once API_ROOT_PATH . 'include' . DS . 'functions.php';
-
+include_once API_ROOT_PATH . DS . 'class' . DS . 'criteria.php';
+include_once API_ROOT_PATH . DS . 'class' . DS . 'module.textsanitizer.php';
+include_once API_ROOT_PATH . DS . 'include' . DS . 'functions.php';
 /**
  * Get database for making it global
  * Requires APILogger, API_DB_PROXY;
  */
-include_once API_ROOT_PATH . 'class' . DS . 'database' . DS . 'databasefactory.php';
+require_once API_ROOT_PATH . DS . 'include' . DS . 'dbconfig.php';
+require_once API_ROOT_PATH . DS . 'class' . DS . 'database' . DS . 'databasefactory.php';
 $GLOBALS['APIDB'] = APIDatabaseFactory::getDatabaseConnection();

@@ -26,10 +26,10 @@
  * @author           DuGris (aka L. JEN) <dugris@frapi.org>
  **/
 
-require_once './include/common.inc.php';
+require_once __DIR__ . '/include/common.inc.php';
 require_once API_ROOT_PATH . '/class/apilists.php';
-include_once '../mainfile.php';
-include_once './class/dbmanager.php';
+include_once dirname(__DIR__) . '/mainfile.php';
+include_once __DIR__ . '/class/dbmanager.php';
 
 defined('API_INSTALL') || die('API Installation wizard die');
 
@@ -40,7 +40,7 @@ $files = APILists::getFileListAsArray(__DIR__ . DIRECTORY_SEPARATOR . 'sql');
 foreach($files as $key => $file)
     if (substr($file, strlen($file)-3,3) != 'sql')
         unset($files[$key]);
-sort($files, SORT_ASC);
+sort($files, SORT_DESC);
 if (count($files) == 0)
     echo json_encode(array('dbreport' => file_get_contents(__DIR__ . DIRECTORY_SEPARATOR . 'sql' . DIRECTORY_SEPARATOR . 'dbreport.html'), 'buttons' => '<button class="btn btn-lg btn-success" type="button" accesskey="n" onclick="location.href=\'' . API_URL . '/install/page_siteinit.php\'"> Continue  <span class="fa fa-caret-right"></span></button>'));
 else 
@@ -49,7 +49,7 @@ else
     $dbm = new Db_manager();
     $result  = $dbm->queryFromFile(__DIR__ . DIRECTORY_SEPARATOR . 'sql' . DIRECTORY_SEPARATOR . $files[0] . '.ran');
     $html = file_get_contents(__DIR__ . DIRECTORY_SEPARATOR . 'sql' . DIRECTORY_SEPARATOR . 'dbreport.html');
-    $html .= "<ul style=\"list-style-bullet: none; float: left; width: 32%; padding: 4px; margin: 3px;\"><il><h3 style=\"font-size: 1.44812em;\">".$file . "</h3></li>" . $dbm->report() . "</ul>\n";
+    $html .= "<ul style=\"list-style-bullet: none; float: left; width: 32%; padding: 4px; margin: 3px;\"><il><h3 style=\"font-size: 1.44812em;\">".$files[0] . "</h3></li>" . $dbm->report() . "</ul>\n";
     file_put_contents(__DIR__ . DIRECTORY_SEPARATOR . 'sql' . DIRECTORY_SEPARATOR . 'dbreport.html', $html);
     echo json_encode(array('dbreport' => $html, 'buttons' => '&nbsp;'));
 }
