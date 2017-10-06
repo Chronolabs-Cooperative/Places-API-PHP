@@ -120,7 +120,7 @@ if (!function_exists("randomAPIKey")) {
 				if (list($key) = $GLOBALS['APIDB']->fetchRow($result))
 				    return $key;
 			}
-			$ret = array();
+			return array();
 		}
 	}
 }
@@ -167,7 +167,7 @@ if (!function_exists("randomGeoLocation")) {
 				if ($place = $GLOBALS['APIDB']->fetchArray($result))
 					return array('latitude'=>$place['Latitude_Float'], 'longitude' => $place['Longitude_Float']);
 			}
-			$ret = array('latitude'=> 0, 'longitude' => 0);
+			return array('latitude'=> 0, 'longitude' => 0);
 		}
 	}
 }

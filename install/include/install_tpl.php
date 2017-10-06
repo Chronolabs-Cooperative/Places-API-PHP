@@ -40,7 +40,7 @@ include_once '../language/' . $wizard->language . '/global.php';
     <meta name="description" content="">
     <meta name="author" content="">
 	<meta id="refreshurl" />
-	<script type="text/javascript" src="<?php echo API_URL; ?>/jquery/jquery.js"></script>
+	<script type="text/javascript" src="<?php echo API_URL; ?>/assets/jquery/jquery.js"></script>
 
     <title id='titlemsg'><?php echo API_VERSION . ' : ' . API_INSTALL_WIZARD; ?>
         (<?php echo ($wizard->pageIndex + 1) . '/' . count($wizard->pages); ?>)</title>

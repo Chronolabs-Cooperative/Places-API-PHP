@@ -110,7 +110,7 @@ class APICacheFile extends APICacheEngine
             'extension' => '.php',
             'prefix'    => 'api_',
             'lock'      => false,
-            'serialize' => false,
+            'serialize' => true,
             'duration'  => 31556926);
         $this->settings = array_merge($defaults, $this->settings);
         if (!isset($this->file)) {
@@ -221,7 +221,11 @@ class APICacheFile extends APICacheEngine
                 $data = APIUtility::recursive('stripslashes', $data);
             }
         } elseif ($data && empty($this->settings['serialize'])) {
-            $data = eval($data);
+            try {
+                $data = eval($data);
+            } catch (Exception $e) {
+                $data = false;
+            }
         }
         $this->file->close();
 

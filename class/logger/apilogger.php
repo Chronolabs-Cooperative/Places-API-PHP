@@ -49,7 +49,7 @@ class APILogger
      */
 
     public $usePopup  = false;
-    public $activated = true;
+    public $activated = false;
 
     /**
      * *@access protected
@@ -224,7 +224,7 @@ class APILogger
                 $trace  = false;
                 $errstr = substr($errstr, 8);
             }
-            echo sprintf(_API_FATAL_MESSAGE, $errstr);
+            echo sprintf('Fatal: %s ~ (%s:%s)', $errstr, basename($errfile), $errline);
             if ($trace && function_exists('debug_backtrace')) {
                 echo "<div style='color:#f0f0f0;background-color:#f0f0f0;'>" . _API_FATAL_BACKTRACE . ':<br>';
                 $trace = debug_backtrace();

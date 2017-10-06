@@ -33,11 +33,11 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<meta property="og:title" content="Geographical API API Services"/>
-<meta property="og:type" content="api"/>
+<meta property="og:title" content="<?php echo API_VERSION; ?>"/>
+<meta property="og:type" content="api<?php echo API_TYPE; ?>"/>
 <meta property="og:image" content="<?php echo API_URL; ?>/assets/images/logo_500x500.png"/>
 <meta property="og:url" content="<?php echo (isset($_SERVER["HTTPS"])?"https://":"http://").$_SERVER["HTTP_HOST"].$_SERVER["REQUEST_URI"]; ?>" />
-<meta property="og:site_name" content="<?php echo API_LICENSE_COMPANY; ?>"/>
+<meta property="og:site_name" content="<?php echo API_VERSION; ?> - <?php echo API_LICENSE_COMPANY; ?>"/>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta http-equiv="rating" content="general" />
 <meta http-equiv="<?php echo $place['iso2']; ?>thor" content="wishcraft@users.sourceforge.net" />
@@ -94,7 +94,7 @@
 <body>
 <div class="main">
 	<img style="float: right; margin: 11px; width: auto; height: auto; clear: none;" src="<?php echo API_URL; ?>/assets/images/logo_350x350.png" />
-    <h1>Geographical API API Services -- <?php echo API_LICENSE_COMPANY; ?></h1>
+    <h1><?php echo API_VERSION; ?> -- <?php echo API_LICENSE_COMPANY; ?></h1>
     <p>This is an API Service for conducting a locational search for a place. It provides the longitude, latitude and altitude of place being searched for and provides responses when access the API inclusing JSON, XML, Serialisation, HTML and RAW outputs.</p>
     <p>You can access the API currently without a key or system it is an open api and was written in response to the many API Services that charge ridiculous amounts for querying such a simple base. The following instructions are how to access the api I hope you enjoy this api as I have writting it!.</p>
     <h2>Examples of Calls (Using JSON)</h2>
