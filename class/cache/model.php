@@ -1,6 +1,16 @@
 <?php
+/*
+ You may not change or alter any portion of this comment or credits
+ of supporting developers from this source code or any supporting source code
+ which is considered copyrighted (c) material of the original comment or credit authors.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+*/
+
 /**
- * Chronolabs REST Geospatial Places Services API
+ * Cache engine For API
  *
  * You may not change or alter any portion of this comment or credits
  * of supporting developers from this source code or any supporting source code
@@ -9,20 +19,14 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * @copyright       Chronolabs Cooperative http://snails.email
- * @license         GNU GPL 3 (http://www.gnu.org/licenses/old-licenses/gpl-2.0.html)
- * @package         api
- * @since           2.0.1
- * @author          Simon Roberts <wishcraft@users.sourceforge.net>
- * @subpackage		places
- * @description		Geospatial Places Services API
- * @see			    http://internetfounder.wordpress.com
- * @see			    http://sourceoforge.net/projects/chronolabsapis
- * @see			    https://github.com/Chronolabs-Cooperative/Places-API-PHP
+ * @copyright       (c) 2000-2016 API Project (www.api.org)
+ * @license             GNU GPL 2 (http://www.gnu.org/licenses/gpl-2.0.html)
+ * @package             class
+ * @subpackage          cache
+ * @since               2.3.0
+ * @author              Taiwen Jiang <phppp@users.sourceforge.net>
  */
-
-
-defined('API_ROOT_PATH') || die('Restricted access');
+defined('API_ROOT_PATH') || exit('Restricted access');
 
 /**
  * Database Storage engine for cache
@@ -39,23 +43,21 @@ defined('API_ROOT_PATH') || die('Restricted access');
  * Redistributions of files must retain the above copyright notice.
  *
  * @filesource
- * @copyright Copyright 2005-2008, Cake Software Foundation, Inc.
- * @link http://www.cakefoundation.org/projects/info/cakephp CakePHP(tm) Project
- * @package cake
+ * @copyright  Copyright 2005-2008, Cake Software Foundation, Inc.
+ * @link       http://www.cakefoundation.org/projects/info/cakephp CakePHP(tm) Project
+ * @package    cake
  * @subpackage cake.cake.libs.cache
- * @since CakePHP(tm) v 1.2.0.4933
- * @version $Revision: 12537 $
- * @modifiedby $LastChangedBy: beckmi $
- * @lastmodified $Date: 2014-05-19 10:19:33 -0400 (Mon, 19 May 2014) $
- * @license http://www.opensource.org/licenses/mit-license.php The MIT License
+ * @since      CakePHP(tm) v 1.2.0.4933
+ * @license    http://www.opensource.org/licenses/mit-license.php The MIT License
  */
+
 /**
  * Database Storage engine for cache
  *
- * @package cake
+ * @package    cake
  * @subpackage cake.cake.libs.cache
  */
-class PlacesCacheModel extends PlacesCacheEngine
+class APICacheModel extends APICacheEngine
 {
     /**
      * settings
@@ -65,7 +67,7 @@ class PlacesCacheModel extends PlacesCacheEngine
      * @var array
      * @access public
      */
-    var $settings = array();
+    public $settings = array();
 
     /**
      * Model instance.
@@ -73,7 +75,7 @@ class PlacesCacheModel extends PlacesCacheEngine
      * @var object
      * @access private
      */
-    var $model = null;
+    public $model;
 
     /**
      * Model instance.
@@ -81,7 +83,7 @@ class PlacesCacheModel extends PlacesCacheEngine
      * @var object
      * @access private
      */
-    var $fields = array();
+    public $fields = array();
 
     /**
      * Initialize the Cache Engine
@@ -89,19 +91,19 @@ class PlacesCacheModel extends PlacesCacheEngine
      * Called automatically by the cache frontend
      * To reinitialize the settings call Cache::engine('EngineName', [optional] settings = array());
      *
-     * @param array $settings array of setting for the engine
+     * @param  array $settings array of setting for the engine
      * @return boolean True if the engine has been successfully initialized, false if not
      * @access   public
      */
-    function init($settings)
+    public function init($settings = array())
     {
-        $PlacesDB =& PlacesDatabaseFactory::getDatabaseConnection();
+        $apiDB = APIDatabaseFactory::getDatabaseConnection();
 
         parent::init($settings);
-        $defaults = array('fields' => array('data' , 'expires'));
+        $defaults       = array('fields' => array('data', 'expires'));
         $this->settings = array_merge($defaults, $this->settings);
-        $this->fields = $this->settings['fields'];
-        $this->model = new PlacesCacheModelHandler($PlacesDB);
+        $this->fields   = $this->settings['fields'];
+        $this->model    = new APICacheModelHandler($apiDB);
 
         return true;
     }
@@ -111,31 +113,31 @@ class PlacesCacheModel extends PlacesCacheEngine
      *
      * @access public
      */
-    function gc()
+    public function gc()
     {
-        return $this->model->deleteAll(new Criteria($this->fields[1], time, '<= '));
+        return $this->model->deleteAll(new Criteria($this->fields[1], time(), '<= '));
     }
 
     /**
      * Write data for key into cache
      *
      * @param  string  $key      Identifier for the data
-     * @param  mixed   $data     Data to be cached
+     * @param  mixed   $value     Data to be cached
      * @param  integer $duration How long to cache the data, in seconds
      * @return boolean True if the data was successfully cached, false on failure
      * @access public
      */
-    function write($key, $data, $duration)
+    public function write($key, $value, $duration = null)
     {
         // if (isset($this->settings['serialize'])) {
-        $data = serialize($data);
+        $value = serialize($value);
         // }
-        if (! $data) {
+        if (!$value) {
             return false;
         }
         $cache_obj = $this->model->create();
-        $cache_obj->setVar($this->model::KEYNAME, $key);
-        $cache_obj->setVar($this->fields[0], $data);
+        $cache_obj->setVar($this->model->keyname, $key);
+        $cache_obj->setVar($this->fields[0], $value);
         $cache_obj->setVar($this->fields[1], time() + $duration);
 
         return $this->model->insert($cache_obj);
@@ -148,10 +150,10 @@ class PlacesCacheModel extends PlacesCacheEngine
      * @return mixed  The cached data, or false if the data doesn't exist, has expired, or if there was an error fetching it
      * @access public
      */
-    function read($key)
+    public function read($key)
     {
-        $criteria = new CriteriaCompo(new Criteria($this->model::KEYNAME, $key));
-        $criteria->add(new Criteria($this->fields[1], time(), ">"));
+        $criteria = new CriteriaCompo(new Criteria($this->model->keyname, $key));
+        $criteria->add(new Criteria($this->fields[1], time(), '>'));
         $criteria->setLimit(1);
         $data = $this->model->getAll($criteria);
         if (!$data) {
@@ -164,11 +166,11 @@ class PlacesCacheModel extends PlacesCacheEngine
     /**
      * Delete a key from the cache
      *
-     * @param  string  $key Identifier for the data
+     * @param  string $key Identifier for the data
      * @return boolean True if the value was successfully deleted, false if it didn't exist or couldn't be removed
      * @access public
      */
-    function delete($key)
+    public function delete($key)
     {
         return $this->model->delete($key);
     }
@@ -179,32 +181,26 @@ class PlacesCacheModel extends PlacesCacheEngine
      * @return boolean True if the cache was successfully cleared, false otherwise
      * @access public
      */
-    function clear()
+    public function clear($check = null)
     {
         return $this->model->deleteAll();
     }
 }
 
 /**
- * PlacesCacheModelObject
+ * APICacheModelObject
  *
  * @package
- * @author John
- * @copyright Copyright (c) 2009
- * @version $Id: model.php 12537 2014-05-19 14:19:33Z beckmi $
- * @access public
+ * @author              John
+ * @copyright       (c) 2000-2016 API Project (www.api.org)
+ * @access              public
  */
-class PlacesCacheModelObject extends PlacesObject
+class APICacheModelObject extends APIObject
 {
-    function PlacesCacheModelObject()
-    {
-        $this->__construct();
-    }
-
     /**
-     *
+     * Constructor
      */
-    function __construct()
+    public function __construct()
     {
         parent::__construct();
         $this->initVar('key', XOBJ_DTYPE_TXTBOX);
@@ -214,17 +210,16 @@ class PlacesCacheModelObject extends PlacesObject
 }
 
 /**
- * PlacesCacheModelHandler
+ * APICacheModelHandler
  *
  * @package
- * @author John
- * @copyright Copyright (c) 2009
- * @version $Id: model.php 12537 2014-05-19 14:19:33Z beckmi $
- * @access public
+ * @author              John
+ * @copyright       (c) 2000-2016 API Project (www.api.org)
+ * @access              public
  */
-class PlacesCacheModelHandler extends PlacesPersistableObjectHandler
+class APICacheModelHandler extends APIPersistableObjectHandler
 {
-    const TABLE = 'cache_model';
-    const CLASSNAME = 'PlacesCacheModelObject';
-    const KEYNAME = 'key';
+    const TABLE     = 'cache_model';
+    const CLASSNAME = 'APICacheModelObject';
+    const KEYNAME   = 'key';
 }

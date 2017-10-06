@@ -22,6 +22,14 @@
  */
 
 
+if (!is_file(__DIR__ . DIRECTORY_SEPARATOR . 'mainfile.php') || !is_file(__DIR__ . DIRECTORY_SEPARATOR . 'license.php'))
+{
+    header('Location: ' . "./install");
+    exit(0);
+}
+
+require_once __DIR__ . DIRECTORY_SEPARATOR . 'mainfile.php';
+
 /**
  * Paths
  */
@@ -62,9 +70,8 @@ define('API_ADDRESS_FIELDS','key|Unit|Building|Street|Suburb|State|Country|Count
  * Include libraries
  */
 require_once __DIR__ . DIRECTORY_SEPARATOR . 'functions.php';
-require_once __DIR__ . DIRECTORY_SEPARATOR . 'class' . DIRECTORY_SEPARATOR . 'debauchosity.php';
-require_once __DIR__ . DIRECTORY_SEPARATOR . 'class' . DIRECTORY_SEPARATOR . 'file' . DIRECTORY_SEPARATOR . 'placesfile.php';
-require_once __DIR__ . DIRECTORY_SEPARATOR . 'class' . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR . 'placescache.php';
+require_once __DIR__ . DIRECTORY_SEPARATOR . 'class' . DIRECTORY_SEPARATOR . 'file' . DIRECTORY_SEPARATOR . 'apifile.php';
+require_once __DIR__ . DIRECTORY_SEPARATOR . 'class' . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR . 'apicache.php';
 
 /**
  * Opens Access Origin Via networking Route NPN

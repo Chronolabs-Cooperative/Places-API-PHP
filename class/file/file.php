@@ -1,6 +1,6 @@
 <?php
 /**
- * Chronolabs REST Geospatial Places Services API
+ * File engine For API
  *
  * You may not change or alter any portion of this comment or credits
  * of supporting developers from this source code or any supporting source code
@@ -9,19 +9,13 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * @copyright       Chronolabs Cooperative http://snails.email
- * @license         GNU GPL 3 (http://www.gnu.org/licenses/old-licenses/gpl-2.0.html)
- * @package         api
- * @since           2.0.1
- * @author          Simon Roberts <wishcraft@users.sourceforge.net>
- * @subpackage		places
- * @description		Geospatial Places Services API
- * @see			    http://internetfounder.wordpress.com
- * @see			    http://sourceoforge.net/projects/chronolabsapis
- * @see			    https://github.com/Chronolabs-Cooperative/Places-API-PHP
+ * @copyright       (c) 2005-2016 API Project (www.api.org)
+ * @license             GNU GPL 2 (http://www.gnu.org/licenses/gpl-2.0.html)
+ * @package             class
+ * @subpackage          file
+ * @since               2.3.0
+ * @author              Taiwen Jiang <phppp@users.sourceforge.net>
  */
-
-
 defined('API_ROOT_PATH') || exit('Restricted access');
 
 /**
@@ -54,7 +48,7 @@ defined('API_ROOT_PATH') || exit('Restricted access');
  * @package    cake
  * @subpackage cake.cake.libs
  */
-class PlacesFileHandler
+class APIFileHandler
 {
     /**
      * folder object of the File
@@ -106,8 +100,8 @@ class PlacesFileHandler
      */
     public function __construct($path, $create = false, $mode = 0755)
     {
-        require_once dirname(__DIR__) . DIRECTORY_SEPARATOR . 'file' . DIRECTORY_SEPARATOR . 'placesfile.php';
-        $this->folder = PlacesFile::getHandler('folder', dirname($path), $create, $mode);
+        APILoad::load('APIFile');
+        $this->folder = APIFile::getHandler('folder', dirname($path), $create, $mode);
         if (!is_dir($path)) {
             $this->name = basename($path);
         }
@@ -180,7 +174,7 @@ class PlacesFileHandler
     /**
      * Return the contents of this File as a string.
      *
-     * @param bool|string $bytes where to start
+     * @param bool|string|int $bytes where to start
      * @param string      $mode
      * @param boolean     $force If true then the file will be re-opened even if its already opened, otherwise it won't
      *
@@ -389,7 +383,7 @@ class PlacesFileHandler
      * makes filename safe for saving
      *
      * @param  string $name the name of the file to make safe if different from $this->name
-     * @param  null   $ext
+     * @param  null|string   $ext
      * @return string $ext the extension of the file
      * @access public
      */

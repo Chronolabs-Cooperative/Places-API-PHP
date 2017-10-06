@@ -1,6 +1,6 @@
 <?php
 /**
- * Chronolabs REST Geospatial Places Services API
+ * Cache engine For API
  *
  * You may not change or alter any portion of this comment or credits
  * of supporting developers from this source code or any supporting source code
@@ -9,20 +9,14 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * @copyright       Chronolabs Cooperative http://snails.email
- * @license         GNU GPL 3 (http://www.gnu.org/licenses/old-licenses/gpl-2.0.html)
- * @package         api
- * @since           2.0.1
- * @author          Simon Roberts <wishcraft@users.sourceforge.net>
- * @subpackage		places
- * @description		Geospatial Places Services API
- * @see			    http://internetfounder.wordpress.com
- * @see			    http://sourceoforge.net/projects/chronolabsapis
- * @see			    https://github.com/Chronolabs-Cooperative/Places-API-PHP
+ * @copyright       (c) 2000-2016 API Project (www.api.org)
+ * @license             GNU GPL 2 (http://www.gnu.org/licenses/gpl-2.0.html)
+ * @package             class
+ * @subpackage          cache
+ * @since               2.3.0
+ * @author              Taiwen Jiang <phppp@users.sourceforge.net>
  */
-
-
-defined('API_ROOT_PATH') || die('Restricted access');
+defined('API_ROOT_PATH') || exit('Restricted access');
 
 /**
  * Memcache storage engine for cache
@@ -39,23 +33,23 @@ defined('API_ROOT_PATH') || die('Restricted access');
  * Redistributions of files must retain the above copyright notice.
  *
  * @filesource
- * @copyright Copyright 2005-2008, Cake Software Foundation, Inc.
- * @link http://www.cakefoundation.org/projects/info/cakephp CakePHP(tm) Project
- * @package cake
+ * @copyright  Copyright 2005-2008, Cake Software Foundation, Inc.
+ * @link       http://www.cakefoundation.org/projects/info/cakephp CakePHP(tm) Project
+ * @package    cake
  * @subpackage cake.cake.libs.cache
- * @since CakePHP(tm) v 1.2.0.4933
- * @version $Revision: 12537 $
- * @modifiedby $LastChangedBy: beckmi $
- * @lastmodified $Date: 2014-05-19 10:19:33 -0400 (Mon, 19 May 2014) $
- * @license http://www.opensource.org/licenses/mit-license.php The MIT License
+ * @since      CakePHP(tm) v 1.2.0.4933
+ * @modifiedby $LastChangedBy$
+ * @lastmodified $Date$
+ * @license    http://www.opensource.org/licenses/mit-license.php The MIT License
  */
+
 /**
  * Memcache storage engine for cache
  *
- * @package cake
+ * @package    cake
  * @subpackage cake.cake.libs.cache
  */
-class PlacesCacheMemcache extends PlacesCacheEngine
+class APICacheMemcache extends APICacheEngine
 {
     /**
      * Memcache wrapper.
@@ -63,7 +57,8 @@ class PlacesCacheMemcache extends PlacesCacheEngine
      * @var object
      * @access private
      */
-    var $memcache = null;
+    private $memcache;
+
     /**
      * settings
      *          servers = string or array of memcache servers, default => 127.0.0.1
@@ -72,7 +67,7 @@ class PlacesCacheMemcache extends PlacesCacheEngine
      * @var array
      * @access public
      */
-    var $settings = array();
+    public $settings = array();
 
     /**
      * Initialize the Cache Engine
@@ -85,15 +80,15 @@ class PlacesCacheMemcache extends PlacesCacheEngine
      * @return boolean True if the engine has been successfully initialized, false if not
      * @access   public
      */
-    function init($settings = array())
+    public function init($settings = array())
     {
         if (!class_exists('Memcache')) {
             return false;
         }
         parent::init($settings);
-        $defaults = array(
-            'servers' => array(
-                '127.0.0.1') ,
+        $defaults       = array(
+            'servers'  => array(
+                '127.0.0.1'),
             'compress' => false);
         $this->settings = array_merge($defaults, $this->settings);
 
@@ -101,15 +96,14 @@ class PlacesCacheMemcache extends PlacesCacheEngine
             $this->settings['compress'] = MEMCACHE_COMPRESSED;
         }
         if (!is_array($this->settings['servers'])) {
-            $this->settings['servers'] = array(
-                $this->settings['servers']);
+            $this->settings['servers'] = array($this->settings['servers']);
         }
         $this->memcache = null;
         $this->memcache = new Memcache();
         foreach ($this->settings['servers'] as $server) {
             $parts = explode(':', $server);
-            $host = $parts[0];
-            $port = 11211;
+            $host  = $parts[0];
+            $port  = 11211;
             if (isset($parts[1])) {
                 $port = $parts[1];
             }
@@ -120,6 +114,7 @@ class PlacesCacheMemcache extends PlacesCacheEngine
 
         return false;
     }
+
     /**
      * Write data for key into cache
      *
@@ -129,10 +124,11 @@ class PlacesCacheMemcache extends PlacesCacheEngine
      * @return boolean True if the data was successfully cached, false on failure
      * @access public
      */
-    function write($key, &$value, $duration)
+    public function write($key, $value, $duration = null)
     {
         return $this->memcache->set($key, $value, $this->settings['compress'], $duration);
     }
+
     /**
      * Read a key from the cache
      *
@@ -140,31 +136,34 @@ class PlacesCacheMemcache extends PlacesCacheEngine
      * @return mixed  The cached data, or false if the data doesn't exist, has expired, or if there was an error fetching it
      * @access public
      */
-    function read($key)
+    public function read($key)
     {
         return $this->memcache->get($key);
     }
+
     /**
      * Delete a key from the cache
      *
-     * @param  string  $key Identifier for the data
+     * @param  string $key Identifier for the data
      * @return boolean True if the value was successfully deleted, false if it didn't exist or couldn't be removed
      * @access public
      */
-    function delete($key)
+    public function delete($key)
     {
         return $this->memcache->delete($key);
     }
+
     /**
      * Delete all keys from the cache
      *
      * @return boolean True if the cache was successfully cleared, false otherwise
      * @access public
      */
-    function clear()
+    public function clear($check = null)
     {
         return $this->memcache->flush();
     }
+
     /**
      * Connects to a server in connection pool
      *
@@ -173,7 +172,7 @@ class PlacesCacheMemcache extends PlacesCacheEngine
      * @return boolean True if memcache server was connected
      * @access public
      */
-    function connect($host, $port = 11211)
+    public function connect($host, $port = 11211)
     {
         if ($this->memcache->getServerStatus($host, $port) === 0) {
             if ($this->memcache->connect($host, $port)) {

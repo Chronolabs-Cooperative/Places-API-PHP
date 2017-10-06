@@ -112,12 +112,12 @@ if (!function_exists("randomPlacesKey")) {
 	 */
 	function randomPlacesKey()
 	{
-		$sql = "SELECT * FROM `countries` WHERE `Records` > 1000 ORDER BY RAND() LIMIT 1 ";
-		if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
-			$country = $GLOBALS['DebauchDB']->fetchArray($result);
-			$sql = "SELECT concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`))) as `key` FROM `" . $country['Table'] . "` ORDER BY RAND() LIMIT 1 ";
-			if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
-				if (list($key) = $GLOBALS['DebauchDB']->fetchRow($result))
+	    $sql = "SELECT * FROM `".$GLOBALS['APIDB']->prefix("countries") . "` WHERE `Records` > 1000 ORDER BY RAND() LIMIT 1 ";
+		if ($result = $GLOBALS['APIDB']->queryF($sql)) {
+			$country = $GLOBALS['APIDB']->fetchArray($result);
+			$sql = "SELECT concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`))) as `key` FROM `" . $GLOBALS['APIDB']->prefix($country['Table']) . "` ORDER BY RAND() LIMIT 1 ";
+			if ($result = $GLOBALS['APIDB']->queryF($sql)) {
+				if (list($key) = $GLOBALS['APIDB']->fetchRow($result))
 				    return $key;
 			}
 			$ret = array();
@@ -136,12 +136,12 @@ if (!function_exists("randomGeoPlace")) {
      */
     function randomGeoPlace()
     {
-        $sql = "SELECT * FROM `countries` WHERE `Records` > 1000  ORDER BY RAND() LIMIT 1 ";
-        if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
-            $country = $GLOBALS['DebauchDB']->fetchArray($result);
-            $sql = "SELECT * FROM `" . $country['Table'] . "` ORDER BY RAND() LIMIT 1 ";
-            if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
-                if ($place = $GLOBALS['DebauchDB']->fetchArray($result))
+        $sql = "SELECT * FROM `" . $GLOBALS['APIDB']->prefix('countries') . "` WHERE `Records` > 1000  ORDER BY RAND() LIMIT 1 ";
+        if ($result = $GLOBALS['APIDB']->queryF($sql)) {
+            $country = $GLOBALS['APIDB']->fetchArray($result);
+            $sql = "SELECT * FROM `" . $GLOBALS['APIDB']->prefix($country['Table']) . "` ORDER BY RAND() LIMIT 1 ";
+            if ($result = $GLOBALS['APIDB']->queryF($sql)) {
+                if ($place = $GLOBALS['APIDB']->fetchArray($result))
                     return array('country' => $country['Country'], 'iso3' => $country['ISO3'], 'iso2' => $country['ISO2'], 'region' => $place['RegionName']);
             }
         }
@@ -159,12 +159,12 @@ if (!function_exists("randomGeoLocation")) {
 	 */
 	function randomGeoLocation()
 	{
-		$sql = "SELECT * FROM `countries` WHERE `Records` > 1000  ORDER BY RAND() LIMIT 1 ";
-		if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
-			$country = $GLOBALS['DebauchDB']->fetchArray($result);
-			$sql = "SELECT * FROM `" . $country['Table'] . "` ORDER BY RAND() LIMIT 1 ";
-			if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
-				if ($place = $GLOBALS['DebauchDB']->fetchArray($result))
+		$sql = "SELECT * FROM `" . $GLOBALS['APIDB']->prefix('countries') . "` WHERE `Records` > 1000  ORDER BY RAND() LIMIT 1 ";
+		if ($result = $GLOBALS['APIDB']->queryF($sql)) {
+			$country = $GLOBALS['APIDB']->fetchArray($result);
+			$sql = "SELECT * FROM `" . $GLOBALS['APIDB']->prefix($country['Table']) . "` ORDER BY RAND() LIMIT 1 ";
+			if ($result = $GLOBALS['APIDB']->queryF($sql)) {
+				if ($place = $GLOBALS['APIDB']->fetchArray($result))
 					return array('latitude'=>$place['Latitude_Float'], 'longitude' => $place['Longitude_Float']);
 			}
 			$ret = array('latitude'=> 0, 'longitude' => 0);
@@ -213,27 +213,27 @@ if (!function_exists("findPlace")) {
 		$sql = '';
 		$ret = array();
 		if (strlen($country)>3&&strtolower($country)!='list'&&strtolower($country)!='random') {
-			$sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key`  FROM `countries` WHERE lower(`Country`) LIKE '".strtolower($country)."' GROUP BY `CountryID` ORDER BY RAND() LIMIT 1";
+			$sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key`  FROM `" . $GLOBALS['APIDB']->prefix('countries') . "` WHERE lower(`Country`) LIKE '".strtolower($country)."' GROUP BY `CountryID` ORDER BY RAND() LIMIT 1";
 			
 		} elseif (strlen($country)>3&&strtolower($country)=='random') {
-			$sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key`  FROM `countries` GROUP BY `CountryID` ORDER BY RAND() LIMIT 1";
+			$sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key`  FROM `" . $GLOBALS['APIDB']->prefix('countries') . "` GROUP BY `CountryID` ORDER BY RAND() LIMIT 1";
 			
 		} elseif (strlen($country)>3&&strtolower($country)=='list') {
-			$sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key`  FROM `countries` GROUP BY `CountryID` ORDER BY `Country` ASC ";
+			$sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key`  FROM `" . $GLOBALS['APIDB']->prefix('countries') . "` GROUP BY `CountryID` ORDER BY `Country` ASC ";
 
 		} elseif (strlen($country)==3) {
-			$sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `countries` WHERE lower(`ISO3`) LIKE '".strtolower($country)."' GROUP BY `CountryID` ORDER BY RAND() LIMIT 1 ";
+			$sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `" . $GLOBALS['APIDB']->prefix('countries') . "` WHERE lower(`ISO3`) LIKE '".strtolower($country)."' GROUP BY `CountryID` ORDER BY RAND() LIMIT 1 ";
 	    } elseif (strlen($country)==2) {
-			$sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `countries` WHERE lower(`ISO2`) LIKE '".strtolower($country)."' GROUP BY `CountryID` ORDER BY RAND() LIMIT 1 ";
+			$sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `" . $GLOBALS['APIDB']->prefix('countries') . "` WHERE lower(`ISO2`) LIKE '".strtolower($country)."' GROUP BY `CountryID` ORDER BY RAND() LIMIT 1 ";
 	    } elseif (strlen($country)!=2 && strlen($country)!=3) {
-	        $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `countries` WHERE lower(`Country`) LIKE '%".strtolower($country)."%' GROUP BY `CountryID` ORDER BY RAND() LIMIT 1 ";
+	        $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `" . $GLOBALS['APIDB']->prefix('countries') . "` WHERE lower(`Country`) LIKE '%".strtolower($country)."%' GROUP BY `CountryID` ORDER BY RAND() LIMIT 1 ";
 	    }
 	    $numberof=$seconds=$start=$end=0;
-	    if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
-		    while($country = $GLOBALS['DebauchDB']->fetchArray($result)) {
+	    if ($result = $GLOBALS['APIDB']->queryF($sql)) {
+		    while($country = $GLOBALS['APIDB']->fetchArray($result)) {
 		        $sql = "SELECT count(*) as records FROM `" . $country['Table'] . "`";
-		        if ($resultb = $GLOBALS['DebauchDB']->queryF($sql)) {
-		            $records = $GLOBALS['DebauchDB']->fetchArray($resultb);
+		        if ($resultb = $GLOBALS['APIDB']->queryF($sql)) {
+		            $records = $GLOBALS['APIDB']->fetchArray($resultb);
 		            $country['records'] = $records['records'];
 		        } else
 		            $country['records'] = 0 ;
@@ -244,16 +244,16 @@ if (!function_exists("findPlace")) {
                     $ret['countries'][$table] = strippedArray($country, explode('|', API_COUNTRY_FIELDS));
 		
     			if (strtolower($place)!='random') {
-    			    $sql = "SELECT *,  concat(`RegionName`, ', ', '" . $country['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`))) as `key`  FROM `" . $table . "` WHERE LOWER(`RegionName`) LIKE '" . strtolower($place) . "%'  ORDER BY RAND()";
+    			    $sql = "SELECT *,  concat(`RegionName`, ', ', '" . $country['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`))) as `key`  FROM `" . $GLOBALS['APIDB']->prefix($table) . "` WHERE LOWER(`RegionName`) LIKE '" . strtolower($place) . "%'  ORDER BY RAND()";
     			} elseif (strtolower($place) == 'random' && strtolower($country) == 'random')
-    			     $sql = "SELECT *,  concat(`RegionName`, ', ', '" . $country['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`))) as `key`  FROM `" . $table . "` ORDER BY RAND()";
+    			     $sql = "SELECT *,  concat(`RegionName`, ', ', '" . $country['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`))) as `key`  FROM `" . $GLOBALS['APIDB']->prefix($table) . "` ORDER BY RAND()";
     			elseif (strtolower($place) == 'random' && strtolower($country) != 'random') {
-    			    $sql = "SELECT *,  concat(`RegionName`, ', ', '" . $country['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`))) as `key`  FROM `" . $table . "` ORDER BY RAND()";
+    			    $sql = "SELECT *,  concat(`RegionName`, ', ', '" . $country['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`))) as `key`  FROM `" . $GLOBALS['APIDB']->prefix($table) . "` ORDER BY RAND()";
     			} else {
-    			    $sql = "SELECT *,  concat(`RegionName`, ', ', '" . $country['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`))) as `key`  FROM `" . $table . "` WHERE LOWER(`RegionName`) LIKE '%" . strtolower($place) . "%'  ORDER BY RAND()";
+    			    $sql = "SELECT *,  concat(`RegionName`, ', ', '" . $country['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`))) as `key`  FROM `" . $GLOBALS['APIDB']->prefix($table) . "` WHERE LOWER(`RegionName`) LIKE '%" . strtolower($place) . "%'  ORDER BY RAND()";
     			}
-				if ($resultb = $GLOBALS['DebauchDB']->queryF($sql)) {
-					while ($region = $GLOBALS['DebauchDB']->fetchArray($resultb)) {
+				if ($resultb = $GLOBALS['APIDB']->queryF($sql)) {
+					while ($region = $GLOBALS['APIDB']->fetchArray($resultb)) {
 					    if ($seconds==0)
 					        $seconds = 120;
 					    elseif ($end!=0&&$start!=0)
@@ -278,11 +278,11 @@ if (!function_exists("findPlace")) {
 						{
     						$latitude = $region['Latitude_Float'];
     						$longitude = $region['Longitude_Float'];
-    						$sql = "SELECT *,  concat(`RegionName`, ', ', '" . $country['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`))) as `key`, 3956 * 2 * ASIN(SQRT(POWER(SIN((" . abs($latitude) . " - abs(`Latitude_Float`)) * pi() / 180 / 2), 2) + COS(" . abs($latitude) . " * pi() / 180 ) * COS(abs(`Latitude_Float`) *  pi() / 180) * POWER(SIN((" . $longitude . " - `Longitude_Float`) *  pi() / 180 / 2), 2) )) as `Distance` FROM `" . $table . "` HAVING `Distance` <= ".$radius." ORDER BY `Distance`";
+    						$sql = "SELECT *,  concat(`RegionName`, ', ', '" . $country['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`))) as `key`, 3956 * 2 * ASIN(SQRT(POWER(SIN((" . abs($latitude) . " - abs(`Latitude_Float`)) * pi() / 180 / 2), 2) + COS(" . abs($latitude) . " * pi() / 180 ) * COS(abs(`Latitude_Float`) *  pi() / 180) * POWER(SIN((" . $longitude . " - `Longitude_Float`) *  pi() / 180 / 2), 2) )) as `Distance` FROM `" . $GLOBALS['APIDB']->prefix($table) . "` HAVING `Distance` <= ".$radius." ORDER BY `Distance`";
     						$ret['search']['countries']++;
     						unset($resultb);
-    						if ($resultc = $GLOBALS['DebauchDB']->queryF($sql)) {
-    						    while ($nearby = $GLOBALS['DebauchDB']->fetchArray($resultc)) {
+    						if ($resultc = $GLOBALS['APIDB']->queryF($sql)) {
+    						    while ($nearby = $GLOBALS['APIDB']->fetchArray($resultc)) {
     						        if (strpos($nearby['RegionName'], ',')) {
     						            $parts = explode(',',$nearby['RegionName']);
 					                    array_reverse($parts);
@@ -345,21 +345,21 @@ if (!function_exists("findNearby")) {
 		
 		$ret = array();
 		$ret['search']['places'] = $ret['search']['countries'] = 0;
-		$sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key`  FROM `countries` GROUP BY `CountryID` ORDER BY RAND() ";
-		if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
-			while($country = $GLOBALS['DebauchDB']->fetchArray($result)) {
+		$sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key`  FROM `" . $GLOBALS['APIDB']->prefix('countries') . "` GROUP BY `CountryID` ORDER BY RAND() ";
+		if ($result = $GLOBALS['APIDB']->queryF($sql)) {
+			while($country = $GLOBALS['APIDB']->fetchArray($result)) {
 			    $table = $country['Table'];
-				$sql = "SELECT count(*) as records FROM `" . $table . "`";
-				if ($resultb = $GLOBALS['DebauchDB']->queryF($sql)) {
-					$records = $GLOBALS['DebauchDB']->fetchArray($resultb);
+				$sql = "SELECT count(*) as records FROM `" . $GLOBALS['APIDB']->prefix($table) . "`";
+				if ($resultb = $GLOBALS['APIDB']->queryF($sql)) {
+					$records = $GLOBALS['APIDB']->fetchArray($resultb);
 					$country['records'] = $records['records'];
 				} else
 					$country['records'] = 0 ;
-				$sql = "SELECT *,  concat(`RegionName`, ', ', '" . $country['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`))) as `key`, 3956 * 2 * ASIN(SQRT(POWER(SIN((" . abs($latitude) . " - abs(`Latitude_Float`)) * pi() / 180 / 2), 2) + COS(" . abs($latitude) . " * pi() / 180 ) * COS(abs(`Latitude_Float`) *  pi() / 180) * POWER(SIN((" . $longitude . " - `Longitude_Float`) *  pi() / 180 / 2), 2) )) as `Distance` FROM `" . $table . "` HAVING `Distance` <= ".$radius." ORDER BY `Distance`";
+				$sql = "SELECT *,  concat(`RegionName`, ', ', '" . $country['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`))) as `key`, 3956 * 2 * ASIN(SQRT(POWER(SIN((" . abs($latitude) . " - abs(`Latitude_Float`)) * pi() / 180 / 2), 2) + COS(" . abs($latitude) . " * pi() / 180 ) * COS(abs(`Latitude_Float`) *  pi() / 180) * POWER(SIN((" . $longitude . " - `Longitude_Float`) *  pi() / 180 / 2), 2) )) as `Distance` FROM `" . $GLOBALS['APIDB']->prefix($table) . "` HAVING `Distance` <= ".$radius." ORDER BY `Distance`";
 				$ret['search']['countries']++;
 				unset($resultb);
-				if ($resultb = $GLOBALS['DebauchDB']->queryF($sql)) {
-					while ($place = $GLOBALS['DebauchDB']->fetchArray($resultb)) {
+				if ($resultb = $GLOBALS['APIDB']->queryF($sql)) {
+					while ($place = $GLOBALS['APIDB']->fetchArray($resultb)) {
 					    if ($format!='xml')
 						    $ret['results']['countries'][$table] = strippedArray($country, explode('|',API_COUNTRY_FIELDS));
 					    else 
@@ -425,21 +425,21 @@ if (!function_exists("findExactly")) {
 		
 		$ret = array();
 		$places = $ret['search']['countries'] = $ret['search']['places'] = 0;
-		$sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key`  FROM `countries` GROUP BY `CountryID` ORDER BY RAND() ";
-		if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
-			while($country = $GLOBALS['DebauchDB']->fetchArray($result)) {
+		$sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key`  FROM `" . $GLOBALS['APIDB']->prefix('countries') . "` GROUP BY `CountryID` ORDER BY RAND() ";
+		if ($result = $GLOBALS['APIDB']->queryF($sql)) {
+			while($country = $GLOBALS['APIDB']->fetchArray($result)) {
 			    $table = $country['Table'];
-				$sql = "SELECT count(*) as records FROM `" . $table . "`";
-				if ($resultb = $GLOBALS['DebauchDB']->queryF($sql)) {
-					$records = $GLOBALS['DebauchDB']->fetchArray($resultb);
+				$sql = "SELECT count(*) as records FROM `" . $GLOBALS['APIDB']->prefix($table) . "`";
+				if ($resultb = $GLOBALS['APIDB']->queryF($sql)) {
+					$records = $GLOBALS['APIDB']->fetchArray($resultb);
 					$country['records'] = $records['records'];
 				} else
 					$country['records'] = 0 ;
 				$ret['search']['countries']++;
-				$sql = "SELECT *,  concat(`RegionName`, ', ', '" . $country['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`))) as `key`, 3956 * 2 * ASIN(SQRT(POWER(SIN((" . abs($latitude) . " - abs(`Latitude_Float`)) * pi() / 180 / 2), 2) + COS(" . abs($latitude) . " * pi() / 180 ) * COS(abs(`Latitude_Float`) *  pi() / 180) * POWER(SIN((" . $longitude . " - `Longitude_Float`) *  pi() / 180 / 2), 2) )) as `Distance` FROM `" . $table . "` WHERE `Latitude_Float` >= ".($latitude - (111.32 * ($radius / 1000)))." AND `Longitude_Float` >= ".($longitude - (111.32 * ($radius / 1000)))." AND `Latitude_Float` <= ".($latitude + (111.32 * ($radius / 1000)))." AND `Longitude_Float` <= ".($longitude + (111.32 * ($radius / 1000)))." ORDER BY `Distance`";
+				$sql = "SELECT *,  concat(`RegionName`, ', ', '" . $country['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`))) as `key`, 3956 * 2 * ASIN(SQRT(POWER(SIN((" . abs($latitude) . " - abs(`Latitude_Float`)) * pi() / 180 / 2), 2) + COS(" . abs($latitude) . " * pi() / 180 ) * COS(abs(`Latitude_Float`) *  pi() / 180) * POWER(SIN((" . $longitude . " - `Longitude_Float`) *  pi() / 180 / 2), 2) )) as `Distance` FROM `" . $GLOBALS['APIDB']->prefix($table) . "` WHERE `Latitude_Float` >= ".($latitude - (111.32 * ($radius / 1000)))." AND `Longitude_Float` >= ".($longitude - (111.32 * ($radius / 1000)))." AND `Latitude_Float` <= ".($latitude + (111.32 * ($radius / 1000)))." AND `Longitude_Float` <= ".($longitude + (111.32 * ($radius / 1000)))." ORDER BY `Distance`";
 				unset($resultb);
-				if ($resultb = $GLOBALS['DebauchDB']->queryF($sql)) {
-					while ($place = $GLOBALS['DebauchDB']->fetchArray($resultb)) {
+				if ($resultb = $GLOBALS['APIDB']->queryF($sql)) {
+					while ($place = $GLOBALS['APIDB']->fetchArray($resultb)) {
 					    if ($format!='xml')
 					        $ret['results']['countries'][$table] = strippedArray($country, explode('|',API_COUNTRY_FIELDS));
 				        else
@@ -529,37 +529,37 @@ if (!function_exists("findKey")) {
 	    } else
 	        $countryid = false;
 	        
-        $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `countries` WHERE md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) LIKE '".$key."' GROUP BY `CountryID` ORDER BY RAND() ";
-        if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
-            if($country = $GLOBALS['DebauchDB']->fetchArray($result)) {
+        $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `" . $GLOBALS['APIDB']->prefix('countries') . "` WHERE md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) LIKE '".$key."' GROUP BY `CountryID` ORDER BY RAND() ";
+        if ($result = $GLOBALS['APIDB']->queryF($sql)) {
+            if($country = $GLOBALS['APIDB']->fetchArray($result)) {
                 $table = $country['Table'];
             }
         }
         if (!isset($table) && !empty($countryid) && $countryid != false)
         {
-            $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `countries` WHERE `CountryID` = '".$countryid."' GROUP BY `CountryID` ORDER BY RAND() ";
-            if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
-                if($country = $GLOBALS['DebauchDB']->fetchArray($result)) {
+            $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `" . $GLOBALS['APIDB']->prefix('countries') . "` WHERE `CountryID` = '".$countryid."' GROUP BY `CountryID` ORDER BY RAND() ";
+            if ($result = $GLOBALS['APIDB']->queryF($sql)) {
+                if($country = $GLOBALS['APIDB']->fetchArray($result)) {
                     $table = $country['Table'];
                 }
             }
         }
         
         if (empty($countryid) && $countryid == false && $found==false) {
-            $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `countries` GROUP BY `CountryID` ORDER BY RAND() ";
-            if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
-                while(($cntry = $GLOBALS['DebauchDB']->fetchArray($result)) && $found == false) {
+            $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `" . $GLOBALS['APIDB']->prefix('countries') . "` GROUP BY `CountryID` ORDER BY RAND() ";
+            if ($result = $GLOBALS['APIDB']->queryF($sql)) {
+                while(($cntry = $GLOBALS['APIDB']->fetchArray($result)) && $found == false) {
                     $sql = "SELECT *, concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`))) as `key`, concat(`RegionName`, ', ', '".$cntry['Country']."') as `Address` FROM `" . $cntry['Table'] . "` WHERE md5(concat(`CountryID`, `CordID`)) LIKE '" . $key . "' ORDER BY RAND() LIMIT 1";
-                    if ($resultb = $GLOBALS['DebauchDB']->queryF($sql)) {
-                        $place = $GLOBALS['DebauchDB']->fetchArray($resultb);
+                    if ($resultb = $GLOBALS['APIDB']->queryF($sql)) {
+                        $place = $GLOBALS['APIDB']->fetchArray($resultb);
                     $table = $cntry['Table'];
                     $found = true;
                     if (!isset($country))
                         $country = $cntry;
                     }
-                    $sql = "SELECT count(*) as records FROM `" . $table . "`";
-                    if ($resultb = $GLOBALS['DebauchDB']->queryF($sql)) {
-                        $records = $GLOBALS['DebauchDB']->fetchArray($resultb);
+                    $sql = "SELECT count(*) as records FROM `" . $GLOBALS['APIDB']->prefix($table) . "`";
+                    if ($resultb = $GLOBALS['APIDB']->queryF($sql)) {
+                        $records = $GLOBALS['APIDB']->fetchArray($resultb);
                         $country['records'] = $records['records'];
                     } else
                         $country['records'] = 0 ;
@@ -589,20 +589,20 @@ if (!function_exists("findKey")) {
                 }
             }
         } elseif ($found==false && !empty($countryid)) {
-            $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `countries` WHERE `CountryID` = '$countryid' ORDER BY RAND() ";
-            if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
-                while(($cntry = $GLOBALS['DebauchDB']->fetchArray($result)) && $found == false) {
+            $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `" . $GLOBALS['APIDB']->prefix('countries') . "` WHERE `CountryID` = '$countryid' ORDER BY RAND() ";
+            if ($result = $GLOBALS['APIDB']->queryF($sql)) {
+                while(($cntry = $GLOBALS['APIDB']->fetchArray($result)) && $found == false) {
                     $sql = "SELECT *,  concat(`RegionName`, ', ', '" . $cntry['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`))) as `key`, concat(`RegionName`, ', ', '".$cntry['Country']."') as `Address`  FROM `" . $cntry['Table'] . "` WHERE md5(concat(`CountryID`, `CordID`)) LIKE '" . $key . "' ORDER BY RAND() LIMIT 1";
-                    if ($resultb = $GLOBALS['DebauchDB']->queryF($sql)) {
-                        $place = $GLOBALS['DebauchDB']->fetchArray($resultb);
+                    if ($resultb = $GLOBALS['APIDB']->queryF($sql)) {
+                        $place = $GLOBALS['APIDB']->fetchArray($resultb);
                     $table = $cntry['Table'];
                     $found=true;
                     if (!isset($country))
                         $country = $cntry;
                     }
-                    $sql = "SELECT count(*) as records FROM `" . $table . "`";
-                    if ($resultb = $GLOBALS['DebauchDB']->queryF($sql)) {
-                        $records = $GLOBALS['DebauchDB']->fetchArray($resultb);
+                    $sql = "SELECT count(*) as records FROM `" . $GLOBALS['APIDB']->prefix($table) . "`";
+                    if ($resultb = $GLOBALS['APIDB']->queryF($sql)) {
+                        $records = $GLOBALS['APIDB']->fetchArray($resultb);
                         $country['records'] = $records['records'];
                     } else
                         $country['records'] = 0 ;
@@ -634,22 +634,22 @@ if (!function_exists("findKey")) {
         }
         
         if (empty($countryid) && $countryid == false && $found==false) {
-            $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `countries` GROUP BY `CountryID` ORDER BY RAND() ";
-            if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
-                while(($cntry = $GLOBALS['DebauchDB']->fetchArray($result)) && $found == false) {
+            $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `" . $GLOBALS['APIDB']->prefix('countries') . "` GROUP BY `CountryID` ORDER BY RAND() ";
+            if ($result = $GLOBALS['APIDB']->queryF($sql)) {
+                while(($cntry = $GLOBALS['APIDB']->fetchArray($result)) && $found == false) {
                     $sql = "SELECT *, concat(`CountryID`, ':', md5(concat('".$cntry['Table']."_venues', `VenueID`, `CordID`, `CountryID`))) as `key` FROM `" . $cntry['Table'] . "_venues` WHERE md5(concat('".$cntry['Table']."_venues',`VenueID`,`CordID`,`CountryID`)) LIKE '" . $key . "' ORDER BY RAND() LIMIT 1";
-                    if ($resultb = $GLOBALS['DebauchDB']->queryF($sql)) {
-                        $venue = $GLOBALS['DebauchDB']->fetchArray($resultb);
+                    if ($resultb = $GLOBALS['APIDB']->queryF($sql)) {
+                        $venue = $GLOBALS['APIDB']->fetchArray($resultb);
                         $sql = "SELECT *,  concat(`RegionName`, ', ', '" . $cntry['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`))) as `key`, concat(`RegionName`, ', ', '".$cntry['Country']."') as `Address`  FROM `" . $cntry['Table'] . "` WHERE `CordID` = '" . $venue['CordID']. "'";
-                        if ($resultc = $GLOBALS['DebauchDB']->queryF($sql))
-                            $place = $GLOBALS['DebauchDB']->fetchArray($resultc);
+                        if ($resultc = $GLOBALS['APIDB']->queryF($sql))
+                            $place = $GLOBALS['APIDB']->fetchArray($resultc);
                         $table = $ctry['Table'];
                         $found = true;
                         if (!isset($country))
                             $country = $cntry;
-                        $sql = "SELECT count(*) as records FROM `" . $table . "`";
-                        if ($resultb = $GLOBALS['DebauchDB']->queryF($sql)) {
-                            $records = $GLOBALS['DebauchDB']->fetchArray($resultb);
+                        $sql = "SELECT count(*) as records FROM `" . $GLOBALS['APIDB']->prefix($table) . "`";
+                        if ($resultb = $GLOBALS['APIDB']->queryF($sql)) {
+                            $records = $GLOBALS['APIDB']->fetchArray($resultb);
                             $country['records'] = $records['records'];
                         } else
                             $country['records'] = 0 ;
@@ -680,22 +680,22 @@ if (!function_exists("findKey")) {
                 }
             }
         } elseif ($found==false && !empty($countryid)) {
-            $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `countries` WHERE `CountryID` = '$countryid' ORDER BY RAND() ";
-            if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
-                while(($cntry = $GLOBALS['DebauchDB']->fetchArray($result)) && $found == false) {
+            $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `" . $GLOBALS['APIDB']->prefix('countries') . "` WHERE `CountryID` = '$countryid' ORDER BY RAND() ";
+            if ($result = $GLOBALS['APIDB']->queryF($sql)) {
+                while(($cntry = $GLOBALS['APIDB']->fetchArray($result)) && $found == false) {
                     $sql = "SELECT *, concat(`CountryID`, ':', md5(concat('".$cntry['Table']."_venues', `VenueID`, `CordID`, `CountryID`))) as `key` FROM `" . $cntry['Table'] . "_venues` WHERE md5(concat('".$cntry['Table']."_venues',`VenueID`,`CordID`,`CountryID`)) LIKE '" . $key . "' ORDER BY RAND() LIMIT 1";
-                    if ($resultb = $GLOBALS['DebauchDB']->queryF($sql)) {
-                        $venue = $GLOBALS['DebauchDB']->fetchArray($resultb);
+                    if ($resultb = $GLOBALS['APIDB']->queryF($sql)) {
+                        $venue = $GLOBALS['APIDB']->fetchArray($resultb);
                         $sql = "SELECT *,  concat(`RegionName`, ', ', '" . $cntry['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`))) as `key`, concat(`RegionName`, ', ', '".$cntry['Country']."') as `Address`  FROM `" . $cntry['Table'] . "` WHERE `CordID` = '" . $venue['CordID']. "'";
-                        if ($resultc = $GLOBALS['DebauchDB']->queryF($sql))
-                            $place = $GLOBALS['DebauchDB']->fetchArray($resultc);
+                        if ($resultc = $GLOBALS['APIDB']->queryF($sql))
+                            $place = $GLOBALS['APIDB']->fetchArray($resultc);
                         $table = $cntry['Table'];
                         $found=true;
                         if (!isset($country))
                             $country = $cntry;
-                        $sql = "SELECT count(*) as records FROM `" . $table . "`";
-                        if ($resultb = $GLOBALS['DebauchDB']->queryF($sql)) {
-                            $records = $GLOBALS['DebauchDB']->fetchArray($resultb);
+                        $sql = "SELECT count(*) as records FROM `" . $GLOBALS['APIDB']->prefix($table) . "`";
+                        if ($resultb = $GLOBALS['APIDB']->queryF($sql)) {
+                            $records = $GLOBALS['APIDB']->fetchArray($resultb);
                             $country['records'] = $records['records'];
                         } else
                             $country['records'] = 0 ;
@@ -728,22 +728,22 @@ if (!function_exists("findKey")) {
         }
         
         if (empty($countryid) && $countryid == false && $found==false) {
-            $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `countries` GROUP BY `CountryID` ORDER BY RAND() ";
-            if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
-                while(($cntry = $GLOBALS['DebauchDB']->fetchArray($result)) && $found == false) {
+            $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `" . $GLOBALS['APIDB']->prefix('countries') . "` GROUP BY `CountryID` ORDER BY RAND() ";
+            if ($result = $GLOBALS['APIDB']->queryF($sql)) {
+                while(($cntry = $GLOBALS['APIDB']->fetchArray($result)) && $found == false) {
                     $sql = "SELECT *, concat(`CountryID`, ':', md5(concat('".$cntry['Table']."_address', `AddressID`, `CordID`, `CountryID`))) as `key` FROM `" . $cntry['Table'] . "_venues` WHERE md5(concat('".$cntry['Table']."_address',`AddressID`,`CordID`,`CountryID`)) LIKE '" . $key . "' ORDER BY RAND() LIMIT 1";
-                    if ($resultb = $GLOBALS['DebauchDB']->queryF($sql)) {
-                        $address = $GLOBALS['DebauchDB']->fetchArray($resultb);
+                    if ($resultb = $GLOBALS['APIDB']->queryF($sql)) {
+                        $address = $GLOBALS['APIDB']->fetchArray($resultb);
                         $sql = "SELECT *,  concat(`RegionName`, ', ', '" . $cntry['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`))) as `key`, concat(`RegionName`, ', ', '".$cntry['Country']."') as `Address`  FROM `" . $cntry['Table'] . "` WHERE `CordID` = '" . $address['CordID']. "'";
-                        if ($resultc = $GLOBALS['DebauchDB']->queryF($sql))
-                            $place = $GLOBALS['DebauchDB']->fetchArray($resultc);
+                        if ($resultc = $GLOBALS['APIDB']->queryF($sql))
+                            $place = $GLOBALS['APIDB']->fetchArray($resultc);
                         $table = $cntry['Table'];
                         $found = true;
                         if (!isset($country))
                             $country = $cntry;
-                        $sql = "SELECT count(*) as records FROM `" . $table . "`";
-                        if ($resultb = $GLOBALS['DebauchDB']->queryF($sql)) {
-                            $records = $GLOBALS['DebauchDB']->fetchArray($resultb);
+                        $sql = "SELECT count(*) as records FROM `" . $GLOBALS['APIDB']->prefix($table) . "`";
+                        if ($resultb = $GLOBALS['APIDB']->queryF($sql)) {
+                            $records = $GLOBALS['APIDB']->fetchArray($resultb);
                             $country['records'] = $records['records'];
                         } else
                             $country['records'] = 0 ;
@@ -774,22 +774,22 @@ if (!function_exists("findKey")) {
                 }
             }
         } elseif ($found==false && !empty($countryid)) {
-            $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `countries` WHERE `CountryID` = '$countryid' ORDER BY RAND() ";
-            if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
-                while(($cntry = $GLOBALS['DebauchDB']->fetchArray($result)) && $found == false) {
+            $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `" . $GLOBALS['APIDB']->prefix('countries') . "` WHERE `CountryID` = '$countryid' ORDER BY RAND() ";
+            if ($result = $GLOBALS['APIDB']->queryF($sql)) {
+                while(($cntry = $GLOBALS['APIDB']->fetchArray($result)) && $found == false) {
                     $sql = "SELECT *, concat(`CountryID`, ':', md5(concat('".$cntry['Table']."_address', `AddressID`, `CordID`, `CountryID`))) as `key` FROM `" . $cntry['Table'] . "_venues` WHERE md5(concat('".$cntry['Table']."_address',`AddressID`,`CordID`,`CountryID`)) LIKE '" . $key . "' ORDER BY RAND() LIMIT 1";
-                    if ($resultb = $GLOBALS['DebauchDB']->queryF($sql)) {
-                        $address = $GLOBALS['DebauchDB']->fetchArray($resultb);
+                    if ($resultb = $GLOBALS['APIDB']->queryF($sql)) {
+                        $address = $GLOBALS['APIDB']->fetchArray($resultb);
                         $sql = "SELECT *,  concat(`RegionName`, ', ', '" . $country['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`))) as `key`, concat(`RegionName`, ', ', '".$country['Country']."') as `Address`  FROM `" . $cntry['Table'] . "` WHERE `CordID` = '" . $address['CordID']. "'";
-                        if ($resultc = $GLOBALS['DebauchDB']->queryF($sql))
-                            $place = $GLOBALS['DebauchDB']->fetchArray($resultc);
+                        if ($resultc = $GLOBALS['APIDB']->queryF($sql))
+                            $place = $GLOBALS['APIDB']->fetchArray($resultc);
                         $table = $cntry['Table'];
                         $found=true;
                         if (!isset($country))
                             $country = $cntry;
-                        $sql = "SELECT count(*) as records FROM `" . $table . "`";
-                        if ($resultb = $GLOBALS['DebauchDB']->queryF($sql)) {
-                            $records = $GLOBALS['DebauchDB']->fetchArray($resultb);
+                        $sql = "SELECT count(*) as records FROM `" . $GLOBALS['APIDB']->prefix($table) . "`";
+                        if ($resultb = $GLOBALS['APIDB']->queryF($sql)) {
+                            $records = $GLOBALS['APIDB']->fetchArray($resultb);
                             $country['records'] = $records['records'];
                         } else
                             $country['records'] = 0 ;
@@ -831,12 +831,12 @@ if (!function_exists("findKey")) {
 	            $places = $ret['results']['place'];
             foreach($places as $table => $values) {
                 foreach($values as $key => $place) {
-                    $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `countries` WHERE `Table` LIKE '$table' GROUP BY `CountryID` ORDER BY RAND() ";
-                    $result = $GLOBALS['DebauchDB']->queryF($sql);
-                    while($country = $GLOBALS['DebauchDB']->fetchArray($result)) {
-                        $sql = "SELECT *, concat(`RegionName`, ', ', '" . $country['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`))) as `key`, 3956 * 2 * ASIN(SQRT(POWER(SIN((" . abs($place['Latitude_Float']) . " - abs(`Latitude_Float`)) * pi() / 180 / 2), 2) + COS(" . abs($place['Latitude_Float']) . " * pi() / 180 ) * COS(abs(`Latitude_Float`) *  pi() / 180) * POWER(SIN((" . $place['Longitude_Float'] . " - `Longitude_Float`) *  pi() / 180 / 2), 2) )) as `Distance`, concat(`RegionName`, ', ', '".$country['Country']."') as `Address`  FROM `" . $table . "` HAVING `Distance` <= ".$radius." ORDER BY `Distance`";
-    					$resultb = $GLOBALS['DebauchDB']->queryF($sql);
-						while ($place = $GLOBALS['DebauchDB']->fetchArray($resultb)) {
+                    $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `" . $GLOBALS['APIDB']->prefix('countries') . "` WHERE `Table` LIKE '$table' GROUP BY `CountryID` ORDER BY RAND() ";
+                    $result = $GLOBALS['APIDB']->queryF($sql);
+                    while($country = $GLOBALS['APIDB']->fetchArray($result)) {
+                        $sql = "SELECT *, concat(`RegionName`, ', ', '" . $country['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`))) as `key`, 3956 * 2 * ASIN(SQRT(POWER(SIN((" . abs($place['Latitude_Float']) . " - abs(`Latitude_Float`)) * pi() / 180 / 2), 2) + COS(" . abs($place['Latitude_Float']) . " * pi() / 180 ) * COS(abs(`Latitude_Float`) *  pi() / 180) * POWER(SIN((" . $place['Longitude_Float'] . " - `Longitude_Float`) *  pi() / 180 / 2), 2) )) as `Distance`, concat(`RegionName`, ', ', '".$country['Country']."') as `Address`  FROM `" . $GLOBALS['APIDB']->prefix($table) . "` HAVING `Distance` <= ".$radius." ORDER BY `Distance`";
+    					$resultb = $GLOBALS['APIDB']->queryF($sql);
+						while ($place = $GLOBALS['APIDB']->fetchArray($resultb)) {
 						    if ($format!='xml')
 						        $ret['results']['nearby']['countries'][$table] = strippedArray($country, explode('|',API_COUNTRY_FIELDS));
 						    else
@@ -914,29 +914,29 @@ if (!function_exists("getAddressGeoMapping"))
             $address['View_SW_Longitude'] = $geo['results'][0]['geometry']['viewport']['southwest']['lng'];
             $address['View_SW_Latitude'] = $geo['results'][0]['geometry']['viewport']['southwest']['lat'];
             
-            $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `countries` WHERE `Country` LIKE '%".$address['Country']."%' GROUP BY `CountryID` ORDER BY RAND() ";
-            $result = $GLOBALS['DebauchDB']->queryF($sql);
-            if ($country = $GLOBALS['DebauchDB']->fetchArray($result)) {
+            $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `" . $GLOBALS['APIDB']->prefix('countries') . "` WHERE `Country` LIKE '%".$address['Country']."%' GROUP BY `CountryID` ORDER BY RAND() ";
+            $result = $GLOBALS['APIDB']->queryF($sql);
+            if ($country = $GLOBALS['APIDB']->fetchArray($result)) {
                 $table = $country['Table'];
                 $sql = "SELECT *, concat(`RegionName`, ', ', '" . $country['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`))) as `key`, 3956 * 2 * ASIN(SQRT(POWER(SIN((" . abs($geo['results'][0]['geometry']['location']['lat']) . " - abs(`Latitude_Float`)) * pi() / 180 / 2), 2) + COS(" . abs($geo['results'][0]['geometry']['location']['lat']) . " * pi() / 180 ) * COS(abs(`Latitude_Float`) *  pi() / 180) * POWER(SIN((" . $geo['results'][0]['geometry']['location']['lng'] . " - `Longitude_Float`) *  pi() / 180 / 2), 2) )) as `Distance`, concat(`RegionName`, ', ', '".$country['Country']."') as `Address`  FROM `" . $country['Table'] . "` WHERE `RegionName` LIKE '%$suburb%' ORDER BY `Distance`";
-                $resultb = $GLOBALS['DebauchDB']->queryF($sql);
-                $place = $GLOBALS['DebauchDB']->fetchArray($resultb);
+                $resultb = $GLOBALS['APIDB']->queryF($sql);
+                $place = $GLOBALS['APIDB']->fetchArray($resultb);
                 $address['CordID'] = $place['CordID'];
                 $address['CountryID'] = $country['CountryID'];
                 
                 $types = array();
                 foreach($geo['results'][0]['types'] as $tno => $type)
                 {
-                    $sql = "SELECT count(*) as `count` from `" . $table . "_address_types` WHERE `Type` LIKE '$type'";
-                    list($count) = $GLOBALS['DebauchDB']->fetchRow( $GLOBALS['DebauchDB']->queryF($sql));
-                    $sql = "SELECT * from `" . $table . "_address_types` WHERE `Type` LIKE '$type'";
-                    $result = $GLOBALS['DebauchDB']->queryF($sql);
+                    $sql = "SELECT count(*) as `count` from `" . $GLOBALS['APIDB']->prefix($table . "_address_types") . "` WHERE `Type` LIKE '$type'";
+                    list($count) = $GLOBALS['APIDB']->fetchRow( $GLOBALS['APIDB']->queryF($sql));
+                    $sql = "SELECT * from `" . $GLOBALS['APIDB']->prefix($table . "_address_types") ."` WHERE `Type` LIKE '$type'";
+                    $result = $GLOBALS['APIDB']->queryF($sql);
                     if ($count<1)
                     {
-                        $sql = "INSERT INTO `" . $table . "_address_types` (`Type`,`Records`) VALUES('$type',0)";
-                        if ($GLOBALS['DebauchDB']->queryF($sql))
-                            $address['Types'][$type] = $GLOBALS['DebauchDB']->getInsertId();
-                    } elseif ($typ = $GLOBALS['DebauchDB']->fetchArray($result)) {
+                        $sql = "INSERT INTO `" . $GLOBALS['APIDB']->prefix($table . "_address_types") . "` (`Type`,`Records`) VALUES('$type',0)";
+                        if ($GLOBALS['APIDB']->queryF($sql))
+                            $address['Types'][$type] = $GLOBALS['APIDB']->getInsertId();
+                    } elseif ($typ = $GLOBALS['APIDB']->fetchArray($result)) {
                         $address['Types'][$type] = $typ['TypeID'];
                     }
                 }
@@ -944,39 +944,39 @@ if (!function_exists("getAddressGeoMapping"))
                 foreach(array_keys($address) as $field)
                     if (!empty($address[$field]))
                         if (is_string($address[$field]) && !is_numeric($address[$field]))
-                            $where[$field] = "`$field` LIKE '" . mysqli_real_escape_string($GLOBALS['DebauchDB']->conn, $address[$field]) . "'";
+                            $where[$field] = "`$field` LIKE '" . mysqli_real_escape_string($GLOBALS['APIDB']->conn, $address[$field]) . "'";
                         elseif (is_array($venue[$field]))
-                            $where[$field] = "`$field` LIKE '" . mysqli_real_escape_string($GLOBALS['DebauchDB']->conn, json_encode($address[$field])) . "'";
+                            $where[$field] = "`$field` LIKE '" . mysqli_real_escape_string($GLOBALS['APIDB']->conn, json_encode($address[$field])) . "'";
                         else
-                            $where[$field] = "`$field` = '" . mysqli_real_escape_string($GLOBALS['DebauchDB']->conn, $address[$field]) . "'";
-                $sql = "SELECT count(*) as `count` from `" . $table . "_address`" . (count($where)>0?" WHERE " .  implode(" AND ", $where):'');
-                list($count) = $GLOBALS['DebauchDB']->fetchRow($GLOBALS['DebauchDB']->queryF($sql));
-                $sql = "SELECT * from `" . $table . "_address`" . (count($where)>0?" WHERE " .  implode(" AND ", $where):'');
-                $resultv = $GLOBALS['DebauchDB']->queryF($sql);
+                            $where[$field] = "`$field` = '" . mysqli_real_escape_string($GLOBALS['APIDB']->conn, $address[$field]) . "'";
+                $sql = "SELECT count(*) as `count` from `" . $GLOBALS['APIDB']->prefix($table . "_address") . "`" . (count($where)>0?" WHERE " .  implode(" AND ", $where):'');
+                list($count) = $GLOBALS['APIDB']->fetchRow($GLOBALS['APIDB']->queryF($sql));
+                $sql = "SELECT * from `" . $GLOBALS['APIDB']->prefix($table . "_address") . "`" . (count($where)>0?" WHERE " .  implode(" AND ", $where):'');
+                $resultv = $GLOBALS['APIDB']->queryF($sql);
                 if ($count==0)
                 {
                     $insert = array();
                     foreach(array_keys($address) as $field)
                         if (!empty($address[$field]))
                             if (!is_array($address[$field]))
-                                $insert[$field] = mysqli_real_escape_string($GLOBALS['DebauchDB']->conn, $address[$field]);
+                                $insert[$field] = mysqli_real_escape_string($GLOBALS['APIDB']->conn, $address[$field]);
                             else
-                                $insert[$field] = mysqli_real_escape_string($GLOBALS['DebauchDB']->conn, json_encode($address[$field]));
+                                $insert[$field] = mysqli_real_escape_string($GLOBALS['APIDB']->conn, json_encode($address[$field]));
                     $insert['created'] = time();
-                    $sql = "INSERT INTO `" . $table . "_address` (`" . implode('`, `', array_keys($insert)) . "`) VALUES('" . implode("', '", $insert) . "')";
-                    if ($GLOBALS['DebauchDB']->queryF($sql))
-                        $address['AddressID'] = $GLOBALS['DebauchDB']->getInsertId();
+                    $sql = "INSERT INTO `" . $GLOBALS['APIDB']->prefix($table . "_address") . "` (`" . implode('`, `', array_keys($insert)) . "`) VALUES('" . implode("', '", $insert) . "')";
+                    if ($GLOBALS['APIDB']->queryF($sql))
+                        $address['AddressID'] = $GLOBALS['APIDB']->getInsertId();
                     else
                         die("SQL Failed: $sql;");
-                } elseif ($add = $GLOBALS['DebauchDB']->fetchArray($result)) {
+                } elseif ($add = $GLOBALS['APIDB']->fetchArray($result)) {
                     $address['AddressID'] = $add['AddressID'];
                 }
-                $sql = "DELETE FROM `" . $table . "_address_types_links` WHERE `AddressID` = '" . $address['AddressID'] . "'";
-                @$GLOBALS['DebauchDB']->queryF($sql);
+                $sql = "DELETE FROM `" . $GLOBALS['APIDB']->prefix($table . "_address_types_links") . "` WHERE `AddressID` = '" . $address['AddressID'] . "'";
+                @$GLOBALS['APIDB']->queryF($sql);
                 foreach($venue['Types'] as $type => $typeid)
                 {
-                    $sql = "INSERT INTO `" . $table . "_address_types_links` (`TypeID`, `AddressID`) VALUES('$typeid', '" . $address['AddressID'] . "')";
-                    if (!$GLOBALS['DebauchDB']->queryF($sql))
+                    $sql = "INSERT INTO `" . $GLOBALS['APIDB']->prefix($table . "_address_types_links") . "` (`TypeID`, `AddressID`) VALUES('$typeid', '" . $address['AddressID'] . "')";
+                    if (!$GLOBALS['APIDB']->queryF($sql))
                         die("SQL Failed: $sql;");
                 }
                 $address['key'] = $address['CountryID'] . ":" . md5($table . "_address" . $address['AddressID'] . $address['CordID'] . $address['CountryID']);               
@@ -1122,29 +1122,29 @@ if (!function_exists("findKeyDetails")) {
         } else
             $countryid = false;
         
-        $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `countries` WHERE md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) LIKE '".$key."' GROUP BY `CountryID` ORDER BY RAND() ";
-        if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
-            if($country = $GLOBALS['DebauchDB']->fetchArray($result)) {
+        $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `" . $GLOBALS['APIDB']->prefix('countries') . "` WHERE md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) LIKE '".$key."' GROUP BY `CountryID` ORDER BY RAND() ";
+        if ($result = $GLOBALS['APIDB']->queryF($sql)) {
+            if($country = $GLOBALS['APIDB']->fetchArray($result)) {
                 $table = $country['Table'];
             }
         }
         if (!isset($table) && !empty($countryid) && $countryid != false)
         {
-            $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `countries` WHERE `CountryID` = '".$countryid."' GROUP BY `CountryID` ORDER BY RAND() ";
-            if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
-                if($country = $GLOBALS['DebauchDB']->fetchArray($result)) {
+            $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `" . $GLOBALS['APIDB']->prefix('countries') . "` WHERE `CountryID` = '".$countryid."' GROUP BY `CountryID` ORDER BY RAND() ";
+            if ($result = $GLOBALS['APIDB']->queryF($sql)) {
+                if($country = $GLOBALS['APIDB']->fetchArray($result)) {
                     $table = $country['Table'];
                 }
             }
         }
        
         if (empty($countryid) && $countryid == false && $found==false) {
-            $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `countries` GROUP BY `CountryID` ORDER BY RAND() ";
-            if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
-                while(($cntry = $GLOBALS['DebauchDB']->fetchArray($result)) && $found == false) {
+            $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `" . $GLOBALS['APIDB']->prefix('countries') . "` GROUP BY `CountryID` ORDER BY RAND() ";
+            if ($result = $GLOBALS['APIDB']->queryF($sql)) {
+                while(($cntry = $GLOBALS['APIDB']->fetchArray($result)) && $found == false) {
                     $sql = "SELECT *, concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`))) as `key`, concat(`RegionName`, ', ', '".$cntry['Country']."') as `Address` FROM `" . $cntry['Table'] . "` WHERE md5(concat(`CountryID`, `CordID`)) LIKE '" . $key . "' ORDER BY RAND() LIMIT 1";
-                    if ($resultb = $GLOBALS['DebauchDB']->queryF($sql)) {
-                        $place = $GLOBALS['DebauchDB']->fetchArray($resultb);
+                    if ($resultb = $GLOBALS['APIDB']->queryF($sql)) {
+                        $place = $GLOBALS['APIDB']->fetchArray($resultb);
                         $table = $cntry['Table'];
                         $found = true;
                         if (!isset($country))
@@ -1153,12 +1153,12 @@ if (!function_exists("findKeyDetails")) {
                 }
             }
         } elseif ($found==false && !empty($countryid)) {
-            $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `countries` WHERE `CountryID` = '$countryid' ORDER BY RAND() ";
-            if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
-                while(($cntry = $GLOBALS['DebauchDB']->fetchArray($result)) && $found == false) {
+            $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `" . $GLOBALS['APIDB']->prefix('countries') . "` WHERE `CountryID` = '$countryid' ORDER BY RAND() ";
+            if ($result = $GLOBALS['APIDB']->queryF($sql)) {
+                while(($cntry = $GLOBALS['APIDB']->fetchArray($result)) && $found == false) {
                     $sql = "SELECT *,  concat(`RegionName`, ', ', '" . $cntry['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`))) as `key`, concat(`RegionName`, ', ', '".$cntry['Country']."') as `Address`  FROM `" . $cntry['Table'] . "` WHERE md5(concat(`CountryID`, `CordID`)) LIKE '" . $key . "' ORDER BY RAND() LIMIT 1";
-                    if ($resultb = $GLOBALS['DebauchDB']->queryF($sql)) {
-                        $place = $GLOBALS['DebauchDB']->fetchArray($resultb);
+                    if ($resultb = $GLOBALS['APIDB']->queryF($sql)) {
+                        $place = $GLOBALS['APIDB']->fetchArray($resultb);
                         $table = $cntry['Table'];
                         $found=true;
                         if (!isset($country))
@@ -1169,15 +1169,15 @@ if (!function_exists("findKeyDetails")) {
         }
         
         if (empty($countryid) && $countryid == false && $found==false) {
-            $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `countries` GROUP BY `CountryID` ORDER BY RAND() ";
-            if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
-                while(($cntry = $GLOBALS['DebauchDB']->fetchArray($result)) && $found == false) {
+            $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `" . $GLOBALS['APIDB']->prefix('countries') . "` GROUP BY `CountryID` ORDER BY RAND() ";
+            if ($result = $GLOBALS['APIDB']->queryF($sql)) {
+                while(($cntry = $GLOBALS['APIDB']->fetchArray($result)) && $found == false) {
                     $sql = "SELECT *, concat(`CountryID`, ':', md5(concat('".$cntry['Table']."_venues', `VenueID`, `CordID`, `CountryID`))) as `key` FROM `" . $cntry['Table'] . "_venues` WHERE md5(concat('".$cntry['Table']."_venues',`VenueID`,`CordID`,`CountryID`)) LIKE '" . $key . "' ORDER BY RAND() LIMIT 1";
-                    if ($resultb = $GLOBALS['DebauchDB']->queryF($sql)) {
-                        $venue = $GLOBALS['DebauchDB']->fetchArray($resultb);
+                    if ($resultb = $GLOBALS['APIDB']->queryF($sql)) {
+                        $venue = $GLOBALS['APIDB']->fetchArray($resultb);
                         $sql = "SELECT *,  concat(`RegionName`, ', ', '" . $cntry['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`))) as `key`, concat(`RegionName`, ', ', '".$cntry['Country']."') as `Address`  FROM `" . $cntry['Table'] . "` WHERE `CordID` = '" . $venue['CordID']. "'";
-                        if ($resultc = $GLOBALS['DebauchDB']->queryF($sql))
-                            $place = $GLOBALS['DebauchDB']->fetchArray($resultc);
+                        if ($resultc = $GLOBALS['APIDB']->queryF($sql))
+                            $place = $GLOBALS['APIDB']->fetchArray($resultc);
                         $table = $ctry['Table'];
                         $found = true;
                         if (!isset($country))
@@ -1186,15 +1186,15 @@ if (!function_exists("findKeyDetails")) {
                 }
             }
         } elseif ($found==false && !empty($countryid)) {
-            $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `countries` WHERE `CountryID` = '$countryid' ORDER BY RAND() ";
-            if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
-                while(($cntry = $GLOBALS['DebauchDB']->fetchArray($result)) && $found == false) {
+            $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `" . $GLOBALS['APIDB']->prefix('countries') . "` WHERE `CountryID` = '$countryid' ORDER BY RAND() ";
+            if ($result = $GLOBALS['APIDB']->queryF($sql)) {
+                while(($cntry = $GLOBALS['APIDB']->fetchArray($result)) && $found == false) {
                     $sql = "SELECT *, concat(`CountryID`, ':', md5(concat('".$cntry['Table']."_venues', `VenueID`, `CordID`, `CountryID`))) as `key` FROM `" . $cntry['Table'] . "_venues` WHERE md5(concat('".$cntry['Table']."_venues',`VenueID`,`CordID`,`CountryID`)) LIKE '" . $key . "' ORDER BY RAND() LIMIT 1";
-                    if ($resultb = $GLOBALS['DebauchDB']->queryF($sql)) {
-                        $venue = $GLOBALS['DebauchDB']->fetchArray($resultb);
+                    if ($resultb = $GLOBALS['APIDB']->queryF($sql)) {
+                        $venue = $GLOBALS['APIDB']->fetchArray($resultb);
                         $sql = "SELECT *,  concat(`RegionName`, ', ', '" . $cntry['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`))) as `key`, concat(`RegionName`, ', ', '".$cntry['Country']."') as `Address`  FROM `" . $cntry['Table'] . "` WHERE `CordID` = '" . $venue['CordID']. "'";
-                        if ($resultc = $GLOBALS['DebauchDB']->queryF($sql))
-                            $place = $GLOBALS['DebauchDB']->fetchArray($resultc);
+                        if ($resultc = $GLOBALS['APIDB']->queryF($sql))
+                            $place = $GLOBALS['APIDB']->fetchArray($resultc);
                         $table = $cntry['Table'];
                         $found=true;
                         if (!isset($country))
@@ -1205,15 +1205,15 @@ if (!function_exists("findKeyDetails")) {
         }
         
         if (empty($countryid) && $countryid == false && $found==false) {
-            $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `countries` GROUP BY `CountryID` ORDER BY RAND() ";
-            if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
-                while(($cntry = $GLOBALS['DebauchDB']->fetchArray($result)) && $found == false) {
+            $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `" . $GLOBALS['APIDB']->prefix('countries') . "` GROUP BY `CountryID` ORDER BY RAND() ";
+            if ($result = $GLOBALS['APIDB']->queryF($sql)) {
+                while(($cntry = $GLOBALS['APIDB']->fetchArray($result)) && $found == false) {
                     $sql = "SELECT *, concat(`CountryID`, ':', md5(concat('".$cntry['Table']."_address', `AddressID`, `CordID`, `CountryID`))) as `key` FROM `" . $cntry['Table'] . "_venues` WHERE md5(concat('".$cntry['Table']."_address',`AddressID`,`CordID`,`CountryID`)) LIKE '" . $key . "' ORDER BY RAND() LIMIT 1";
-                    if ($resultb = $GLOBALS['DebauchDB']->queryF($sql)) {
-                        $address = $GLOBALS['DebauchDB']->fetchArray($resultb);
+                    if ($resultb = $GLOBALS['APIDB']->queryF($sql)) {
+                        $address = $GLOBALS['APIDB']->fetchArray($resultb);
                         $sql = "SELECT *,  concat(`RegionName`, ', ', '" . $cntry['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`))) as `key`, concat(`RegionName`, ', ', '".$cntry['Country']."') as `Address`  FROM `" . $cntry['Table'] . "` WHERE `CordID` = '" . $address['CordID']. "'";
-                        if ($resultc = $GLOBALS['DebauchDB']->queryF($sql))
-                            $place = $GLOBALS['DebauchDB']->fetchArray($resultc);
+                        if ($resultc = $GLOBALS['APIDB']->queryF($sql))
+                            $place = $GLOBALS['APIDB']->fetchArray($resultc);
                         $table = $cntry['Table'];
                         $found = true;
                         if (!isset($country))
@@ -1222,15 +1222,15 @@ if (!function_exists("findKeyDetails")) {
                 }
             }
         } elseif ($found==false && !empty($countryid)) {
-            $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `countries` WHERE `CountryID` = '$countryid' ORDER BY RAND() ";
-            if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
-                while(($cntry = $GLOBALS['DebauchDB']->fetchArray($result)) && $found == false) {
+            $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `" . $GLOBALS['APIDB']->prefix('countries') . "` WHERE `CountryID` = '$countryid' ORDER BY RAND() ";
+            if ($result = $GLOBALS['APIDB']->queryF($sql)) {
+                while(($cntry = $GLOBALS['APIDB']->fetchArray($result)) && $found == false) {
                     $sql = "SELECT *, concat(`CountryID`, ':', md5(concat('".$cntry['Table']."_address', `AddressID`, `CordID`, `CountryID`))) as `key` FROM `" . $cntry['Table'] . "_venues` WHERE md5(concat('".$cntry['Table']."_address',`AddressID`,`CordID`,`CountryID`)) LIKE '" . $key . "' ORDER BY RAND() LIMIT 1";
-                    if ($resultb = $GLOBALS['DebauchDB']->queryF($sql)) {
-                        $address = $GLOBALS['DebauchDB']->fetchArray($resultb);
+                    if ($resultb = $GLOBALS['APIDB']->queryF($sql)) {
+                        $address = $GLOBALS['APIDB']->fetchArray($resultb);
                         $sql = "SELECT *,  concat(`RegionName`, ', ', '" . $country['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`))) as `key`, concat(`RegionName`, ', ', '".$country['Country']."') as `Address`  FROM `" . $cntry['Table'] . "` WHERE `CordID` = '" . $address['CordID']. "'";
-                        if ($resultc = $GLOBALS['DebauchDB']->queryF($sql))
-                            $place = $GLOBALS['DebauchDB']->fetchArray($resultc);
+                        if ($resultc = $GLOBALS['APIDB']->queryF($sql))
+                            $place = $GLOBALS['APIDB']->fetchArray($resultc);
                         $table = $cntry['Table'];
                         $found=true;
                         if (!isset($country))
@@ -1255,7 +1255,7 @@ if (!function_exists("findKeyDetails")) {
                         $postcode = $values['long_name'];
                 }
                 
-                $sql = "UPDATE `" . $country['Table'] . "` SET `Updates` = `Updates` + 1, `Postcode` = '" . mysqli_real_escape_string($GLOBALS['DebauchDB']->conn, $postcode) . "',  `State` = '" . mysqli_real_escape_string($GLOBALS['DebauchDB']->conn, $state) . "', `GoogleID` = '" . mysqli_real_escape_string($GLOBALS['DebauchDB']->conn, ($place['GoogleID'] = $geo['results'][0]['place_id'])) . "', `Action` = UNIX_TIMESTAMP() WHERE `CordID` = '" . $place['CordID'] . "' AND `CountryID` = '" . $place['CountryID'] . "'";
+                $sql = "UPDATE `" . $country['Table'] . "` SET `Updates` = `Updates` + 1, `Postcode` = '" . mysqli_real_escape_string($GLOBALS['APIDB']->conn, $postcode) . "',  `State` = '" . mysqli_real_escape_string($GLOBALS['APIDB']->conn, $state) . "', `GoogleID` = '" . mysqli_real_escape_string($GLOBALS['APIDB']->conn, ($place['GoogleID'] = $geo['results'][0]['place_id'])) . "', `Action` = UNIX_TIMESTAMP() WHERE `CordID` = '" . $place['CordID'] . "' AND `CountryID` = '" . $place['CountryID'] . "'";
                 if (!$GLOBALS["DebauchDB"]->query($sql))
                     die("SQL Failed: $sql;");
             }
@@ -1295,17 +1295,17 @@ if (!function_exists("getArrayDetails")) {
     function getArrayDetails($googleid = '', $table = '', $format = 'json')
     {
         $sql = "SELECT count(*) as `count` FROM `".$table."_details` WHERE `Key` LIKE '$googleid'";
-        list($count) = $GLOBALS['DebauchDB']->fetchRow( $GLOBALS['DebauchDB']->queryF($sql));
-        $sql = "SELECT *, DECOMPRESS(`data`) as `json` from `" . $table . "_details` WHERE `Key` LIKE '$googleid'";
-        $result = $GLOBALS['DebauchDB']->queryF($sql);
+        list($count) = $GLOBALS['APIDB']->fetchRow( $GLOBALS['APIDB']->queryF($sql));
+        $sql = "SELECT *, DECOMPRESS(`data`) as `json` from `" . $GLOBALS['APIDB']->prefix($table . "_details") . "` WHERE `Key` LIKE '$googleid'";
+        $result = $GLOBALS['APIDB']->queryF($sql);
         if ($count<1)
         {
             $data = json_decode(getURIData("https://maps.googleapis.com/maps/api/place/details/json?" . (!empty($googleid)?"placeid=".$googleid."&":"") . (!empty($reference)?"reference=".$reference."&":"") . "key=". API_GOOGLE_KEY), true);
-            $sql = "INSERT INTO `" . $table . "_details` (`Key`,`data`,`retrieve`,`updating`) VALUES('$googleid',COMPRESS('".mysqli_real_escape_string($GLOBALS['DebauchDB']->conn, json_encode($data)) . "'), UNIX_TIMESTAMP(), UNIX_TIMESTAMP() + (3600 * 24 * 7 * 4 * ".mt_rand(7,11) . "))";
-            if (!$GLOBALS['DebauchDB']->queryF($sql))
+            $sql = "INSERT INTO `" . $GLOBALS['APIDB']->prefix($table . "_details") . "` (`Key`,`data`,`retrieve`,`updating`) VALUES('$googleid',COMPRESS('".mysqli_real_escape_string($GLOBALS['APIDB']->conn, json_encode($data)) . "'), UNIX_TIMESTAMP(), UNIX_TIMESTAMP() + (3600 * 24 * 7 * 4 * ".mt_rand(7,11) . "))";
+            if (!$GLOBALS['APIDB']->queryF($sql))
                 die("SQL Failed: $sql;");
             return $data;
-        } elseif ($details = $GLOBALS['DebauchDB']->fetchArray($result)) {
+        } elseif ($details = $GLOBALS['APIDB']->fetchArray($result)) {
             return json_decode($details['json'], true);
         }
     }
@@ -1410,7 +1410,7 @@ if (!function_exists("getVenueResults")) {
     {
         $ret = $venues = array();
         
-        $GLOBALS['DebauchDB']->queryF("START TRANSACTION");
+        $GLOBALS['APIDB']->queryF("START TRANSACTION");
         
         if ( strpos($key, ":") > 0 )
         {
@@ -1419,29 +1419,29 @@ if (!function_exists("getVenueResults")) {
         } else
             $countryid = false;
             
-        $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `countries` WHERE md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) LIKE '".$key."' GROUP BY `CountryID` ORDER BY RAND() ";
-        if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
-            if($country = $GLOBALS['DebauchDB']->fetchArray($result)) {
+        $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `" . $GLOBALS['APIDB']->prefix('countries') . "` WHERE md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) LIKE '".$key."' GROUP BY `CountryID` ORDER BY RAND() ";
+        if ($result = $GLOBALS['APIDB']->queryF($sql)) {
+            if($country = $GLOBALS['APIDB']->fetchArray($result)) {
                 $table = $country['Table'];
             }
         }
         if (!isset($table) && !empty($countryid) && $countryid != false)
         {
-            $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `countries` WHERE `CountryID` = '".$countryid."' GROUP BY `CountryID` ORDER BY RAND() ";
-            if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
-                if($country = $GLOBALS['DebauchDB']->fetchArray($result)) {
+            $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `" . $GLOBALS['APIDB']->prefix('countries') . "` WHERE `CountryID` = '".$countryid."' GROUP BY `CountryID` ORDER BY RAND() ";
+            if ($result = $GLOBALS['APIDB']->queryF($sql)) {
+                if($country = $GLOBALS['APIDB']->fetchArray($result)) {
                     $table = $country['Table'];
                 }
             }
         }
         
         if (empty($countryid) && $countryid == false && $found==false) {
-            $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `countries` GROUP BY `CountryID` ORDER BY RAND() ";
-            if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
-                while(($cntry = $GLOBALS['DebauchDB']->fetchArray($result)) && $found == false) {
+            $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `" . $GLOBALS['APIDB']->prefix('countries') . "` GROUP BY `CountryID` ORDER BY RAND() ";
+            if ($result = $GLOBALS['APIDB']->queryF($sql)) {
+                while(($cntry = $GLOBALS['APIDB']->fetchArray($result)) && $found == false) {
                     $sql = "SELECT *, concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`))) as `key`, concat(`RegionName`, ', ', '".$cntry['Country']."') as `Address` FROM `" . $cntry['Table'] . "` WHERE md5(concat(`CountryID`, `CordID`)) LIKE '" . $key . "' ORDER BY RAND() LIMIT 1";
-                    if ($resultb = $GLOBALS['DebauchDB']->queryF($sql)) {
-                        $place = $GLOBALS['DebauchDB']->fetchArray($resultb);
+                    if ($resultb = $GLOBALS['APIDB']->queryF($sql)) {
+                        $place = $GLOBALS['APIDB']->fetchArray($resultb);
                     $table = $cntry['Table'];
                     $found = true;
                     if (!isset($country))
@@ -1450,12 +1450,12 @@ if (!function_exists("getVenueResults")) {
                 }
             }
         } elseif ($found==false && !empty($countryid)) {
-            $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `countries` WHERE `CountryID` = '$countryid' ORDER BY RAND() ";
-            if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
-                while(($cntry = $GLOBALS['DebauchDB']->fetchArray($result)) && $found == false) {
+            $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `" . $GLOBALS['APIDB']->prefix('countries') . "` WHERE `CountryID` = '$countryid' ORDER BY RAND() ";
+            if ($result = $GLOBALS['APIDB']->queryF($sql)) {
+                while(($cntry = $GLOBALS['APIDB']->fetchArray($result)) && $found == false) {
                     $sql = "SELECT *,  concat(`RegionName`, ', ', '" . $cntry['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`))) as `key`, concat(`RegionName`, ', ', '".$cntry['Country']."') as `Address`  FROM `" . $cntry['Table'] . "` WHERE md5(concat(`CountryID`, `CordID`)) LIKE '" . $key . "' ORDER BY RAND() LIMIT 1";
-                    if ($resultb = $GLOBALS['DebauchDB']->queryF($sql)) {
-                        $place = $GLOBALS['DebauchDB']->fetchArray($resultb);
+                    if ($resultb = $GLOBALS['APIDB']->queryF($sql)) {
+                        $place = $GLOBALS['APIDB']->fetchArray($resultb);
                     $table = $cntry['Table'];
                     $found=true;
                     if (!isset($country))
@@ -1466,15 +1466,15 @@ if (!function_exists("getVenueResults")) {
         }
         
         if (empty($countryid) && $countryid == false && $found==false) {
-            $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `countries` GROUP BY `CountryID` ORDER BY RAND() ";
-            if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
-                while(($cntry = $GLOBALS['DebauchDB']->fetchArray($result)) && $found == false) {
+            $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `" . $GLOBALS['APIDB']->prefix('countries') . "` GROUP BY `CountryID` ORDER BY RAND() ";
+            if ($result = $GLOBALS['APIDB']->queryF($sql)) {
+                while(($cntry = $GLOBALS['APIDB']->fetchArray($result)) && $found == false) {
                     $sql = "SELECT *, concat(`CountryID`, ':', md5(concat('".$cntry['Table']."_venues', `VenueID`, `CordID`, `CountryID`))) as `key` FROM `" . $cntry['Table'] . "_venues` WHERE md5(concat('".$cntry['Table']."_venues',`VenueID`,`CordID`,`CountryID`)) LIKE '" . $key . "' ORDER BY RAND() LIMIT 1";
-                    if ($resultb = $GLOBALS['DebauchDB']->queryF($sql)) {
-                        $venue = $GLOBALS['DebauchDB']->fetchArray($resultb);
+                    if ($resultb = $GLOBALS['APIDB']->queryF($sql)) {
+                        $venue = $GLOBALS['APIDB']->fetchArray($resultb);
                         $sql = "SELECT *,  concat(`RegionName`, ', ', '" . $cntry['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`))) as `key`, concat(`RegionName`, ', ', '".$cntry['Country']."') as `Address`  FROM `" . $cntry['Table'] . "` WHERE `CordID` = '" . $venue['CordID']. "'";
-                        if ($resultc = $GLOBALS['DebauchDB']->queryF($sql))
-                            $place = $GLOBALS['DebauchDB']->fetchArray($resultc);
+                        if ($resultc = $GLOBALS['APIDB']->queryF($sql))
+                            $place = $GLOBALS['APIDB']->fetchArray($resultc);
                         $table = $ctry['Table'];
                         $found = true;
                         if (!isset($country))
@@ -1483,15 +1483,15 @@ if (!function_exists("getVenueResults")) {
                 }
             }
         } elseif ($found==false && !empty($countryid)) {
-            $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `countries` WHERE `CountryID` = '$countryid' ORDER BY RAND() ";
-            if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
-                while(($cntry = $GLOBALS['DebauchDB']->fetchArray($result)) && $found == false) {
+            $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `" . $GLOBALS['APIDB']->prefix('countries') . "` WHERE `CountryID` = '$countryid' ORDER BY RAND() ";
+            if ($result = $GLOBALS['APIDB']->queryF($sql)) {
+                while(($cntry = $GLOBALS['APIDB']->fetchArray($result)) && $found == false) {
                     $sql = "SELECT *, concat(`CountryID`, ':', md5(concat('".$cntry['Table']."_venues', `VenueID`, `CordID`, `CountryID`))) as `key` FROM `" . $cntry['Table'] . "_venues` WHERE md5(concat('".$cntry['Table']."_venues',`VenueID`,`CordID`,`CountryID`)) LIKE '" . $key . "' ORDER BY RAND() LIMIT 1";
-                    if ($resultb = $GLOBALS['DebauchDB']->queryF($sql)) {
-                        $venue = $GLOBALS['DebauchDB']->fetchArray($resultb);
+                    if ($resultb = $GLOBALS['APIDB']->queryF($sql)) {
+                        $venue = $GLOBALS['APIDB']->fetchArray($resultb);
                         $sql = "SELECT *,  concat(`RegionName`, ', ', '" . $cntry['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`))) as `key`, concat(`RegionName`, ', ', '".$cntry['Country']."') as `Address`  FROM `" . $cntry['Table'] . "` WHERE `CordID` = '" . $venue['CordID']. "'";
-                        if ($resultc = $GLOBALS['DebauchDB']->queryF($sql))
-                            $place = $GLOBALS['DebauchDB']->fetchArray($resultc);
+                        if ($resultc = $GLOBALS['APIDB']->queryF($sql))
+                            $place = $GLOBALS['APIDB']->fetchArray($resultc);
                         $table = $cntry['Table'];
                         $found=true;
                         if (!isset($country))
@@ -1502,15 +1502,15 @@ if (!function_exists("getVenueResults")) {
         }
         
         if (empty($countryid) && $countryid == false && $found==false) {
-            $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `countries` GROUP BY `CountryID` ORDER BY RAND() ";
-            if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
-                while(($cntry = $GLOBALS['DebauchDB']->fetchArray($result)) && $found == false) {
+            $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `" . $GLOBALS['APIDB']->prefix('countries') . "` GROUP BY `CountryID` ORDER BY RAND() ";
+            if ($result = $GLOBALS['APIDB']->queryF($sql)) {
+                while(($cntry = $GLOBALS['APIDB']->fetchArray($result)) && $found == false) {
                     $sql = "SELECT *, concat(`CountryID`, ':', md5(concat('".$cntry['Table']."_address', `AddressID`, `CordID`, `CountryID`))) as `key` FROM `" . $cntry['Table'] . "_venues` WHERE md5(concat('".$cntry['Table']."_address',`AddressID`,`CordID`,`CountryID`)) LIKE '" . $key . "' ORDER BY RAND() LIMIT 1";
-                    if ($resultb = $GLOBALS['DebauchDB']->queryF($sql)) {
-                        $address = $GLOBALS['DebauchDB']->fetchArray($resultb);
+                    if ($resultb = $GLOBALS['APIDB']->queryF($sql)) {
+                        $address = $GLOBALS['APIDB']->fetchArray($resultb);
                         $sql = "SELECT *,  concat(`RegionName`, ', ', '" . $cntry['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`))) as `key`, concat(`RegionName`, ', ', '".$cntry['Country']."') as `Address`  FROM `" . $cntry['Table'] . "` WHERE `CordID` = '" . $address['CordID']. "'";
-                        if ($resultc = $GLOBALS['DebauchDB']->queryF($sql))
-                            $place = $GLOBALS['DebauchDB']->fetchArray($resultc);
+                        if ($resultc = $GLOBALS['APIDB']->queryF($sql))
+                            $place = $GLOBALS['APIDB']->fetchArray($resultc);
                         $table = $cntry['Table'];
                         $found = true;
                         if (!isset($country))
@@ -1519,15 +1519,15 @@ if (!function_exists("getVenueResults")) {
                 }
             }
         } elseif ($found==false && !empty($countryid)) {
-            $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `countries` WHERE `CountryID` = '$countryid' ORDER BY RAND() ";
-            if ($result = $GLOBALS['DebauchDB']->queryF($sql)) {
-                while(($cntry = $GLOBALS['DebauchDB']->fetchArray($result)) && $found == false) {
+            $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key` FROM `" . $GLOBALS['APIDB']->prefix('countries') . "` WHERE `CountryID` = '$countryid' ORDER BY RAND() ";
+            if ($result = $GLOBALS['APIDB']->queryF($sql)) {
+                while(($cntry = $GLOBALS['APIDB']->fetchArray($result)) && $found == false) {
                     $sql = "SELECT *, concat(`CountryID`, ':', md5(concat('".$cntry['Table']."_address', `AddressID`, `CordID`, `CountryID`))) as `key` FROM `" . $cntry['Table'] . "_venues` WHERE md5(concat('".$cntry['Table']."_address',`AddressID`,`CordID`,`CountryID`)) LIKE '" . $key . "' ORDER BY RAND() LIMIT 1";
-                    if ($resultb = $GLOBALS['DebauchDB']->queryF($sql)) {
-                        $address = $GLOBALS['DebauchDB']->fetchArray($resultb);
+                    if ($resultb = $GLOBALS['APIDB']->queryF($sql)) {
+                        $address = $GLOBALS['APIDB']->fetchArray($resultb);
                         $sql = "SELECT *,  concat(`RegionName`, ', ', '" . $country['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`))) as `key`, concat(`RegionName`, ', ', '".$country['Country']."') as `Address`  FROM `" . $cntry['Table'] . "` WHERE `CordID` = '" . $address['CordID']. "'";
-                        if ($resultc = $GLOBALS['DebauchDB']->queryF($sql))
-                            $place = $GLOBALS['DebauchDB']->fetchArray($resultc);
+                        if ($resultc = $GLOBALS['APIDB']->queryF($sql))
+                            $place = $GLOBALS['APIDB']->fetchArray($resultc);
                         $table = $cntry['Table'];
                         $found=true;
                         if (!isset($country))
@@ -1545,16 +1545,16 @@ if (!function_exists("getVenueResults")) {
                     $types = array();
                     foreach($values['types'] as $tno => $type)
                     {
-                        $sql = "SELECT count(*) as `count` from `" . $table . "_venues_types` WHERE `Type` LIKE '$type'";
-                        list($count) = $GLOBALS['DebauchDB']->fetchRow( $GLOBALS['DebauchDB']->queryF($sql));
-                        $sql = "SELECT * from `" . $table . "_venues_types` WHERE `Type` LIKE '$type'";
-                        $result = $GLOBALS['DebauchDB']->queryF($sql);
+                        $sql = "SELECT count(*) as `count` from `" . $GLOBALS['APIDB']->prefix($table . "_venues_types") . "` WHERE `Type` LIKE '$type'";
+                        list($count) = $GLOBALS['APIDB']->fetchRow( $GLOBALS['APIDB']->queryF($sql));
+                        $sql = "SELECT * from `" . $GLOBALS['APIDB']->prefix($table . "_venues_types") . "` WHERE `Type` LIKE '$type'";
+                        $result = $GLOBALS['APIDB']->queryF($sql);
                         if ($count<1)
                         {
-                            $sql = "INSERT INTO `" . $table . "_venues_types` (`Type`,`Records`) VALUES('$type',0)";
-                            if ($GLOBALS['DebauchDB']->queryF($sql))
-                                $types[$type] = $GLOBALS['DebauchDB']->getInsertId();
-                        } elseif ($typ = $GLOBALS['DebauchDB']->fetchArray($result)) {
+                            $sql = "INSERT INTO `" . $GLOBALS['APIDB']->prefix($table . "_venues_types") . "` (`Type`,`Records`) VALUES('$type',0)";
+                            if ($GLOBALS['APIDB']->queryF($sql))
+                                $types[$type] = $GLOBALS['APIDB']->getInsertId();
+                        } elseif ($typ = $GLOBALS['APIDB']->fetchArray($result)) {
                             $types[$type] = $typ['TypeID'];
                         }
                     }
@@ -1578,30 +1578,30 @@ if (!function_exists("getVenueResults")) {
                     foreach(array_keys($venue) as $field)
                         if (!empty($venue[$field]))
                             if (is_string($venue[$field]) && !is_numeric($venue[$field]))
-                                $where[$field] = "`$field` LIKE '" . mysqli_real_escape_string($GLOBALS['DebauchDB']->conn, $venue[$field]) . "'";
+                                $where[$field] = "`$field` LIKE '" . mysqli_real_escape_string($GLOBALS['APIDB']->conn, $venue[$field]) . "'";
                             elseif (is_array($venue[$field]))
-                                $where[$field] = "`$field` LIKE '" . mysqli_real_escape_string($GLOBALS['DebauchDB']->conn, json_encode($venue[$field])) . "'";
+                                $where[$field] = "`$field` LIKE '" . mysqli_real_escape_string($GLOBALS['APIDB']->conn, json_encode($venue[$field])) . "'";
                             else 
-                                $where[$field] = "`$field` = '" . mysqli_real_escape_string($GLOBALS['DebauchDB']->conn, $venue[$field]) . "'";
-                    $sql = "SELECT count(*) as `count` from `" . $table . "_venues`" . (count($where)>0?" WHERE " .  implode(" AND ", $where):'');
-                    list($count) = $GLOBALS['DebauchDB']->fetchRow($GLOBALS['DebauchDB']->queryF($sql));
-                    $sql = "SELECT * from `" . $table . "_venues`" . (count($where)>0?" WHERE " .  implode(" AND ", $where):'');
-                    $resultv = $GLOBALS['DebauchDB']->queryF($sql);
+                                $where[$field] = "`$field` = '" . mysqli_real_escape_string($GLOBALS['APIDB']->conn, $venue[$field]) . "'";
+                    $sql = "SELECT count(*) as `count` from `" . $GLOBALS['APIDB']->prefix($table . "_venues") . "`" . (count($where)>0?" WHERE " .  implode(" AND ", $where):'');
+                    list($count) = $GLOBALS['APIDB']->fetchRow($GLOBALS['APIDB']->queryF($sql));
+                    $sql = "SELECT * from `" . $GLOBALS['APIDB']->prefix($table . "_venues") . "`" . (count($where)>0?" WHERE " .  implode(" AND ", $where):'');
+                    $resultv = $GLOBALS['APIDB']->queryF($sql);
                     if ($count==0)
                     {
                         $insert = array();
                         foreach(array_keys($venue) as $field)
                           if (!empty($venue[$field]))
                               if (!is_array($venue[$field]))
-                                    $insert[$field] = mysqli_real_escape_string($GLOBALS['DebauchDB']->conn, $venue[$field]);
+                                    $insert[$field] = mysqli_real_escape_string($GLOBALS['APIDB']->conn, $venue[$field]);
                               else 
-                                    $insert[$field] = mysqli_real_escape_string($GLOBALS['DebauchDB']->conn, json_encode($venue[$field]));    
-                        $sql = "INSERT INTO `" . $table . "_venues` (`" . implode('`, `', array_keys($insert)) . "`) VALUES('" . implode("', '", $insert) . "')";
-                        if ($GLOBALS['DebauchDB']->queryF($sql))
-                            $venue['VenueID'] = $GLOBALS['DebauchDB']->getInsertId();
+                                    $insert[$field] = mysqli_real_escape_string($GLOBALS['APIDB']->conn, json_encode($venue[$field]));    
+                        $sql = "INSERT INTO `" . $GLOBALS['APIDB']->prefix($table . "_venues") . "` (`" . implode('`, `', array_keys($insert)) . "`) VALUES('" . implode("', '", $insert) . "')";
+                        if ($GLOBALS['APIDB']->queryF($sql))
+                            $venue['VenueID'] = $GLOBALS['APIDB']->getInsertId();
                         else 
                             die("SQL Failed: $sql;");
-                    } elseif ($ven = $GLOBALS['DebauchDB']->fetchArray($result)) {
+                    } elseif ($ven = $GLOBALS['APIDB']->fetchArray($result)) {
                         $venue['VenueID'] = $ven['VenueID'];
                     }
                     $venue['key'] = (!empty($venue['CountryID'])?$venue['CountryID'].":":"") . md5($table."_venues".$venue['VenueID'].$venue['CordID'].$venue['CountryID']);
@@ -1619,55 +1619,55 @@ if (!function_exists("getVenueResults")) {
                             foreach(array_keys($photo) as $field)
                                 if (!empty($photo[$field]))
                                     if (is_string($photo[$field]) && !is_numeric($photo[$field]))
-                                        $where[$field] = "`$field` LIKE " . mysqli_real_escape_string($GLOBALS['DebauchDB']->conn, $photo[$field]);
+                                        $where[$field] = "`$field` LIKE " . mysqli_real_escape_string($GLOBALS['APIDB']->conn, $photo[$field]);
                                     elseif (is_array($photo[$field]))
-                                        $where[$field] = "`$field` LIKE " . mysqli_real_escape_string($GLOBALS['DebauchDB']->conn, json_encode($photo[$field]));
+                                        $where[$field] = "`$field` LIKE " . mysqli_real_escape_string($GLOBALS['APIDB']->conn, json_encode($photo[$field]));
                                     else
-                                        $where[$field] = "`$field` = " . mysqli_real_escape_string($GLOBALS['DebauchDB']->conn, $photo[$field]);
+                                        $where[$field] = "`$field` = " . mysqli_real_escape_string($GLOBALS['APIDB']->conn, $photo[$field]);
                             $photo['VenueID'] = $venue['VenueID'];
                             $photo['HTML'] = $image['html_attributions'];
-                            $sql = "SELECT count(*) from `" . $table . "_venues_photos`" . (count($where)>0?" WHERE " .  implode(" AND ", $where):'');
-                            list($count) = $GLOBALS['DebauchDB']->fetchRow($GLOBALS['DebauchDB']->queryF($sql));
-                            $sql = "SELECT * from `" . $table . "_venues_photos`" . (count($where)>0?" WHERE " .  implode(" AND ", $where):'');
-                            $resultp = $GLOBALS['DebauchDB']->queryF($sql);
+                            $sql = "SELECT count(*) from `" . $GLOBALS['APIDB']->prefix($table . "_venues_photos") . "`" . (count($where)>0?" WHERE " .  implode(" AND ", $where):'');
+                            list($count) = $GLOBALS['APIDB']->fetchRow($GLOBALS['APIDB']->queryF($sql));
+                            $sql = "SELECT * from `" . $GLOBALS['APIDB']->prefix($table . "_venues_photos") . "`" . (count($where)>0?" WHERE " .  implode(" AND ", $where):'');
+                            $resultp = $GLOBALS['APIDB']->queryF($sql);
                             if ($count==0)
                             {
                                 $insert = array();
                                 foreach(array_keys($photo) as $field)
                                     if (!empty($photo[$field]))
                                         if (!is_array($photo[$field]))
-                                            $insert[$field] = mysqli_real_escape_string($GLOBALS['DebauchDB']->conn, $photo[$field]);
+                                            $insert[$field] = mysqli_real_escape_string($GLOBALS['APIDB']->conn, $photo[$field]);
                                         else
-                                            $insert[$field] = mysqli_real_escape_string($GLOBALS['DebauchDB']->conn, json_encode($photo[$field]));
-                                $sql = "INSERT INTO `" . $table . "_venues_photos` (`" . implode('`, `', array_keys($insert)) . "`) VALUES('" . implode("', '", $insert) . "')";
-                                if ($GLOBALS['DebauchDB']->queryF($sql))
-                                    $photo['PhotoID'] = $GLOBALS['DebauchDB']->getInsertId();
+                                            $insert[$field] = mysqli_real_escape_string($GLOBALS['APIDB']->conn, json_encode($photo[$field]));
+                                $sql = "INSERT INTO `" . $GLOBALS['APIDB']->prefix($table . "_venues_photos") . "` (`" . implode('`, `', array_keys($insert)) . "`) VALUES('" . implode("', '", $insert) . "')";
+                                if ($GLOBALS['APIDB']->queryF($sql))
+                                    $photo['PhotoID'] = $GLOBALS['APIDB']->getInsertId();
                                 else
                                     die("SQL Failed: $sql;");
-                            } elseif ($pht = $GLOBALS['DebauchDB']->fetchArray($resultp)) {
+                            } elseif ($pht = $GLOBALS['APIDB']->fetchArray($resultp)) {
                                 $photo['PhotoID'] = $pht['PhotoID'];
                             }
                             $venue['photos'][$idp] = $photo;
                         }
                     }
-                    $sql = "DELETE FROM `" . $table . "_venues_types_links` WHERE `VenueID` = '" . $venue['VenueID'] . "'";
-                    @$GLOBALS['DebauchDB']->queryF($sql);
+                    $sql = "DELETE FROM `" . $GLOBALS['APIDB']->prefix($table . "_venues_types_links") . "` WHERE `VenueID` = '" . $venue['VenueID'] . "'";
+                    @$GLOBALS['APIDB']->queryF($sql);
                     foreach($venue['Types'] as $type => $typeid)
                     {
-                        $sql = "INSERT INTO `" . $table . "_venues_types_links` (`TypeID`, `VenueID`) VALUES('$typeid', '" . $venue['VenueID'] . "')";
-                        if (!$GLOBALS['DebauchDB']->queryF($sql))
+                        $sql = "INSERT INTO `" . $GLOBALS['APIDB']->prefix($table . "_venues_types_links"). "` (`TypeID`, `VenueID`) VALUES('$typeid', '" . $venue['VenueID'] . "')";
+                        if (!$GLOBALS['APIDB']->queryF($sql))
                             die("SQL Failed: $sql;");
                     }
                     $ret[places_sef($venue['Name'])] = strippedArray($venue, explode('|',API_VENUE_FIELDS));
                   
                 } elseif (isset($values['name']) && !empty($values['name'])) {
-                    $sql = "SELECT count(*) FROM `" . $table . "` WHERE `RegionName` LIKE '".getLikedWildcard($values['name'])."'";
-                    list($count) = $GLOBALS['DebauchDB']->fetchRow($GLOBALS['DebauchDB']->queryF($sql));
-                    $sql = "SELECT *, concat(`RegionName`, ', ', '" . $country['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`))) as `key`, concat(`RegionName`, ', ', '".$country['Country']."') as `Address`  FROM `" . $table . "` WHERE `RegionName` LIKE '".getLikedWildcard($values['name'])."'";
-                    $resultr = $GLOBALS['DebauchDB']->queryF($sql);
+                    $sql = "SELECT count(*) FROM `" . $GLOBALS['APIDB']->prefix($table) . "` WHERE `RegionName` LIKE '".getLikedWildcard($values['name'])."'";
+                    list($count) = $GLOBALS['APIDB']->fetchRow($GLOBALS['APIDB']->queryF($sql));
+                    $sql = "SELECT *, concat(`RegionName`, ', ', '" . $country['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`))) as `key`, concat(`RegionName`, ', ', '".$country['Country']."') as `Address`  FROM `" . $GLOBALS['APIDB']->prefix($table) . "` WHERE `RegionName` LIKE '".getLikedWildcard($values['name'])."'";
+                    $resultr = $GLOBALS['APIDB']->queryF($sql);
                     if ($count!=0)
                     {
-                        while($region = $GLOBALS['DebauchDB']->fetchArray($resultr))
+                        while($region = $GLOBALS['APIDB']->fetchArray($resultr))
                         {
                             if (number_format($region['Latitude_Float'],3)==number_format($values['geometry']['location']['lat'],3) && number_format($region['Longitude_Float'],3)==number_format($values['geometry']['location']['lng'],3))
                             {
@@ -1682,17 +1682,17 @@ if (!function_exists("getVenueResults")) {
                                 foreach(array_keys($region) as $field)
                                     if (!empty($region[$field]))
                                         if (!is_array($region[$field]))
-                                            $update[$field] = "`$field` = '" . mysqli_real_escape_string($GLOBALS['DebauchDB']->conn, $region[$field]) . "'";
+                                            $update[$field] = "`$field` = '" . mysqli_real_escape_string($GLOBALS['APIDB']->conn, $region[$field]) . "'";
                                         else
-                                            $update[$field] = "`$field` = '" . mysqli_real_escape_string($GLOBALS['DebauchDB']->conn, json_encode($region[$field])) . "'";
-                                $sql = "UPDATE `$table` SET " . implode(', ', $update) . " WHERE `CordID` = '" . mysqli_real_escape_string($GLOBALS['DebauchDB']->conn, $region['CordID']) . "'";
-                                if (!$GLOBALS['DebauchDB']->queryF($sql))
+                                            $update[$field] = "`$field` = '" . mysqli_real_escape_string($GLOBALS['APIDB']->conn, json_encode($region[$field])) . "'";
+                                $sql = "UPDATE `$table` SET " . implode(', ', $update) . " WHERE `CordID` = '" . mysqli_real_escape_string($GLOBALS['APIDB']->conn, $region['CordID']) . "'";
+                                if (!$GLOBALS['APIDB']->queryF($sql))
                                     die("SQL Failed: $sql;");
                             }
                         }
                     } else {
-                        $sql = "SELECT MAX(`CordID`) + 1 as CordID  FROM `" . $table . "` GROUP BY `CountryID`";
-                        list($cordid) = $GLOBALS['DebauchDB']->fetchRow($GLOBALS['DebauchDB']->queryF($sql));
+                        $sql = "SELECT MAX(`CordID`) + 1 as CordID  FROM `" . $GLOBALS['APIDB']->prefix($table) . "` GROUP BY `CountryID`";
+                        list($cordid) = $GLOBALS['APIDB']->fetchRow($GLOBALS['APIDB']->queryF($sql));
                         
                         $region = array();
                         $region['CordID'] = $cordid;
@@ -1708,17 +1708,17 @@ if (!function_exists("getVenueResults")) {
                         foreach(array_keys($region) as $field)
                             if (!empty($region[$field]))
                                 if (!is_array($region[$field]))
-                                    $insert[$field] = mysqli_real_escape_string($GLOBALS['DebauchDB']->conn, $region[$field]);
+                                    $insert[$field] = mysqli_real_escape_string($GLOBALS['APIDB']->conn, $region[$field]);
                                 else
-                                    $insert[$field] = mysqli_real_escape_string($GLOBALS['DebauchDB']->conn, json_encode($region[$field]));
+                                    $insert[$field] = mysqli_real_escape_string($GLOBALS['APIDB']->conn, json_encode($region[$field]));
                    
                         $sql = "INSERT INTO `$table` (`" . implode('`, `', array_keys($insert)) . "`) VALUES('" . implode("', '", $insert) . "')";
-                        if (!$GLOBALS['DebauchDB']->queryF($sql))
+                        if (!$GLOBALS['APIDB']->queryF($sql))
                             die("SQL Failed: $sql;");
                     }
             }
         }
-        $GLOBALS['DebauchDB']->queryF("COMMIT");
+        $GLOBALS['APIDB']->queryF("COMMIT");
         return $ret;
     }
 }

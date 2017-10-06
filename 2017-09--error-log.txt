@@ -1,7 +1,0 @@
-[27-Sep-2017 23:52:55 Australia/Melbourne] PHP Fatal error:  Maximum execution time of 30 seconds exceeded in /home/antony/eclipse-workspace/places.localhost/functions.php on line 284
-[27-Sep-2017 23:53:25 Australia/Melbourne] PHP Fatal error:  Maximum execution time of 30 seconds exceeded in /home/antony/eclipse-workspace/places.localhost/functions.php on line 50
-[28-Sep-2017 00:10:52 Australia/Melbourne] PHP Fatal error:  Maximum execution time of 30 seconds exceeded in /home/antony/eclipse-workspace/places.localhost/functions.php on line 35
-[28-Sep-2017 00:11:22 Australia/Melbourne] PHP Fatal error:  Maximum execution time of 30 seconds exceeded in /home/antony/eclipse-workspace/places.localhost/functions.php on line 50
-[28-Sep-2017 00:11:52 Australia/Melbourne] PHP Fatal error:  Maximum execution time of 30 seconds exceeded in /home/antony/eclipse-workspace/places.localhost/functions.php on line 50
-[28-Sep-2017 00:12:22 Australia/Melbourne] PHP Fatal error:  Maximum execution time of 30 seconds exceeded in /home/antony/eclipse-workspace/places.localhost/functions.php on line 96
-[28-Sep-2017 05:26:30 Australia/Melbourne] PHP Fatal error:  Maximum execution time of 30 seconds exceeded in /home/antony/eclipse-workspace/places.localhost/functions.php on line 1423

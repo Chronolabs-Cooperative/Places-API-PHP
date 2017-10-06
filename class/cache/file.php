@@ -1,6 +1,6 @@
 <?php
 /**
- * Chronolabs REST Geospatial Places Services API
+ * Cache engine For API
  *
  * You may not change or alter any portion of this comment or credits
  * of supporting developers from this source code or any supporting source code
@@ -9,20 +9,14 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * @copyright       Chronolabs Cooperative http://snails.email
- * @license         GNU GPL 3 (http://www.gnu.org/licenses/old-licenses/gpl-2.0.html)
- * @package         api
- * @since           2.0.1
- * @author          Simon Roberts <wishcraft@users.sourceforge.net>
- * @subpackage		places
- * @description		Geospatial Places Services API
- * @see			    http://internetfounder.wordpress.com
- * @see			    http://sourceoforge.net/projects/chronolabsapis
- * @see			    https://github.com/Chronolabs-Cooperative/Places-API-PHP
+ * @copyright       (c) 2000-2016 API Project (www.api.org)
+ * @license             GNU GPL 2 (http://www.gnu.org/licenses/gpl-2.0.html)
+ * @package             class
+ * @subpackage          cache
+ * @since               2.3.0
+ * @author              Taiwen Jiang <phppp@users.sourceforge.net>
  */
-
-
-defined('API_ROOT_PATH') || die('Restricted access');
+defined('API_ROOT_PATH') || exit('Restricted access');
 
 /**
  * File Storage engine for cache
@@ -39,25 +33,24 @@ defined('API_ROOT_PATH') || die('Restricted access');
  * Redistributions of files must retain the above copyright notice.
  *
  * @filesource
- * @copyright Copyright 2005-2008, Cake Software Foundation, Inc.
- * @link http://www.cakefoundation.org/projects/info/cakephp CakePHP(tm) Project
- * @package cake
+ * @copyright  Copyright 2005-2008, Cake Software Foundation, Inc.
+ * @link       http://www.cakefoundation.org/projects/info/cakephp CakePHP(tm) Project
+ * @package    cake
  * @subpackage cake.cake.libs.cache
- * @since CakePHP(tm) v 1.2.0.4933
- * @version $Revision: 12537 $
- * @modifiedby $LastChangedBy: beckmi $
- * @lastmodified $Date: 2014-05-19 10:19:33 -0400 (Mon, 19 May 2014) $
- * @license http://www.opensource.org/licenses/mit-license.php The MIT License
+ * @since      CakePHP(tm) v 1.2.0.4933
+ * @modifiedby $LastChangedBy$
+ * @lastmodified $Date$
+ * @license    http://www.opensource.org/licenses/mit-license.php The MIT License
  */
 
 /**
  * File Storage engine for cache
  *
- * @todo use the File and Folder classes (if it's not a too big performance hit)
- * @package cake
+ * @todo       use the File and Folder classes (if it's not a too big performance hit)
+ * @package    cake
  * @subpackage cake.cake.libs.cache
  */
-class PlacesCacheFile extends PlacesCacheEngine
+class APICacheFile extends APICacheEngine
 {
     /**
      * Instance of File class
@@ -65,20 +58,20 @@ class PlacesCacheFile extends PlacesCacheEngine
      * @var object
      * @access private
      */
-    var $file = null;
+    private $file;
 
     /**
      * settings
      *                path = absolute path to cache directory, default => CACHE
-     *                prefix = string prefix for filename, default => Places_
+     *                prefix = string prefix for filename, default => api_
      *                lock = enable file locking on write, default => false
      *                serialize = serialize the data, default => false
      *
      * @var array
-     * @see CacheEngine::__defaults
+     * @see    CacheEngine::__defaults
      * @access public
      */
-    var $settings = array();
+    public $settings = array();
 
     /**
      * Set to true if FileEngine::init(); and FileEngine::active(); do not fail.
@@ -86,7 +79,7 @@ class PlacesCacheFile extends PlacesCacheEngine
      * @var boolean
      * @access private
      */
-    var $active = false;
+    private $active = false;
 
     /**
      * True unless FileEngine::active(); fails
@@ -94,7 +87,7 @@ class PlacesCacheFile extends PlacesCacheEngine
      * @var boolean
      * @access private
      */
-    var $init = true;
+    private $init = true;
 
     /**
      * Initialize the Cache Engine
@@ -102,20 +95,27 @@ class PlacesCacheFile extends PlacesCacheEngine
      * Called automatically by the cache frontend
      * To reinitialize the settings call Cache::engine('EngineName', [optional] settings = array());
      *
-     * @param array $settings array of setting for the engine
+     * @param  array $settings array of setting for the engine
      * @return boolean True if the engine has been successfully initialized, false if not
      * @access   public
      */
-    function init($settings = array())
+    public function init($settings = array())
     {
+        if (!is_dir(API_VAR_PATH . '/' . parse_url(API_URL, PHP_URL_HOST)))
+            mkdir(API_VAR_PATH . '/' . parse_url(API_URL, PHP_URL_HOST), 0777, true);
+        
         parent::init($settings);
-        if (!is_dir(API_CACHE_PATH))
-            mkdir(API_CACHE_PATH, 0777, true);
-        $defaults = array('path' => API_CACHE_PATH , 'extension' => '.php' , 'prefix' => strtolower($_SERVER['HTTP_HOST']).'__' , 'lock' => false , 'serialize' => false , 'duration' => 31556926);
+        $defaults       = array(
+            'path'      => API_VAR_PATH . '/' . parse_url(API_URL, PHP_URL_HOST),
+            'extension' => '.php',
+            'prefix'    => 'api_',
+            'lock'      => false,
+            'serialize' => false,
+            'duration'  => 31556926);
         $this->settings = array_merge($defaults, $this->settings);
         if (!isset($this->file)) {
-            require_once dirname(__DIR__) . DIRECTORY_SEPARATOR . 'file' . DIRECTORY_SEPARATOR . 'placesfile.php';
-            $this->file = PlacesFile::getHandler('file', $this->settings['path'] . '/index.html', true);
+            APILoad::load('APIFile');
+            $this->file = APIFile::getHandler('file', $this->settings['path'] . '/index.html', true);
         }
         $this->settings['path'] = $this->file->folder->cd($this->settings['path']);
         if (empty($this->settings['path'])) {
@@ -131,7 +131,7 @@ class PlacesCacheFile extends PlacesCacheEngine
      * @return boolean True if garbage collection was successful, false on failure
      * @access public
      */
-    function gc()
+    public function gc()
     {
         return $this->clear(true);
     }
@@ -139,15 +139,15 @@ class PlacesCacheFile extends PlacesCacheEngine
     /**
      * Write data for key into cache
      *
-     * @param  string  $key      Identifier for the data
-     * @param  mixed   $data     Data to be cached
-     * @param  mixed   $duration How long to cache the data, in seconds
+     * @param  string $key      Identifier for the data
+     * @param  mixed  $data     Data to be cached
+     * @param  mixed  $duration How long to cache the data, in seconds
      * @return boolean True if the data was successfully cached, false on failure
      * @access public
      */
-    function write($key, $data = null, $duration = null)
+    public function write($key, $data = null, $duration = null)
     {
-        if (!isset($data) || ! $this->init) {
+        if (!isset($data) || !$this->init) {
             return false;
         }
 
@@ -158,12 +158,12 @@ class PlacesCacheFile extends PlacesCacheEngine
         if ($duration == null) {
             $duration = $this->settings['duration'];
         }
-        $windows = false;
+        $windows   = false;
         $lineBreak = "\n";
 
-        if (substr(PHP_OS, 0, 3) == "WIN") {
+        if (substr(PHP_OS, 0, 3) === 'WIN') {
             $lineBreak = "\r\n";
-            $windows = true;
+            $windows   = true;
         }
         $expires = time() + $duration;
         if (!empty($this->settings['serialize'])) {
@@ -174,7 +174,7 @@ class PlacesCacheFile extends PlacesCacheEngine
             }
             $contents = $expires . $lineBreak . $data . $lineBreak;
         } else {
-            $contents = $expires . $lineBreak . "return " . var_export($data, true) . ";" . $lineBreak;
+            $contents = $expires . $lineBreak . 'return ' . var_export($data, true) . ';' . $lineBreak;
         }
 
         if ($this->settings['lock']) {
@@ -193,9 +193,9 @@ class PlacesCacheFile extends PlacesCacheEngine
      * @return mixed  The cached data, or false if the data doesn't exist, has expired, or if there was an error fetching it
      * @access public
      */
-    function read($key)
+    public function read($key)
     {
-        if ($this->setKey($key) === false || ! $this->init) {
+        if ($this->setKey($key) === false || !$this->init) {
             return false;
         }
         if ($this->settings['lock']) {
@@ -203,7 +203,7 @@ class PlacesCacheFile extends PlacesCacheEngine
         }
         $cachetime = $this->file->read(11);
 
-        if ($cachetime !== false && intval($cachetime) < time()) {
+        if ($cachetime !== false && (int)$cachetime < time()) {
             $this->file->close();
             $this->file->delete();
 
@@ -213,13 +213,14 @@ class PlacesCacheFile extends PlacesCacheEngine
         $data = $this->file->read(true);
         if (!empty($data) && !empty($this->settings['serialize'])) {
             $data = stripslashes($data);
-            $data = preg_replace('!s:(\d+):"(.*?)";!se', "'s:'.strlen('$2').':\"$2\";'", $data);
+            // $data = preg_replace('!s:(\d+):"(.*?)";!se', "'s:'.strlen('$2').':\"$2\";'", $data);
+            $data = preg_replace_callback('!s:(\d+):"(.*?)";!s', function ($m) { return 's:' . strlen($m[2]) . ':"' . $m[2] . '";'; }, $data);
             $data = unserialize($data);
             if (is_array($data)) {
-                require_once dirname(__DIR__) . DIRECTORY_SEPARATOR . 'placesutility.php';
-                $data = PlacesUtility::recursive('stripslashes', $data);
+                APILoad::load('APIUtility');
+                $data = APIUtility::recursive('stripslashes', $data);
             }
-        } else if ($data && empty($this->settings['serialize'])) {
+        } elseif ($data && empty($this->settings['serialize'])) {
             $data = eval($data);
         }
         $this->file->close();
@@ -230,13 +231,13 @@ class PlacesCacheFile extends PlacesCacheEngine
     /**
      * Delete a key from the cache
      *
-     * @param  string  $key Identifier for the data
+     * @param  string $key Identifier for the data
      * @return boolean True if the value was successfully deleted, false if it didn't exist or couldn't be removed
      * @access public
      */
-    function delete($key)
+    public function delete($key)
     {
-        if ($this->setKey($key) === false || ! $this->init) {
+        if ($this->setKey($key) === false || !$this->init) {
             return false;
         }
 
@@ -250,14 +251,14 @@ class PlacesCacheFile extends PlacesCacheEngine
      * @return boolean True if the cache was successfully cleared, false otherwise
      * @access public
      */
-    function clear($check = true)
+    public function clear($check = true)
     {
         if (!$this->init) {
             return false;
         }
         $dir = dir($this->settings['path']);
         if ($check) {
-            $now = time();
+            $now       = time();
             $threshold = $now - $this->settings['duration'];
         }
         while (($entry = $dir->read()) !== false) {
@@ -292,25 +293,27 @@ class PlacesCacheFile extends PlacesCacheEngine
      * @return mixed  Absolute cache file for the given key or false if erroneous
      * @access private
      */
-    function setKey($key)
+    private function setKey($key)
     {
         $this->file->folder->cd($this->settings['path']);
-        $this->file->name = $this->settings['prefix'] . $key . $this->settings['extension'];
+        $this->file->name   = $this->settings['prefix'] . $key . $this->settings['extension'];
         $this->file->handle = null;
-        $this->file->info = null;
+        $this->file->info   = null;
         if (!$this->file->folder->inPath($this->file->pwd(), true)) {
             return false;
         }
+        return null;
     }
+
     /**
      * Determine is cache directory is writable
      *
      * @return boolean
      * @access private
      */
-    function active()
+    private function active()
     {
-        if (!$this->active && $this->init && ! is_writable($this->settings['path'])) {
+        if (!$this->active && $this->init && !is_writable($this->settings['path'])) {
             $this->init = false;
             trigger_error(sprintf('%s is not writable', $this->settings['path']), E_USER_WARNING);
         } else {

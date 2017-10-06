@@ -1,6 +1,6 @@
 <?php
 /**
- * Chronolabs REST Geospatial Places Services API
+ * Folder engine For API
  *
  * You may not change or alter any portion of this comment or credits
  * of supporting developers from this source code or any supporting source code
@@ -9,18 +9,13 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * @copyright       Chronolabs Cooperative http://snails.email
- * @license         GNU GPL 3 (http://www.gnu.org/licenses/old-licenses/gpl-2.0.html)
- * @package         api
- * @since           2.0.1
- * @author          Simon Roberts <wishcraft@users.sourceforge.net>
- * @subpackage		places
- * @description		Geospatial Places Services API
- * @see			    http://internetfounder.wordpress.com
- * @see			    http://sourceoforge.net/projects/chronolabsapis
- * @see			    https://github.com/Chronolabs-Cooperative/Places-API-PHP
+ * @copyright       (c) 2005-2016 API Project (www.api.org)
+ * @license             GNU GPL 2 (http://www.gnu.org/licenses/gpl-2.0.html)
+ * @package             class
+ * @subpackage          file
+ * @since               2.3.0
+ * @author              Taiwen Jiang <phppp@users.sourceforge.net>
  */
-
 
 /**
  * Convenience class for handling directories.
@@ -54,7 +49,7 @@
  * @package    cake
  * @subpackage cake.cake.libs
  */
-class PlacesFolderHandler
+class APIFolderHandler
 {
     /**
      * Path to Folder.
@@ -122,7 +117,7 @@ class PlacesFolderHandler
     public function __construct($path = false, $create = true, $mode = false)
     {
         if (empty($path)) {
-            $path = API_CACHE_PATH;
+            $path = API_VAR_PATH . '/caches/api_cache';
         }
         if ($mode) {
             $this->mode = intval($mode, 8);
@@ -187,7 +182,7 @@ class PlacesFolderHandler
                         $item = $n;
                     }
                 } else {
-                    if ((!preg_match('/^\\.+$/', $n) && $exceptions == false) || ($exceptions == true && !preg_match('/^\\.(.*)$/', $n))) {
+                    if ((!preg_match('/^\\.+$/', $n) && $exceptions === false) || ($exceptions === true && !preg_match('/^\\.(.*)$/', $n))) {
                         $item = $n;
                     }
                 }
@@ -327,7 +322,7 @@ class PlacesFolderHandler
      */
     public function normalizePath($path)
     {
-        if (PlacesFolderHandler::isWindowsPath($path)) {
+        if (APIFolderHandler::isWindowsPath($path)) {
             return '\\';
         }
 
@@ -345,7 +340,7 @@ class PlacesFolderHandler
      */
     public function correctSlashFor($path)
     {
-        if (PlacesFolderHandler::isWindowsPath($path)) {
+        if (APIFolderHandler::isWindowsPath($path)) {
             return '\\';
         }
 
@@ -363,11 +358,11 @@ class PlacesFolderHandler
      */
     public function slashTerm($path)
     {
-        if (PlacesFolderHandler::isSlashTerm($path)) {
+        if (APIFolderHandler::isSlashTerm($path)) {
             return $path;
         }
 
-        return $path . PlacesFolderHandler::correctSlashFor($path);
+        return $path . APIFolderHandler::correctSlashFor($path);
     }
 
     /**
@@ -386,16 +381,16 @@ class PlacesFolderHandler
     }
 
     /**
-     * Returns true if the File is in a given PlacesPath.
+     * Returns true if the File is in a given APIPath.
      *
      * @param string $path
      *
      * @return bool
      * @access public
      */
-    public function inPlacesPath($path = '')
+    public function inAPIPath($path = '')
     {
-        $dir    = substr($this->slashTerm(Places_ROOT_PATH), 0, -1);
+        $dir    = substr($this->slashTerm(API_ROOT_PATH), 0, -1);
         $newdir = $dir . $path;
 
         return $this->inPath($newdir);
@@ -672,7 +667,7 @@ class PlacesFolderHandler
     /**
      * Recursive directory copy.
      *
-     * @param array $options (to, from, chmod, skip)
+     * @param array|string $options (to, from, chmod, skip)
      *
      * @return bool
      * @access public
@@ -753,7 +748,7 @@ class PlacesFolderHandler
     /**
      * Recursive directory move.
      *
-     * @param array $options (to, from, chmod, skip)
+     * @param array|string $options (to, from, chmod, skip)
      *
      * @return boolean Success
      * @access public

@@ -1,6 +1,6 @@
 <?php
 /**
- * Chronolabs REST Geospatial Places Services API
+ * Cache engine For API
  *
  * You may not change or alter any portion of this comment or credits
  * of supporting developers from this source code or any supporting source code
@@ -9,20 +9,14 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * @copyright       Chronolabs Cooperative http://snails.email
- * @license         GNU GPL 3 (http://www.gnu.org/licenses/old-licenses/gpl-2.0.html)
- * @package         api
- * @since           2.0.1
- * @author          Simon Roberts <wishcraft@users.sourceforge.net>
- * @subpackage		places
- * @description		Geospatial Places Services API
- * @see			    http://internetfounder.wordpress.com
- * @see			    http://sourceoforge.net/projects/chronolabsapis
- * @see			    https://github.com/Chronolabs-Cooperative/Places-API-PHP
+ * @copyright       (c) 2000-2016 API Project (www.api.org)
+ * @license             GNU GPL 2 (http://www.gnu.org/licenses/gpl-2.0.html)
+ * @package             class
+ * @subpackage          cache
+ * @since               2.3.0
+ * @author              Taiwen Jiang <phppp@users.sourceforge.net>
  */
-
-
-defined('API_ROOT_PATH') || die('Restricted access');
+defined('API_ROOT_PATH') || exit('Restricted access');
 
 /**
  * Xcache storage engine for cache.
@@ -39,24 +33,24 @@ defined('API_ROOT_PATH') || die('Restricted access');
  * Redistributions of files must retain the above copyright notice.
  *
  * @filesource
- * @copyright Copyright 2005-2008, Cake Software Foundation, Inc.
- * @link http://www.cakefoundation.org/projects/info/cakephp CakePHP(tm) Project
- * @package cake
+ * @copyright  Copyright 2005-2008, Cake Software Foundation, Inc.
+ * @link       http://www.cakefoundation.org/projects/info/cakephp CakePHP(tm) Project
+ * @package    cake
  * @subpackage cake.cake.libs.cache
- * @since CakePHP(tm) v 1.2.0.4947
- * @version $Revision: 12537 $
+ * @since      CakePHP(tm) v 1.2.0.4947
  * @modifiedby $LastChangedBy: beckmi $
- * @lastmodified $Date: 2014-05-19 10:19:33 -0400 (Mon, 19 May 2014) $
- * @license http://www.opensource.org/licenses/mit-license.php The MIT License
+ * @lastmodified $Date: 2015-06-06 17:59:41 -0400 (Sat, 06 Jun 2015) $
+ * @license    http://www.opensource.org/licenses/mit-license.php The MIT License
  */
+
 /**
  * Xcache storage engine for cache
  *
- * @link http://trac.lighttpd.net/xcache/ Xcache
- * @package cake
+ * @link       http://trac.lighttpd.net/xcache/ Xcache
+ * @package    cake
  * @subpackage cake.cake.libs.cache
  */
-class PlacesCacheXcache extends PlacesCacheEngine
+class APICacheXcache extends APICacheEngine
 {
     /**
      * settings
@@ -66,7 +60,7 @@ class PlacesCacheXcache extends PlacesCacheEngine
      * @var array
      * @access public
      */
-    var $settings = array();
+    public $settings = array();
 
     /**
      * Initialize the Cache Engine
@@ -74,14 +68,14 @@ class PlacesCacheXcache extends PlacesCacheEngine
      * Called automatically by the cache frontend
      * To reinitialize the settings call Cache::engine('EngineName', [optional] settings = array());
      *
-     * @param array $settings array of setting for the engine
+     * @param  array $settings array of setting for the engine
      * @return boolean True if the engine has been successfully initialized, false if not
      * @access   public
      */
-    function init($settings)
+    public function init($settings = array())
     {
         parent::init($settings);
-        $defaults = array('PHP_AUTH_USER' => 'cake' , 'PHP_AUTH_PW' => 'cake');
+        $defaults       = array('PHP_AUTH_USER' => 'cake', 'PHP_AUTH_PW' => 'cake');
         $this->settings = array_merge($defaults, $this->settings);
 
         return function_exists('xcache_info');
@@ -96,7 +90,7 @@ class PlacesCacheXcache extends PlacesCacheEngine
      * @return boolean True if the data was successfully cached, false on failure
      * @access public
      */
-    function write($key, &$value, $duration)
+    public function write($key, $value, $duration = null)
     {
         return xcache_set($key, $value, $duration);
     }
@@ -108,7 +102,7 @@ class PlacesCacheXcache extends PlacesCacheEngine
      * @return mixed  The cached data, or false if the data doesn't exist, has expired, or if there was an error fetching it
      * @access public
      */
-    function read($key)
+    public function read($key)
     {
         if (xcache_isset($key)) {
             return xcache_get($key);
@@ -120,11 +114,11 @@ class PlacesCacheXcache extends PlacesCacheEngine
     /**
      * Delete a key from the cache
      *
-     * @param  string  $key Identifier for the data
+     * @param  string $key Identifier for the data
      * @return boolean True if the value was successfully deleted, false if it didn't exist or couldn't be removed
      * @access public
      */
-    function delete($key)
+    public function delete($key)
     {
         return xcache_unset($key);
     }
@@ -135,11 +129,11 @@ class PlacesCacheXcache extends PlacesCacheEngine
      * @return boolean True if the cache was successfully cleared, false otherwise
      * @access public
      */
-    function clear()
+    public function clear($check = null)
     {
         $result = true;
         $this->__auth();
-        for ($i = 0, $max = xcache_count(XC_TYPE_VAR); $i < $max; $i++) {
+        for ($i = 0, $max = xcache_count(XC_TYPE_VAR); $i < $max; ++$i) {
             if (!xcache_clear_cache(XC_TYPE_VAR, $i)) {
                 $result = false;
                 break;
@@ -160,10 +154,10 @@ class PlacesCacheXcache extends PlacesCacheEngine
      * @param bool $reverse Revert changes
      * @access   private
      */
-    function __auth($reverse = false)
+    private function __auth($reverse = false)
     {
         static $backup = array();
-        $keys = array('PHP_AUTH_USER' , 'PHP_AUTH_PW');
+        $keys = array('PHP_AUTH_USER', 'PHP_AUTH_PW');
         foreach ($keys as $key) {
             if ($reverse) {
                 if (isset($backup[$key])) {
@@ -177,7 +171,7 @@ class PlacesCacheXcache extends PlacesCacheEngine
                 if (!empty($value)) {
                     $backup[$key] = $value;
                 }
-                $varName = '__' . $key;
+                $varName       = '__' . $key;
                 $_SERVER[$key] = $this->settings[$varName];
             }
         }
