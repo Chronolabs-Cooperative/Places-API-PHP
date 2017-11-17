@@ -71,7 +71,7 @@ if (!$timeout = APICache::read(basename(__DIR__) . '--verify-timeout'))
     if ($count==0)
     {
         $GLOBALS['APIDB']->query("START TRANSACTION");
-        $sql = "INSERT INTO `" . $GLOBALS['APIDB']->prefix("countries_oldhashs") . "` (`retired`, `current`, `created`) SELECT md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `retired`, md5(concat(`Country`, `Capital`, `Continent`, `CurrencyCode`)) as `current`, UNIX_TIMESTAMP() FROM `" . $GLOBALS['APIDB']->prefix("countries") . " ` GROUP BY `CountryID` ORDER BY `retired`";
+        $sql = "INSERT INTO `" . $GLOBALS['APIDB']->prefix("countries_oldhashs") . "` (`retired`, `current`, `created`) SELECT md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `retired`, md5(concat(`Country`, `Capital`, `Continent`, `CurrencyCode`)) as `current`, UNIX_TIMESTAMP() FROM `" . $GLOBALS['APIDB']->prefix("countries") . "` GROUP BY `CountryID` ORDER BY `retired`";
         if (!$GLOBALS['APIDB']->query($sql))
             die("SQL Failed: $sql;");
         $GLOBALS['APIDB']->query("COMMIT");
@@ -143,7 +143,7 @@ if (!$timeout = APICache::read(basename(__DIR__) . '--verify-timeout'))
                     while(list($key) = $GLOBALS['APIDB']->fetchRow($GLOBALS['APIDB']->query($sql)))
                         unset($keys[$key]);
     
-                    $sql = "INSERT INTO `" . $GLOBALS['APIDB']->prefix($table . "_oldhashs") . "` (`retired`, `current`, `created`) SELECT $retired as `retired`, $current as `current`, UNIX_TIMESTAMP() FROM `" . $GLOBALS['APIDB']->prefix($table.$add) . " ` WHERE `retired` IN ('" . implode("','", $keys) . "') GROUP BY `CountryID` ORDER BY `retired`";
+                    $sql = "INSERT INTO `" . $GLOBALS['APIDB']->prefix($table . "_oldhashs") . "` (`retired`, `current`, `created`) SELECT $retired as `retired`, $current as `current`, UNIX_TIMESTAMP() FROM `" . $GLOBALS['APIDB']->prefix($table . $add) . "` WHERE `retired` IN ('" . implode("','", $keys) . "') GROUP BY `CountryID` ORDER BY `retired`";
                     if (!$GLOBALS['APIDB']->query($sql))
                         die("SQL Failed: $sql;");
                 }
