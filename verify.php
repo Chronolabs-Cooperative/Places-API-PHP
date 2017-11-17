@@ -53,7 +53,7 @@ if (!$timeout = APICache::read(basename(__DIR__) . '--verify-timeout'))
     }
     
     $table = 'countries';
-    if (!isset($tables[$GLOBALS['APIDB']->prefix($table)]))
+    if (!isset($tables[$GLOBALS['APIDB']->prefix("$table_oldhashs")]))
     {
         $query[] = "CREATE TABLE `" . $GLOBALS['APIDB']->prefix("$table_oldhashs") . "` (
                 `id` mediumint(250) UNSIGNED NOT NULL,
@@ -82,7 +82,7 @@ if (!$timeout = APICache::read(basename(__DIR__) . '--verify-timeout'))
     while($country = $GLOBALS['APIDB']->fetchArray($results))
     {
         $table = $country['Table'];
-        if (!isset($tables[$GLOBALS['APIDB']->prefix($table)]))
+        if (!isset($tables[$GLOBALS['APIDB']->prefix("$table_oldhashs")]))
         {
             $query[] = "CREATE TABLE `" . $GLOBALS['APIDB']->prefix("$table_oldhashs") . "` (
                 `id` mediumint(250) UNSIGNED NOT NULL,
