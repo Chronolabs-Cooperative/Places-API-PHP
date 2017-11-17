@@ -59,6 +59,7 @@ if (!$timeout = APICache::read(basename(__DIR__) . '--verify-timeout'))
                 `retired` char(44) NOT NULL DEFAULT '',
                 `current` char(44) NOT NULL DEFAULT '',
                 `created` int(11) DEFAULT NULL,
+                PRIMARY KEY (`id`),
                 KEY `SEARCH` (`retired`,`current`,`id`)
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8";
         if (!$GLOBALS['APIDB']->query($sql))
@@ -88,6 +89,7 @@ if (!$timeout = APICache::read(basename(__DIR__) . '--verify-timeout'))
                 `retired` char(44) NOT NULL DEFAULT '',
                 `current` char(44) NOT NULL DEFAULT '',
                 `created` int(11) DEFAULT NULL,
+                PRIMARY KEY (`id`),
                 KEY `SEARCH` (`retired`,`current`,`id`)
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8";
             if (!$GLOBALS['APIDB']->query($sql))
