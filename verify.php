@@ -50,6 +50,12 @@ if (!$timeout = APICache::read(basename(__DIR__) . '--verify-timeout'))
         while($row = $GLOBALS['APIDB']->fetchArray($results))
             if (!empty($row))
                 $fields[$table][$row['Field']] = $row;
+            
+        if (substr(strtolower($row['Type']),0,5)=='float' && strtolower($row['Type']) != 'float(44,30)')
+        {
+            if (!$GLOBALS['APIDB']->query($sql = "ALTER TABLE `" . API_DB_NAME . "`.`" . $table . "` CHANGE COLUMN `".$row['Field']."` `".$row['Field']."` float(44,30) NOT NULL DEFAULT '0'"))
+                die("SQL Failed: $sql;");
+        }
     }
     
     if (!isset($tables[$GLOBALS['APIDB']->prefix("countries_oldhashs")]))
@@ -98,7 +104,7 @@ if (!$timeout = APICache::read(basename(__DIR__) . '--verify-timeout'))
         
         $GLOBALS['APIDB']->query("START TRANSACTION");
         $tb = $country['Table'];
-        foreach(array("places", "addresses", "venues", "states") as $mode)
+        foreach(array("places", "places2", "addresses", "venues", "states") as $mode)
         {
             switch ($mode)
             {
@@ -106,6 +112,11 @@ if (!$timeout = APICache::read(basename(__DIR__) . '--verify-timeout'))
                     $add = '';
                     $retired = "concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`)))";
                     $current = "concat(`CountryID`, ':', md5(concat(`RegionName`, ', ', '" . $country['Country'] . "')))";
+                    break;
+                case 'places2';
+                    $add = '';
+                    $retired = "concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`)))";
+                    $current = "concat(`CountryID`, ':', md5(concat(`Longitude_Float`, `Latitude_Float`, `RegionName`, ', ', '" . $country['Country'] . "')))";
                     break;
                 case 'addresses';
                     $add = '_'.$mode;

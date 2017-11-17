@@ -115,7 +115,7 @@ if (!function_exists("randomAPIKey")) {
 	    $sql = "SELECT * FROM `".$GLOBALS['APIDB']->prefix("countries") . "` WHERE `Records` > 1000 ORDER BY RAND() LIMIT 1 ";
 		if ($result = $GLOBALS['APIDB']->queryF($sql)) {
 			$country = $GLOBALS['APIDB']->fetchArray($result);
-			$sql = "SELECT concat(`CountryID`, ':', md5(concat(`RegionName`, '" . $country['Country'] . "'))) as `key` FROM `" . $GLOBALS['APIDB']->prefix($country['Table']) . "` ORDER BY RAND() LIMIT 1 ";
+			$sql = "SELECT concat(`CountryID`, ':', md5(concat(`Longitude_Float`, `Latitude_Float`, `RegionName`, '" . $country['Country'] . "'))) as `key` FROM `" . $GLOBALS['APIDB']->prefix($country['Table']) . "` ORDER BY RAND() LIMIT 1 ";
 			if ($result = $GLOBALS['APIDB']->queryF($sql)) {
 				if (list($key) = $GLOBALS['APIDB']->fetchRow($result))
 				    return $key;
@@ -244,13 +244,13 @@ if (!function_exists("findPlace")) {
                     $ret['countries'][$table] = strippedArray($country, explode('|', API_COUNTRY_FIELDS));
 		
     			if (strtolower($place)!='random') {
-    			    $sql = "SELECT *,  concat(`RegionName`, '" . $country['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`RegionName`, '" . $country['Country'] . "'))) as `key`  FROM `" . $GLOBALS['APIDB']->prefix($table) . "` WHERE LOWER(`RegionName`) LIKE '" . strtolower($place) . "%'  ORDER BY RAND()";
+    			    $sql = "SELECT *,  concat(`RegionName`, '" . $country['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`Longitude_Float`, `Latitude_Float`, `RegionName`, '" . $country['Country'] . "'))) as `key`  FROM `" . $GLOBALS['APIDB']->prefix($table) . "` WHERE LOWER(`RegionName`) LIKE '" . strtolower($place) . "%'  ORDER BY RAND()";
     			} elseif (strtolower($place) == 'random' && strtolower($country) == 'random')
-    			     $sql = "SELECT *,  concat(`RegionName`, '" . $country['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`RegionName`, '" . $country['Country'] . "'))) as `key`  FROM `" . $GLOBALS['APIDB']->prefix($table) . "` ORDER BY RAND()";
+    			     $sql = "SELECT *,  concat(`RegionName`, '" . $country['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`Longitude_Float`, `Latitude_Float`, `RegionName`, '" . $country['Country'] . "'))) as `key`  FROM `" . $GLOBALS['APIDB']->prefix($table) . "` ORDER BY RAND()";
     			elseif (strtolower($place) == 'random' && strtolower($country) != 'random') {
-    			    $sql = "SELECT *,  concat(`RegionName`, '" . $country['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`RegionName`, '" . $country['Country'] . "'))) as `key`  FROM `" . $GLOBALS['APIDB']->prefix($table) . "` ORDER BY RAND()";
+    			    $sql = "SELECT *,  concat(`RegionName`, '" . $country['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`Longitude_Float`, `Latitude_Float`, `RegionName`, '" . $country['Country'] . "'))) as `key`  FROM `" . $GLOBALS['APIDB']->prefix($table) . "` ORDER BY RAND()";
     			} else {
-    			    $sql = "SELECT *,  concat(`RegionName`, '" . $country['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`RegionName`, '" . $country['Country'] . "'))) as `key`  FROM `" . $GLOBALS['APIDB']->prefix($table) . "` WHERE LOWER(`RegionName`) LIKE '%" . strtolower($place) . "%'  ORDER BY RAND()";
+    			    $sql = "SELECT *,  concat(`RegionName`, '" . $country['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`Longitude_Float`, `Latitude_Float`, `RegionName`, '" . $country['Country'] . "'))) as `key`  FROM `" . $GLOBALS['APIDB']->prefix($table) . "` WHERE LOWER(`RegionName`) LIKE '%" . strtolower($place) . "%'  ORDER BY RAND()";
     			}
 				if ($resultb = $GLOBALS['APIDB']->queryF($sql)) {
 					while ($region = $GLOBALS['APIDB']->fetchArray($resultb)) {
@@ -278,7 +278,7 @@ if (!function_exists("findPlace")) {
 						{
     						$latitude = $region['Latitude_Float'];
     						$longitude = $region['Longitude_Float'];
-    						$sql = "SELECT *,  concat(`RegionName`, '" . $country['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`RegionName`, '" . $country['Country'] . "'))) as `key`, 3956 * 2 * ASIN(SQRT(POWER(SIN((" . abs($latitude) . " - abs(`Latitude_Float`)) * pi() / 180 / 2), 2) + COS(" . abs($latitude) . " * pi() / 180 ) * COS(abs(`Latitude_Float`) *  pi() / 180) * POWER(SIN((" . $longitude . " - `Longitude_Float`) *  pi() / 180 / 2), 2) )) as `Distance` FROM `" . $GLOBALS['APIDB']->prefix($table) . "` HAVING `Distance` <= ".$radius. " ORDER BY `Distance`";
+    						$sql = "SELECT *,  concat(`RegionName`, '" . $country['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`Longitude_Float`, `Latitude_Float`, `RegionName`, '" . $country['Country'] . "'))) as `key`, 3956 * 2 * ASIN(SQRT(POWER(SIN((" . abs($latitude) . " - abs(`Latitude_Float`)) * pi() / 180 / 2), 2) + COS(" . abs($latitude) . " * pi() / 180 ) * COS(abs(`Latitude_Float`) *  pi() / 180) * POWER(SIN((" . $longitude . " - `Longitude_Float`) *  pi() / 180 / 2), 2) )) as `Distance` FROM `" . $GLOBALS['APIDB']->prefix($table) . "` HAVING `Distance` <= ".$radius. " ORDER BY `Distance`";
     						$ret['search']['countries']++;
     						unset($resultb);
     						if ($resultc = $GLOBALS['APIDB']->queryF($sql)) {
@@ -355,7 +355,7 @@ if (!function_exists("findNearby")) {
 					$country['records'] = $records['records'];
 				} else
 					$country['records'] = 0 ;
-				$sql = "SELECT *,  concat(`RegionName`, '" . $country['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`RegionName`, '" . $country['Country'] . "'))) as `key`, 3956 * 2 * ASIN(SQRT(POWER(SIN((" . abs($latitude) . " - abs(`Latitude_Float`)) * pi() / 180 / 2), 2) + COS(" . abs($latitude) . " * pi() / 180 ) * COS(abs(`Latitude_Float`) *  pi() / 180) * POWER(SIN((" . $longitude . " - `Longitude_Float`) *  pi() / 180 / 2), 2) )) as `Distance` FROM `" . $GLOBALS['APIDB']->prefix($table) . "` HAVING `Distance` <= ".$radius. " ORDER BY `Distance`";
+				$sql = "SELECT *,  concat(`RegionName`, '" . $country['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`Longitude_Float`, `Latitude_Float`, `RegionName`, '" . $country['Country'] . "'))) as `key`, 3956 * 2 * ASIN(SQRT(POWER(SIN((" . abs($latitude) . " - abs(`Latitude_Float`)) * pi() / 180 / 2), 2) + COS(" . abs($latitude) . " * pi() / 180 ) * COS(abs(`Latitude_Float`) *  pi() / 180) * POWER(SIN((" . $longitude . " - `Longitude_Float`) *  pi() / 180 / 2), 2) )) as `Distance` FROM `" . $GLOBALS['APIDB']->prefix($table) . "` HAVING `Distance` <= ".$radius. " ORDER BY `Distance`";
 				$ret['search']['countries']++;
 				unset($resultb);
 				if ($resultb = $GLOBALS['APIDB']->queryF($sql)) {
@@ -436,7 +436,7 @@ if (!function_exists("findExactly")) {
 				} else
 					$country['records'] = 0 ;
 				$ret['search']['countries']++;
-				$sql = "SELECT *,  concat(`RegionName`, '" . $country['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`RegionName`, '" . $country['Country'] . "'))) as `key`, 3956 * 2 * ASIN(SQRT(POWER(SIN((" . abs($latitude) . " - abs(`Latitude_Float`)) * pi() / 180 / 2), 2) + COS(" . abs($latitude) . " * pi() / 180 ) * COS(abs(`Latitude_Float`) *  pi() / 180) * POWER(SIN((" . $longitude . " - `Longitude_Float`) *  pi() / 180 / 2), 2) )) as `Distance` FROM `" . $GLOBALS['APIDB']->prefix($table) . "` WHERE `Latitude_Float` >= ".($latitude - (111.32 * ($radius / 1000)))." AND `Longitude_Float` >= ".($longitude - (111.32 * ($radius / 1000)))." AND `Latitude_Float` <= ".($latitude + (111.32 * ($radius / 1000)))." AND `Longitude_Float` <= ".($longitude + (111.32 * ($radius / 1000))). " ORDER BY `Distance`";
+				$sql = "SELECT *,  concat(`RegionName`, '" . $country['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`Longitude_Float`, `Latitude_Float`, `RegionName`, '" . $country['Country'] . "'))) as `key`, 3956 * 2 * ASIN(SQRT(POWER(SIN((" . abs($latitude) . " - abs(`Latitude_Float`)) * pi() / 180 / 2), 2) + COS(" . abs($latitude) . " * pi() / 180 ) * COS(abs(`Latitude_Float`) *  pi() / 180) * POWER(SIN((" . $longitude . " - `Longitude_Float`) *  pi() / 180 / 2), 2) )) as `Distance` FROM `" . $GLOBALS['APIDB']->prefix($table) . "` WHERE `Latitude_Float` >= ".($latitude - (111.32 * ($radius / 1000)))." AND `Longitude_Float` >= ".($longitude - (111.32 * ($radius / 1000)))." AND `Latitude_Float` <= ".($latitude + (111.32 * ($radius / 1000)))." AND `Longitude_Float` <= ".($longitude + (111.32 * ($radius / 1000))). " ORDER BY `Distance`";
 				unset($resultb);
 				if ($resultb = $GLOBALS['APIDB']->queryF($sql)) {
 					while ($place = $GLOBALS['APIDB']->fetchArray($resultb)) {
@@ -549,7 +549,7 @@ if (!function_exists("findKey")) {
             $sql = "SELECT *, md5(concat(`Country`, `Capital`, `Continent`, `CurrencyCode`)) as `key` FROM `" . $GLOBALS['APIDB']->prefix('countries') . "` GROUP BY `CountryID` ORDER BY RAND() ";
             if ($result = $GLOBALS['APIDB']->queryF($sql)) {
                 while(($cntry = $GLOBALS['APIDB']->fetchArray($result)) && $found == false) {
-                    $sql = "SELECT *, concat(`CountryID`, ':', md5(concat(`RegionName`, '" . $cntry['Country'] . "'))) as `key`, concat(`RegionName`, '".$cntry['Country']."') as `Address` FROM `" . $cntry['Table'] . "` WHERE '" . places_oldhash($key, $cntry['Table']) . "' LIKE concat('%',md5(concat(`RegionName`, '" . $country['Country'] . "')),'%')  ORDER BY RAND() LIMIT 1";
+                    $sql = "SELECT *, concat(`CountryID`, ':', md5(concat(`Longitude_Float`, `Latitude_Float`, `RegionName`, '" . $cntry['Country'] . "'))) as `key`, concat(`RegionName`, '".$cntry['Country']."') as `Address` FROM `" . $cntry['Table'] . "` WHERE '" . places_oldhash($key, $cntry['Table']) . "' LIKE concat('%',md5(concat(`Longitude_Float`, `Latitude_Float`, `RegionName`, '" . $country['Country'] . "')),'%')  ORDER BY RAND() LIMIT 1";
                     if ($resultb = $GLOBALS['APIDB']->queryF($sql)) {
                         $place = $GLOBALS['APIDB']->fetchArray($resultb);
                     $table = $cntry['Table'];
@@ -592,7 +592,7 @@ if (!function_exists("findKey")) {
             $sql = "SELECT *, md5(concat(`Country`, `Capital`, `Continent`, `CurrencyCode`)) as `key` FROM `" . $GLOBALS['APIDB']->prefix('countries') . "` WHERE `CountryID` = '$countryid' ORDER BY RAND() ";
             if ($result = $GLOBALS['APIDB']->queryF($sql)) {
                 while(($cntry = $GLOBALS['APIDB']->fetchArray($result)) && $found == false) {
-                    $sql = "SELECT *,  concat(`RegionName`, '" . $cntry['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`RegionName`, '" . $cntry['Country'] . "'))) as `key`, concat(`RegionName`, '".$cntry['Country']."') as `Address`  FROM `" . $cntry['Table'] . "` WHERE '" . places_oldhash($key, $cntry['Table']) . "' LIKE concat('%',md5(concat(`RegionName`, '" . $country['Country'] . "')),'%') ORDER BY RAND() LIMIT 1";
+                    $sql = "SELECT *,  concat(`RegionName`, '" . $cntry['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`Longitude_Float`, `Latitude_Float`, `RegionName`, '" . $cntry['Country'] . "'))) as `key`, concat(`RegionName`, '".$cntry['Country']."') as `Address`  FROM `" . $cntry['Table'] . "` WHERE '" . places_oldhash($key, $cntry['Table']) . "' LIKE concat('%',md5(concat(`Longitude_Float`, `Latitude_Float`, `RegionName`, '" . $country['Country'] . "')),'%') ORDER BY RAND() LIMIT 1";
                     if ($resultb = $GLOBALS['APIDB']->queryF($sql)) {
                         $place = $GLOBALS['APIDB']->fetchArray($resultb);
                     $table = $cntry['Table'];
@@ -640,7 +640,7 @@ if (!function_exists("findKey")) {
                     $sql = "SELECT *, concat('" . !empty($country['CountryID'])?$country['CountryID'].":":"" . "', md5(concat(`Name`, `Vicinity`))) as `key` FROM `" . $cntry['Table'] . "_venues` WHERE '" . places_oldhash($key, $cntry['Table']) . "' LIKE concat('%', md5(concat(`Name`, `Vicinity`)), '%') ORDER BY RAND() LIMIT 1";
                     if ($resultb = $GLOBALS['APIDB']->queryF($sql)) {
                         $venue = $GLOBALS['APIDB']->fetchArray($resultb);
-                        $sql = "SELECT *,  concat(`RegionName`, '" . $cntry['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`RegionName`, '" . $cntry['Country'] . "'))) as `key`, concat(`RegionName`, '".$cntry['Country']."') as `Address`  FROM `" . $cntry['Table'] . "` WHERE `CordID` = '" . $venue['CordID']. "'";
+                        $sql = "SELECT *,  concat(`RegionName`, '" . $cntry['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`Longitude_Float`, `Latitude_Float`, `RegionName`, '" . $cntry['Country'] . "'))) as `key`, concat(`RegionName`, '".$cntry['Country']."') as `Address`  FROM `" . $cntry['Table'] . "` WHERE `CordID` = '" . $venue['CordID']. "'";
                         if ($resultc = $GLOBALS['APIDB']->queryF($sql))
                             $place = $GLOBALS['APIDB']->fetchArray($resultc);
                         $table = $ctry['Table'];
@@ -686,7 +686,7 @@ if (!function_exists("findKey")) {
                     $sql = "SELECT *, concat('" . !empty($cntry['CountryID'])?$cntry['CountryID'].":":"" . "', md5(concat(`Name`, `Vicinity`))) as `key` FROM `" . $cntry['Table'] . "_venues` WHERE '" . places_oldhash($key, $cntry['Table']) . "' LIKE concat('%', md5(concat(`Name`, `Vicinity`)), '%') ORDER BY RAND() LIMIT 1";
                     if ($resultb = $GLOBALS['APIDB']->queryF($sql)) {
                         $venue = $GLOBALS['APIDB']->fetchArray($resultb);
-                        $sql = "SELECT *,  concat(`RegionName`, '" . $cntry['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`RegionName`, '" . $cntry['Country'] . "'))) as `key`, concat(`RegionName`, '".$cntry['Country']."') as `Address`  FROM `" . $cntry['Table'] . "` WHERE `CordID` = '" . $venue['CordID']. "'";
+                        $sql = "SELECT *,  concat(`RegionName`, '" . $cntry['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`Longitude_Float`, `Latitude_Float`, `RegionName`, '" . $cntry['Country'] . "'))) as `key`, concat(`RegionName`, '".$cntry['Country']."') as `Address`  FROM `" . $cntry['Table'] . "` WHERE `CordID` = '" . $venue['CordID']. "'";
                         if ($resultc = $GLOBALS['APIDB']->queryF($sql))
                             $place = $GLOBALS['APIDB']->fetchArray($resultc);
                         $table = $cntry['Table'];
@@ -734,7 +734,7 @@ if (!function_exists("findKey")) {
                     $sql = "SELECT *, concat('" . !empty($cntry['CountryID'])?$cntry['CountryID'].":":"" . "', md5(concat(`Name`, `Vicinity`))) as `key` FROM `" . $cntry['Table'] . "_venues` WHERE '" . places_oldhash($key, $cntry['Table']) . "' LIKE concat('%', md5(concat(`Name`, `Vicinity`)), '%') ORDER BY RAND() LIMIT 1";
                     if ($resultb = $GLOBALS['APIDB']->queryF($sql)) {
                         $address = $GLOBALS['APIDB']->fetchArray($resultb);
-                        $sql = "SELECT *,  concat(`RegionName`, '" . $cntry['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`RegionName`, '" . $cntry['Country'] . "'))) as `key`, concat(`RegionName`, '".$cntry['Country']."') as `Address`  FROM `" . $cntry['Table'] . "` WHERE `CordID` = '" . $address['CordID']. "'";
+                        $sql = "SELECT *,  concat(`RegionName`, '" . $cntry['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`Longitude_Float`, `Latitude_Float`, `RegionName`, '" . $cntry['Country'] . "'))) as `key`, concat(`RegionName`, '".$cntry['Country']."') as `Address`  FROM `" . $cntry['Table'] . "` WHERE `CordID` = '" . $address['CordID']. "'";
                         if ($resultc = $GLOBALS['APIDB']->queryF($sql))
                             $place = $GLOBALS['APIDB']->fetchArray($resultc);
                         $table = $cntry['Table'];
@@ -780,7 +780,7 @@ if (!function_exists("findKey")) {
                     $sql = "SELECT *, concat('" . !empty($cntry['CountryID'])?$cntry['CountryID'].":":"" . "', md5(concat(`Name`, `Vicinity`))) as `key` FROM `" . $cntry['Table'] . "_venues` WHERE '" . places_oldhash($key, $cntry['Table']) . "' LIKE concat('%', md5(concat(`Name`, `Vicinity`)), '%') ORDER BY RAND() LIMIT 1";
                     if ($resultb = $GLOBALS['APIDB']->queryF($sql)) {
                         $address = $GLOBALS['APIDB']->fetchArray($resultb);
-                        $sql = "SELECT *,  concat(`RegionName`, '" . $country['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`RegionName`, '" . $cntry['Country'] . "'))) as `key`, concat(`RegionName`, '".$country['Country']."') as `Address`  FROM `" . $cntry['Table'] . "` WHERE `CordID` = '" . $address['CordID']. "'";
+                        $sql = "SELECT *,  concat(`RegionName`, '" . $country['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`Longitude_Float`, `Latitude_Float`, `RegionName`, '" . $cntry['Country'] . "'))) as `key`, concat(`RegionName`, '".$country['Country']."') as `Address`  FROM `" . $cntry['Table'] . "` WHERE `CordID` = '" . $address['CordID']. "'";
                         if ($resultc = $GLOBALS['APIDB']->queryF($sql))
                             $place = $GLOBALS['APIDB']->fetchArray($resultc);
                         $table = $cntry['Table'];
@@ -834,7 +834,7 @@ if (!function_exists("findKey")) {
                     $sql = "SELECT *, md5(concat(`Country`, `Capital`, `Continent`, `CurrencyCode`)) as `key` FROM `" . $GLOBALS['APIDB']->prefix('countries') . "` WHERE `Table` LIKE '$table' GROUP BY `CountryID` ORDER BY RAND() ";
                     $result = $GLOBALS['APIDB']->queryF($sql);
                     while($country = $GLOBALS['APIDB']->fetchArray($result)) {
-                        $sql = "SELECT *, concat(`RegionName`, '" . $country['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`RegionName`, '" . $country['Country'] . "'))) as `key`, 3956 * 2 * ASIN(SQRT(POWER(SIN((" . abs($place['Latitude_Float']) . " - abs(`Latitude_Float`)) * pi() / 180 / 2), 2) + COS(" . abs($place['Latitude_Float']) . " * pi() / 180 ) * COS(abs(`Latitude_Float`) *  pi() / 180) * POWER(SIN((" . $place['Longitude_Float'] . " - `Longitude_Float`) *  pi() / 180 / 2), 2) )) as `Distance`, concat(`RegionName`, '".$country['Country']."') as `Address`  FROM `" . $GLOBALS['APIDB']->prefix($table) . "` HAVING `Distance` <= ".$radius. " ORDER BY `Distance`";
+                        $sql = "SELECT *, concat(`RegionName`, '" . $country['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`Longitude_Float`, `Latitude_Float`, `RegionName`, '" . $country['Country'] . "'))) as `key`, 3956 * 2 * ASIN(SQRT(POWER(SIN((" . abs($place['Latitude_Float']) . " - abs(`Latitude_Float`)) * pi() / 180 / 2), 2) + COS(" . abs($place['Latitude_Float']) . " * pi() / 180 ) * COS(abs(`Latitude_Float`) *  pi() / 180) * POWER(SIN((" . $place['Longitude_Float'] . " - `Longitude_Float`) *  pi() / 180 / 2), 2) )) as `Distance`, concat(`RegionName`, '".$country['Country']."') as `Address`  FROM `" . $GLOBALS['APIDB']->prefix($table) . "` HAVING `Distance` <= ".$radius. " ORDER BY `Distance`";
     					$resultb = $GLOBALS['APIDB']->queryF($sql);
 						while ($place = $GLOBALS['APIDB']->fetchArray($resultb)) {
 						    if ($format!='xml')
@@ -918,7 +918,7 @@ if (!function_exists("getAddressGeoMapping"))
             $result = $GLOBALS['APIDB']->queryF($sql);
             if ($country = $GLOBALS['APIDB']->fetchArray($result)) {
                 $table = $country['Table'];
-                $sql = "SELECT *, concat(`RegionName`, '" . $country['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`RegionName`, '" . $country['Country'] . "'))) as `key`, 3956 * 2 * ASIN(SQRT(POWER(SIN((" . abs($geo['results'][0]['geometry']['location']['lat']) . " - abs(`Latitude_Float`)) * pi() / 180 / 2), 2) + COS(" . abs($geo['results'][0]['geometry']['location']['lat']) . " * pi() / 180 ) * COS(abs(`Latitude_Float`) *  pi() / 180) * POWER(SIN((" . $geo['results'][0]['geometry']['location']['lng'] . " - `Longitude_Float`) *  pi() / 180 / 2), 2) )) as `Distance`, concat(`RegionName`, '".$country['Country']."') as `Address`  FROM `" . $country['Table'] . "` WHERE `RegionName` LIKE '%$suburb%' ORDER BY `Distance`";
+                $sql = "SELECT *, concat(`RegionName`, '" . $country['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`Longitude_Float`, `Latitude_Float`, `RegionName`, '" . $country['Country'] . "'))) as `key`, 3956 * 2 * ASIN(SQRT(POWER(SIN((" . abs($geo['results'][0]['geometry']['location']['lat']) . " - abs(`Latitude_Float`)) * pi() / 180 / 2), 2) + COS(" . abs($geo['results'][0]['geometry']['location']['lat']) . " * pi() / 180 ) * COS(abs(`Latitude_Float`) *  pi() / 180) * POWER(SIN((" . $geo['results'][0]['geometry']['location']['lng'] . " - `Longitude_Float`) *  pi() / 180 / 2), 2) )) as `Distance`, concat(`RegionName`, '".$country['Country']."') as `Address`  FROM `" . $country['Table'] . "` WHERE `RegionName` LIKE '%$suburb%' ORDER BY `Distance`";
                 $resultb = $GLOBALS['APIDB']->queryF($sql);
                 $place = $GLOBALS['APIDB']->fetchArray($resultb);
                 $address['CordID'] = $place['CordID'];
@@ -1142,7 +1142,7 @@ if (!function_exists("findKeyDetails")) {
             $sql = "SELECT *, md5(concat(`Country`, `Capital`, `Continent`, `CurrencyCode`)) as `key` FROM `" . $GLOBALS['APIDB']->prefix('countries') . "` GROUP BY `CountryID` ORDER BY RAND() ";
             if ($result = $GLOBALS['APIDB']->queryF($sql)) {
                 while(($cntry = $GLOBALS['APIDB']->fetchArray($result)) && $found == false) {
-                    $sql = "SELECT *, concat(`CountryID`, ':', md5(concat(`RegionName`, '" . $country['Country'] . "'))) as `key`, concat(`RegionName`, '".$cntry['Country']."') as `Address` FROM `" . $cntry['Table'] . "` WHERE '" . places_oldhash($key, $cntry['Table']) . "' LIKE concat('%', md5(concat(`RegionName`, '" . $country['Country'] . "')),'%') ORDER BY RAND() LIMIT 1";
+                    $sql = "SELECT *, concat(`CountryID`, ':', md5(concat(`Longitude_Float`, `Latitude_Float`, `RegionName`, '" . $country['Country'] . "'))) as `key`, concat(`RegionName`, '".$cntry['Country']."') as `Address` FROM `" . $cntry['Table'] . "` WHERE '" . places_oldhash($key, $cntry['Table']) . "' LIKE concat('%', md5(concat(`Longitude_Float`, `Latitude_Float`, `RegionName`, '" . $country['Country'] . "')),'%') ORDER BY RAND() LIMIT 1";
                     if ($resultb = $GLOBALS['APIDB']->queryF($sql)) {
                         $place = $GLOBALS['APIDB']->fetchArray($resultb);
                         $table = $cntry['Table'];
@@ -1156,7 +1156,7 @@ if (!function_exists("findKeyDetails")) {
             $sql = "SELECT *, md5(concat(`Country`, `Capital`, `Continent`, `CurrencyCode`)) as `key` FROM `" . $GLOBALS['APIDB']->prefix('countries') . "` WHERE `CountryID` = '$countryid' ORDER BY RAND() ";
             if ($result = $GLOBALS['APIDB']->queryF($sql)) {
                 while(($cntry = $GLOBALS['APIDB']->fetchArray($result)) && $found == false) {
-                    $sql = "SELECT *,  concat(`RegionName`, '" . $cntry['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`RegionName`, '" . $country['Country'] . "'))) as `key`, concat(`RegionName`, '".$cntry['Country']."') as `Address`  FROM `" . $cntry['Table'] . "` WHERE '" . places_oldhash($key, $cntry['Table']) . "' LIKE concat('%', md5(concat(`RegionName`, '" . $country['Country'] . "')),'%') ORDER BY RAND() LIMIT 1";
+                    $sql = "SELECT *,  concat(`RegionName`, '" . $cntry['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`Longitude_Float`, `Latitude_Float`, `RegionName`, '" . $country['Country'] . "'))) as `key`, concat(`RegionName`, '".$cntry['Country']."') as `Address`  FROM `" . $cntry['Table'] . "` WHERE '" . places_oldhash($key, $cntry['Table']) . "' LIKE concat('%', md5(concat(`Longitude_Float`, `Latitude_Float`, `RegionName`, '" . $country['Country'] . "')),'%') ORDER BY RAND() LIMIT 1";
                     if ($resultb = $GLOBALS['APIDB']->queryF($sql)) {
                         $place = $GLOBALS['APIDB']->fetchArray($resultb);
                         $table = $cntry['Table'];
@@ -1175,7 +1175,7 @@ if (!function_exists("findKeyDetails")) {
                     $sql = "SELECT *, concat('" . !empty($country['CountryID'])?$country['CountryID'].":":"" . "', md5(concat(`Name`, `Vicinity`))) as `key` FROM `" . $cntry['Table'] . "_venues` WHERE '" . places_oldhash($key, $cntry['Table']) . "' LIKE concat('%', md5(concat(`Name`, `Vicinity`)), '%') ORDER BY RAND() LIMIT 1";
                     if ($resultb = $GLOBALS['APIDB']->queryF($sql)) {
                         $venue = $GLOBALS['APIDB']->fetchArray($resultb);
-                        $sql = "SELECT *,  concat(`RegionName`, '" . $cntry['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`RegionName`, '" . $country['Country'] . "'))) as `key`, concat(`RegionName`, '".$cntry['Country']."') as `Address`  FROM `" . $cntry['Table'] . "` WHERE `CordID` = '" . $venue['CordID']. "'";
+                        $sql = "SELECT *,  concat(`RegionName`, '" . $cntry['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`Longitude_Float`, `Latitude_Float`, `RegionName`, '" . $country['Country'] . "'))) as `key`, concat(`RegionName`, '".$cntry['Country']."') as `Address`  FROM `" . $cntry['Table'] . "` WHERE `CordID` = '" . $venue['CordID']. "'";
                         if ($resultc = $GLOBALS['APIDB']->queryF($sql))
                             $place = $GLOBALS['APIDB']->fetchArray($resultc);
                         $table = $ctry['Table'];
@@ -1192,7 +1192,7 @@ if (!function_exists("findKeyDetails")) {
                     $sql = "SELECT *, concat('" . !empty($country['CountryID'])?$country['CountryID'].":":"" . "', md5(concat(`Name`, `Vicinity`))) as `key` FROM `" . $cntry['Table'] . "_venues` WHERE '" . places_oldhash($key, $cntry['Table']) . "' LIKE concat('%', md5(concat(`Name`, `Vicinity`)), '%') ORDER BY RAND() LIMIT 1";
                     if ($resultb = $GLOBALS['APIDB']->queryF($sql)) {
                         $venue = $GLOBALS['APIDB']->fetchArray($resultb);
-                        $sql = "SELECT *,  concat(`RegionName`, '" . $cntry['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`RegionName`, '" . $country['Country'] . "'))) as `key`, concat(`RegionName`, '".$cntry['Country']."') as `Address`  FROM `" . $cntry['Table'] . "` WHERE `CordID` = '" . $venue['CordID']. "'";
+                        $sql = "SELECT *,  concat(`RegionName`, '" . $cntry['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`Longitude_Float`, `Latitude_Float`, `RegionName`, '" . $country['Country'] . "'))) as `key`, concat(`RegionName`, '".$cntry['Country']."') as `Address`  FROM `" . $cntry['Table'] . "` WHERE `CordID` = '" . $venue['CordID']. "'";
                         if ($resultc = $GLOBALS['APIDB']->queryF($sql))
                             $place = $GLOBALS['APIDB']->fetchArray($resultc);
                         $table = $cntry['Table'];
@@ -1211,7 +1211,7 @@ if (!function_exists("findKeyDetails")) {
                     $sql = "SELECT *, concat('" . !empty($cntry['CountryID'])?$cntry['CountryID'].":":"" . "', md5(concat(`Name`, `Vicinity`))) as `key` FROM `" . $cntry['Table'] . "_venues` WHERE '" . places_oldhash($key, $cntry['Table']) . "' LIKE concat('%', md5(concat(`Name`, `Vicinity`)), '%') ORDER BY RAND() LIMIT 1";
                     if ($resultb = $GLOBALS['APIDB']->queryF($sql)) {
                         $address = $GLOBALS['APIDB']->fetchArray($resultb);
-                        $sql = "SELECT *,  concat(`RegionName`, '" . $cntry['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`RegionName`, '" . $country['Country'] . "'))) as `key`, concat(`RegionName`, '".$cntry['Country']."') as `Address`  FROM `" . $cntry['Table'] . "` WHERE `CordID` = '" . $address['CordID']. "'";
+                        $sql = "SELECT *,  concat(`RegionName`, '" . $cntry['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`Longitude_Float`, `Latitude_Float`, `RegionName`, '" . $country['Country'] . "'))) as `key`, concat(`RegionName`, '".$cntry['Country']."') as `Address`  FROM `" . $cntry['Table'] . "` WHERE `CordID` = '" . $address['CordID']. "'";
                         if ($resultc = $GLOBALS['APIDB']->queryF($sql))
                             $place = $GLOBALS['APIDB']->fetchArray($resultc);
                         $table = $cntry['Table'];
@@ -1228,7 +1228,7 @@ if (!function_exists("findKeyDetails")) {
                     $sql = "SELECT *, concat('" . !empty($cntry['CountryID'])?$cntry['CountryID'].":":"" . "', md5(concat(`Name`, `Vicinity`))) as `key` FROM `" . $cntry['Table'] . "_venues` WHERE '" . places_oldhash($key, $cntry['Table']) . "' LIKE concat('%', md5(concat(`Name`, `Vicinity`)), '%') ORDER BY RAND() LIMIT 1";
                     if ($resultb = $GLOBALS['APIDB']->queryF($sql)) {
                         $address = $GLOBALS['APIDB']->fetchArray($resultb);
-                        $sql = "SELECT *,  concat(`RegionName`, '" . $country['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`RegionName`, '" . $country['Country'] . "'))) as `key`, concat(`RegionName`, '".$country['Country']."') as `Address`  FROM `" . $cntry['Table'] . "` WHERE `CordID` = '" . $address['CordID']. "'";
+                        $sql = "SELECT *,  concat(`RegionName`, '" . $country['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`Longitude_Float`, `Latitude_Float`, `RegionName`, '" . $country['Country'] . "'))) as `key`, concat(`RegionName`, '".$country['Country']."') as `Address`  FROM `" . $cntry['Table'] . "` WHERE `CordID` = '" . $address['CordID']. "'";
                         if ($resultc = $GLOBALS['APIDB']->queryF($sql))
                             $place = $GLOBALS['APIDB']->fetchArray($resultc);
                         $table = $cntry['Table'];
@@ -1439,7 +1439,7 @@ if (!function_exists("getVenueResults")) {
             $sql = "SELECT *, md5(concat(`Country`, `Capital`, `Continent`, `CurrencyCode`)) as `key` FROM `" . $GLOBALS['APIDB']->prefix('countries') . "` GROUP BY `CountryID` ORDER BY RAND() ";
             if ($result = $GLOBALS['APIDB']->queryF($sql)) {
                 while(($cntry = $GLOBALS['APIDB']->fetchArray($result)) && $found == false) {
-                    $sql = "SELECT *, concat(`CountryID`, ':', md5(concat(`RegionName`, '" . $country['Country'] . "'))) as `key`, concat(`RegionName`, '".$cntry['Country']."') as `Address` FROM `" . $cntry['Table'] . "` WHERE '" . places_oldhash($key, $cntry['Table']) . "' LIKE concat('%', md5(concat(`RegionName`, '" . $country['Country'] . "')),'%') ORDER BY RAND() LIMIT 1";
+                    $sql = "SELECT *, concat(`CountryID`, ':', md5(concat(`Longitude_Float`, `Latitude_Float`, `RegionName`, '" . $country['Country'] . "'))) as `key`, concat(`RegionName`, '".$cntry['Country']."') as `Address` FROM `" . $cntry['Table'] . "` WHERE '" . places_oldhash($key, $cntry['Table']) . "' LIKE concat('%', md5(concat(`Longitude_Float`, `Latitude_Float`, `RegionName`, '" . $country['Country'] . "')),'%') ORDER BY RAND() LIMIT 1";
                     if ($resultb = $GLOBALS['APIDB']->queryF($sql)) {
                         $place = $GLOBALS['APIDB']->fetchArray($resultb);
                     $table = $cntry['Table'];
@@ -1453,7 +1453,7 @@ if (!function_exists("getVenueResults")) {
             $sql = "SELECT *, md5(concat(`Country`, `Capital`, `Continent`, `CurrencyCode`)) as `key` FROM `" . $GLOBALS['APIDB']->prefix('countries') . "` WHERE `CountryID` = '$countryid' ORDER BY RAND() ";
             if ($result = $GLOBALS['APIDB']->queryF($sql)) {
                 while(($cntry = $GLOBALS['APIDB']->fetchArray($result)) && $found == false) {
-                    $sql = "SELECT *,  concat(`RegionName`, '" . $cntry['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`RegionName`, '" . $country['Country'] . "'))) as `key`, concat(`RegionName`, '".$cntry['Country']."') as `Address`  FROM `" . $cntry['Table'] . "` WHERE '" . places_oldhash($key, $cntry['Table']) . "' LIKE concat('%', md5(concat(`RegionName`, '" . $country['Country'] . "')),'%') ORDER BY RAND() LIMIT 1";
+                    $sql = "SELECT *,  concat(`RegionName`, '" . $cntry['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`Longitude_Float`, `Latitude_Float`, `RegionName`, '" . $country['Country'] . "'))) as `key`, concat(`RegionName`, '".$cntry['Country']."') as `Address`  FROM `" . $cntry['Table'] . "` WHERE '" . places_oldhash($key, $cntry['Table']) . "' LIKE concat('%', md5(concat(`Longitude_Float`, `Latitude_Float`, `RegionName`, '" . $country['Country'] . "')),'%') ORDER BY RAND() LIMIT 1";
                     if ($resultb = $GLOBALS['APIDB']->queryF($sql)) {
                         $place = $GLOBALS['APIDB']->fetchArray($resultb);
                     $table = $cntry['Table'];
@@ -1472,7 +1472,7 @@ if (!function_exists("getVenueResults")) {
                     $sql = "SELECT *, concat('" . !empty($country['CountryID'])?$country['CountryID'].":":"" . "', md5(concat(`Name`, `Vicinity`))) as `key` FROM `" . $cntry['Table'] . "_venues` WHERE '" . places_oldhash($key, $cntry['Table']) . "' LIKE concat('%', md5(concat(`Name`, `Vicinity`)), '%') ORDER BY RAND() LIMIT 1";
                     if ($resultb = $GLOBALS['APIDB']->queryF($sql)) {
                         $venue = $GLOBALS['APIDB']->fetchArray($resultb);
-                        $sql = "SELECT *,  concat(`RegionName`, '" . $cntry['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`RegionName`, '" . $country['Country'] . "'))) as `key`, concat(`RegionName`, '".$cntry['Country']."') as `Address`  FROM `" . $cntry['Table'] . "` WHERE `CordID` = '" . $venue['CordID']. "'";
+                        $sql = "SELECT *,  concat(`RegionName`, '" . $cntry['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`Longitude_Float`, `Latitude_Float`, `RegionName`, '" . $country['Country'] . "'))) as `key`, concat(`RegionName`, '".$cntry['Country']."') as `Address`  FROM `" . $cntry['Table'] . "` WHERE `CordID` = '" . $venue['CordID']. "'";
                         if ($resultc = $GLOBALS['APIDB']->queryF($sql))
                             $place = $GLOBALS['APIDB']->fetchArray($resultc);
                         $table = $ctry['Table'];
@@ -1489,7 +1489,7 @@ if (!function_exists("getVenueResults")) {
                     $sql = "SELECT *, concat('" . !empty($country['CountryID'])?$country['CountryID'].":":"" . "', md5(concat(`Name`, `Vicinity`))) as `key` FROM `" . $cntry['Table'] . "_venues` WHERE '" . places_oldhash($key, $cntry['Table']) . "' LIKE concat('%', md5(concat(`Name`, `Vicinity`)), '%') ORDER BY RAND() LIMIT 1";
                     if ($resultb = $GLOBALS['APIDB']->queryF($sql)) {
                         $venue = $GLOBALS['APIDB']->fetchArray($resultb);
-                        $sql = "SELECT *,  concat(`RegionName`, '" . $cntry['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`RegionName`, '" . $country['Country'] . "'))) as `key`, concat(`RegionName`, '".$cntry['Country']."') as `Address`  FROM `" . $cntry['Table'] . "` WHERE `CordID` = '" . $venue['CordID']. "'";
+                        $sql = "SELECT *,  concat(`RegionName`, '" . $cntry['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`Longitude_Float`, `Latitude_Float`, `RegionName`, '" . $country['Country'] . "'))) as `key`, concat(`RegionName`, '".$cntry['Country']."') as `Address`  FROM `" . $cntry['Table'] . "` WHERE `CordID` = '" . $venue['CordID']. "'";
                         if ($resultc = $GLOBALS['APIDB']->queryF($sql))
                             $place = $GLOBALS['APIDB']->fetchArray($resultc);
                         $table = $cntry['Table'];
@@ -1508,7 +1508,7 @@ if (!function_exists("getVenueResults")) {
                     $sql = "SELECT *, concat('" . !empty($country['CountryID'])?$country['CountryID'].":":"" . "', md5(concat(`Name`, `Vicinity`))) as `key` FROM `" . $cntry['Table'] . "_venues` WHERE '" . places_oldhash($key, $cntry['Table']) . "' LIKE concat('%', md5(concat(`Name`, `Vicinity`)), '%') ORDER BY RAND() LIMIT 1";
                     if ($resultb = $GLOBALS['APIDB']->queryF($sql)) {
                         $address = $GLOBALS['APIDB']->fetchArray($resultb);
-                        $sql = "SELECT *,  concat(`RegionName`, '" . $cntry['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`RegionName`, '" . $country['Country'] . "'))) as `key`, concat(`RegionName`, '".$cntry['Country']."') as `Address`  FROM `" . $cntry['Table'] . "` WHERE `CordID` = '" . $address['CordID']. "'";
+                        $sql = "SELECT *,  concat(`RegionName`, '" . $cntry['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`Longitude_Float`, `Latitude_Float`, `RegionName`, '" . $country['Country'] . "'))) as `key`, concat(`RegionName`, '".$cntry['Country']."') as `Address`  FROM `" . $cntry['Table'] . "` WHERE `CordID` = '" . $address['CordID']. "'";
                         if ($resultc = $GLOBALS['APIDB']->queryF($sql))
                             $place = $GLOBALS['APIDB']->fetchArray($resultc);
                         $table = $cntry['Table'];
@@ -1525,7 +1525,7 @@ if (!function_exists("getVenueResults")) {
                     $sql = "SELECT *, concat('" . !empty($cntry['CountryID'])?$cntry['CountryID'].":":"" . "', md5(concat(`Name`, `Vicinity`))) as `key` FROM `" . $cntry['Table'] . "_venues` WHERE '" . places_oldhash($key, $cntry['Table']) . "' LIKE concat('%', md5(concat(`Name`, `Vicinity`)), '%') ORDER BY RAND() LIMIT 1";
                     if ($resultb = $GLOBALS['APIDB']->queryF($sql)) {
                         $address = $GLOBALS['APIDB']->fetchArray($resultb);
-                        $sql = "SELECT *,  concat(`RegionName`, '" . $country['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`RegionName`, '" . $cntry['Country'] . "'))) as `key`, concat(`RegionName`, '".$country['Country']."') as `Address`  FROM `" . $cntry['Table'] . "` WHERE `CordID` = '" . $address['CordID']. "'";
+                        $sql = "SELECT *,  concat(`RegionName`, '" . $country['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`Longitude_Float`, `Latitude_Float`, `RegionName`, '" . $cntry['Country'] . "'))) as `key`, concat(`RegionName`, '".$country['Country']."') as `Address`  FROM `" . $cntry['Table'] . "` WHERE `CordID` = '" . $address['CordID']. "'";
                         if ($resultc = $GLOBALS['APIDB']->queryF($sql))
                             $place = $GLOBALS['APIDB']->fetchArray($resultc);
                         $table = $cntry['Table'];
@@ -1663,7 +1663,7 @@ if (!function_exists("getVenueResults")) {
                 } elseif (isset($values['name']) && !empty($values['name'])) {
                     $sql = "SELECT count(*) FROM `" . $GLOBALS['APIDB']->prefix($table) . "` WHERE `RegionName` LIKE '".getLikedWildcard($values['name'])."'";
                     list($count) = $GLOBALS['APIDB']->fetchRow($GLOBALS['APIDB']->queryF($sql));
-                    $sql = "SELECT *, concat(`RegionName`, '" . $country['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`RegionName`, '" . $country['Country'] . "'))) as `key`, concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`))) as `retired-key`, concat(`RegionName`, '".$country['Country']."') as `Address`  FROM `" . $GLOBALS['APIDB']->prefix($table) . "` WHERE `RegionName` LIKE '".getLikedWildcard($values['name'])."'";
+                    $sql = "SELECT *, concat(`RegionName`, '" . $country['Country'] . "') as `Address`, concat(`CountryID`, ':', md5(concat(`Longitude_Float`, `Latitude_Float`, `RegionName`, '" . $country['Country'] . "'))) as `key`, concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`))) as `retired-key`, concat(`RegionName`, '".$country['Country']."') as `Address`  FROM `" . $GLOBALS['APIDB']->prefix($table) . "` WHERE `RegionName` LIKE '".getLikedWildcard($values['name'])."'";
                     $resultr = $GLOBALS['APIDB']->queryF($sql);
                     if ($count!=0)
                     {

@@ -1,6 +1,10 @@
-# Chronolabs Cooperative ~ GeoSpatial API Lookups API 
+## Chronolabs Cooperative presents
 
-## Author: Simon Antony Roberts <wishcraft@users.sourceforge.net>
+# GeoSpatial + Locational Places Services API 3.0.8
+
+### Author: Simon Antony Roberts <wishcraft@users.sourceforge.net>
+
+#### Demo: http://places.snails.email or http://places.xortify.com
 
 This API is a Geospatial service provided by PHP7.0 - it utilises file caches as well as a mysqli database interface to provide and provision both locality keys as well as country and continent keys.
 
