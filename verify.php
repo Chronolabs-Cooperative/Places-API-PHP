@@ -54,7 +54,7 @@ if (!$timeout = APICache::read(basename(__DIR__) . '--verify-timeout'))
     
     if (!isset($tables[$GLOBALS['APIDB']->prefix("countries_oldhashs")]))
     {
-        $query[] = "CREATE TABLE `" . $GLOBALS['APIDB']->prefix("countries_oldhashs") . "` (
+        $sql = "CREATE TABLE `" . $GLOBALS['APIDB']->prefix("countries_oldhashs") . "` (
                 `id` mediumint(250) UNSIGNED NOT NULL AUTO_INCREMENT,
                 `retired` char(44) NOT NULL DEFAULT '',
                 `current` char(44) NOT NULL DEFAULT '',
@@ -71,7 +71,7 @@ if (!$timeout = APICache::read(basename(__DIR__) . '--verify-timeout'))
     if ($count==0)
     {
         $GLOBALS['APIDB']->query("START TRANSACTION");
-        $sql = "INSERT INTO `" . $GLOBALS['APIDB']->prefix("countries_oldhashs") . "` (`retired`, `current`, `created`) SELECT md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `retired`, md5(concat(`Country`, `Capital`, `Continent`, `CurrencyCode`)) as `current`, UNIX_TIMESTAMP() FROM `" . $GLOBALS['APIDB']->prefix("countries") . " ` ORDER BY `retired`";
+        $sql = "INSERT INTO `" . $GLOBALS['APIDB']->prefix("countries_oldhashs") . "` (`retired`, `current`, `created`) SELECT md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `retired`, md5(concat(`Country`, `Capital`, `Continent`, `CurrencyCode`)) as `current`, UNIX_TIMESTAMP() FROM `" . $GLOBALS['APIDB']->prefix("countries") . " ` GROUP BY `CountryID` ORDER BY `retired`";
         if (!$GLOBALS['APIDB']->query($sql))
             die("SQL Failed: $sql;");
         $GLOBALS['APIDB']->query("COMMIT");
@@ -84,7 +84,7 @@ if (!$timeout = APICache::read(basename(__DIR__) . '--verify-timeout'))
         $table = $country['Table'];
         if (!isset($tables[$GLOBALS['APIDB']->prefix($table . "_oldhashs")]))
         {
-            $query[] = "CREATE TABLE `" . $GLOBALS['APIDB']->prefix($table . "_oldhashs") . "` (
+            $sql = "CREATE TABLE `" . $GLOBALS['APIDB']->prefix($table . "_oldhashs") . "` (
                 `id` mediumint(250) UNSIGNED NOT NULL AUTO_INCREMENT,
                 `retired` char(44) NOT NULL DEFAULT '',
                 `current` char(44) NOT NULL DEFAULT '',
