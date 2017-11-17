@@ -22,8 +22,6 @@
  */
 
 
-	global $domain, $protocol, $entity, $contact, $referee, $peerings, API_URL . "/", $APIDB;
-	
 	$key = randomAPIKey();
 	$distance = mt_rand(2,69) / mt_rand(3,9);
 	$local = randomGeoLocation();

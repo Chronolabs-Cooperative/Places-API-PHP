@@ -32,3 +32,13 @@ There is a couple of cronjobs to be set they are the following after running: $ 
     */15 * * * * /usr/bin/php -q /var/www/places.snails.email/crons/align-postcode-states.php
     */25 * * * * /usr/bin/php -q /var/www/places.snails.email/crons/mining-localities.php
     */15 */6 * * * /usr/bin/php -q /var/www/places.snails.email/crons/updating-details.php
+    
+# Whats new in version 3.x.x
+
+There reason there has recently been a main revision number upgrade, is all the hash/checksum item keys, that is the hashing information for reference items has been made congruent across all the places api so they are the same between operator not unilaterial different with each service often for the same item key!
+
+## Upgrading from version 2.x to 3.x
+
+Simply unzip the package or pull the resource and replace the files with the archive or github resource files, then execute outside it cache time the file ./verify.php to upgrade you can do this by browsing the site a couple of time refreshing till there is a long pause while verify validates the database or you can execute it at the shell bash as follows:
+
+    $ /usr/bin/php -q /var/www/places.snails.email/verify.php
