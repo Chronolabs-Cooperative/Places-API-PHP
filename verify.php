@@ -56,8 +56,8 @@ if (!$timeout = APICache::read(basename(__DIR__) . '--verify-timeout'))
     {
         $sql = "CREATE TABLE `" . $GLOBALS['APIDB']->prefix("countries_oldhashs") . "` (
                 `id` mediumint(250) UNSIGNED NOT NULL AUTO_INCREMENT,
-                `retired` char(44) NOT NULL DEFAULT '',
-                `current` char(44) NOT NULL DEFAULT '',
+                `retired` char(44) DEFAULT NULL,
+                `current` char(44) DEFAULT NULL,
                 `created` int(11) DEFAULT NULL,
                 PRIMARY KEY (`id`),
                 KEY `SEARCH` (`retired`,`current`,`id`)
@@ -86,8 +86,8 @@ if (!$timeout = APICache::read(basename(__DIR__) . '--verify-timeout'))
         {
             $sql = "CREATE TABLE `" . $GLOBALS['APIDB']->prefix($table . "_oldhashs") . "` (
                 `id` mediumint(250) UNSIGNED NOT NULL AUTO_INCREMENT,
-                `retired` char(44) NOT NULL DEFAULT '',
-                `current` char(44) NOT NULL DEFAULT '',
+                `retired` char(44) DEFAULT NULL,
+                `current` char(44) DEFAULT NULL,
                 `created` int(11) DEFAULT NULL,
                 PRIMARY KEY (`id`),
                 KEY `SEARCH` (`retired`,`current`,`id`)
