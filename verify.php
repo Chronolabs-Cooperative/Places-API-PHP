@@ -52,13 +52,12 @@ if (!$timeout = APICache::read(basename(__DIR__) . '--verify-timeout'))
                 $fields[$table][$row['Field']] = $row;
     }
     
-    $table = 'countries';
-    if (!isset($tables[$GLOBALS['APIDB']->prefix($table . "_oldhashs")]))
+    if (!isset($tables[$GLOBALS['APIDB']->prefix("countries_oldhashs")]))
     {
-        $query[] = "CREATE TABLE `" . $GLOBALS['APIDB']->prefix($table . "_oldhashs") . "` (
-                `id` mediumint(250) UNSIGNED NOT NULL,
-                `retired` char(44) NOT NULL DEFAULT NULL,
-                `current` char(44) NOT NULL DEFAULT NULL,
+        $query[] = "CREATE TABLE `" . $GLOBALS['APIDB']->prefix("countries_oldhashs") . "` (
+                `id` mediumint(250) UNSIGNED NOT NULL AUTO_INCREMENT,
+                `retired` char(44) NOT NULL DEFAULT '',
+                `current` char(44) NOT NULL DEFAULT '',
                 `created` int(11) DEFAULT NULL,
                 KEY `SEARCH` (`retired`,`current`,`id`)
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8";
@@ -71,7 +70,7 @@ if (!$timeout = APICache::read(basename(__DIR__) . '--verify-timeout'))
     if ($count==0)
     {
         $GLOBALS['APIDB']->query("START TRANSACTION");
-        $sql = "INSERT INTO `" . $GLOBALS['APIDB']->prefix("countries_oldhashs") . "` (`retired`, `current`, `created`) VALUES SELECT md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `retired`, md5(concat(`Country`, `Capital`, `Continent`, `CurrencyCode`)) as `current`, UNIX_TIMESTAMP() FROM `" . $GLOBALS['APIDB']->prefix($table) . " ` ORDER BY `retired`";
+        $sql = "INSERT INTO `" . $GLOBALS['APIDB']->prefix("countries_oldhashs") . "` (`retired`, `current`, `created`) SELECT md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `retired`, md5(concat(`Country`, `Capital`, `Continent`, `CurrencyCode`)) as `current`, UNIX_TIMESTAMP() FROM `" . $GLOBALS['APIDB']->prefix("countries") . " ` ORDER BY `retired`";
         if (!$GLOBALS['APIDB']->query($sql))
             die("SQL Failed: $sql;");
         $GLOBALS['APIDB']->query("COMMIT");
@@ -85,9 +84,9 @@ if (!$timeout = APICache::read(basename(__DIR__) . '--verify-timeout'))
         if (!isset($tables[$GLOBALS['APIDB']->prefix($table . "_oldhashs")]))
         {
             $query[] = "CREATE TABLE `" . $GLOBALS['APIDB']->prefix($table . "_oldhashs") . "` (
-                `id` mediumint(250) UNSIGNED NOT NULL,
-                `retired` char(44) NOT NULL DEFAULT NULL,
-                `current` char(44) NOT NULL DEFAULT NULL,
+                `id` mediumint(250) UNSIGNED NOT NULL AUTO_INCREMENT,
+                `retired` char(44) NOT NULL DEFAULT '',
+                `current` char(44) NOT NULL DEFAULT '',
                 `created` int(11) DEFAULT NULL,
                 KEY `SEARCH` (`retired`,`current`,`id`)
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8";
@@ -142,7 +141,7 @@ if (!$timeout = APICache::read(basename(__DIR__) . '--verify-timeout'))
                     while(list($key) = $GLOBALS['APIDB']->fetchRow($GLOBALS['APIDB']->query($sql)))
                         unset($keys[$key]);
     
-                    $sql = "INSERT INTO `" . $GLOBALS['APIDB']->prefix($table . "_oldhashs") . "` (`retired`, `current`, `created`) VALUES SELECT $retired as `retired`, $current as `current`, UNIX_TIMESTAMP() FROM `" . $GLOBALS['APIDB']->prefix($table.$add) . " ` WHERE `retired` IN ('" . implode("','", $keys) . "') ORDER BY `retired`";
+                    $sql = "INSERT INTO `" . $GLOBALS['APIDB']->prefix($table . "_oldhashs") . "` (`retired`, `current`, `created`) SELECT $retired as `retired`, $current as `current`, UNIX_TIMESTAMP() FROM `" . $GLOBALS['APIDB']->prefix($table.$add) . " ` WHERE `retired` IN ('" . implode("','", $keys) . "') GROUP BY `CountryID` ORDER BY `retired`";
                     if (!$GLOBALS['APIDB']->query($sql))
                         die("SQL Failed: $sql;");
                 }
