@@ -52,10 +52,104 @@ if (!$timeout = APICache::read(basename(__DIR__) . '--verify-timeout'))
                 $fields[$table][$row['Field']] = $row;
     }
     
+    $table = 'countries';
+    if (!isset($tables[$GLOBALS['APIDB']->prefix($table)]))
+    {
+        $query[] = "CREATE TABLE `" . $GLOBALS['APIDB']->prefix("$table_oldhashs") . "` (
+                `id` mediumint(250) UNSIGNED NOT NULL,
+                `retired` char(44) NOT NULL DEFAULT NULL,
+                `current` char(44) NOT NULL DEFAULT NULL,
+                `created` int(11) DEFAULT NULL,
+                KEY `SEARCH` (`retired`,`current`,`id`)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8";
+        if (!$GLOBALS['APIDB']->query($sql))
+            die("SQL Failed: $sql;");
+    }
+    
+    $sql = "SELECT count(*) as `count` FROM `" . $GLOBALS['APIDB']->prefix("$table_oldhashs") . "`";
+    list($count) = $GLOBALS['APIDB']->fetchRow($GLOBALS['APIDB']->query($sql));
+    if ($count==0)
+    {
+        $GLOBALS['APIDB']->query("START TRANSACTION");
+        $sql = "INSERT INTO `" . $GLOBALS['APIDB']->prefix("$table_oldhashs") . "` (`retired`, `current`, `created`) VALUES SELECT md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `retired`, md5(concat(`Country`, `Capital`, `Continent`, `CurrencyCode`)) as `current`, UNIX_TIMESTAMP() FROM `" . $GLOBALS['APIDB']->prefix($table) . " ` ORDER BY `retired`";
+        if (!$GLOBALS['APIDB']->query($sql))
+            die("SQL Failed: $sql;");
+        $GLOBALS['APIDB']->query("COMMIT");
+    }
+    
     $sql = "SELECT * FROM `" . $GLOBALS['APIDB']->prefix('countries') . "` WHERE `Table` NOT IN ('" . implode("', '", $tables) . "')";
     $results = $GLOBALS['APIDB']->query($sql);
     while($country = $GLOBALS['APIDB']->fetchArray($results))
     {
+        $table = $country['Table'];
+        if (!isset($tables[$GLOBALS['APIDB']->prefix($table)]))
+        {
+            $query[] = "CREATE TABLE `" . $GLOBALS['APIDB']->prefix("$table_oldhashs") . "` (
+                `id` mediumint(250) UNSIGNED NOT NULL,
+                `retired` char(44) NOT NULL DEFAULT NULL,
+                `current` char(44) NOT NULL DEFAULT NULL,
+                `created` int(11) DEFAULT NULL,
+                KEY `SEARCH` (`retired`,`current`,`id`)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8";
+            if (!$GLOBALS['APIDB']->query($sql))
+                die("SQL Failed: $sql;");
+        }
+        
+        $GLOBALS['APIDB']->query("START TRANSACTION");
+        $tb = $table;
+        foreach(array("places", "addresses", "venues", "states") as $mode)
+        {
+            switch ($mode)
+            {
+                case 'places';
+                    $add = '';
+                    $retired = "md5(concat(`CountryID`, ':', md5(concat(`CountryID`, `CordID`)))";
+                    $current = "md5(concat(`CountryID`, ':', md5(concat(`RegionName`, ', ', '" . $country['Country'] . "')))";
+                    break;
+                case 'addresses';
+                    $add = '_'.$mode;
+                    $retired = "concat(`CountryID`, ':', md5(concat('".$country['Table']."_address', `AddressID`, `CordID`, `CountryID`)))";
+                    $current = "concat('" . !empty($country['CountryID'])?$country['CountryID'].":":"" . "', md5(concat(`Unit`, `Building`, `Street`, `Suburb`, `State`, `Country_ISO2`, `Postcode`, `Council`)))";
+                    break;
+                case 'venues';
+                    $add = '_'.$mode;
+                    $retired = "concat('" . !empty($country['CountryID'])?$country['CountryID'].":":"" . "', md5(concat('".$table."_venues',`VenueID`CordID`,`CountryID`))";
+                    $current = "concat('" . !empty($country['CountryID'])?$country['CountryID'].":":"" . "', md5(concat(`Name`, `Vicinity`)))";
+                    break;
+                case 'states';
+                    $add = '_'.$mode;
+                    $retired = "md5(concat(`CountryID`, ':', md5(concat(`CountryID`, `StateID`)))";
+                    $current = "md5(concat(`CountryID`, ':', md5(concat(`State`, '" . $country['Country'] . "')))";
+                    break;
+                
+            }
+                
+            $sql = "SELECT count(*) as `count` FROM `" . $GLOBALS['APIDB']->prefix("$table$add") . "`";
+            list($count) = $GLOBALS['APIDB']->fetchRow($GLOBALS['APIDB']->query($sql));
+            if ($count>0)
+            {
+                $sql = "SELECT $retired  as `key` FROM `" . $GLOBALS['APIDB']->prefix("$table$add") . "` ORDER BY `key`";
+                $keys = array();
+                while(list($key) = $GLOBALS['APIDB']->fetchRow($GLOBALS['APIDB']->query($sql)))
+                {
+                    $keys[$key] = $key;
+                }
+                $sql = "SELECT count(*) as `count` FROM `" . $GLOBALS['APIDB']->prefix("$table_oldhashs") . "` WHERE `retired` IN ('" . implode("','", $keys) . "')";
+                list($count) = $GLOBALS['APIDB']->fetchRow($GLOBALS['APIDB']->query($sql));
+                if ($count<>count($keys))
+                {
+                    $sql = "SELECT `retired` FROM `" . $GLOBALS['APIDB']->prefix("$table_oldhashs") . "` WHERE `retired` IN ('" . implode("','", $keys) . "')";
+                    while(list($key) = $GLOBALS['APIDB']->fetchRow($GLOBALS['APIDB']->query($sql)))
+                        unset($keys[$key]);
+    
+                    $sql = "INSERT INTO `" . $GLOBALS['APIDB']->prefix("$table_oldhashs") . "` (`retired`, `current`, `created`) VALUES SELECT $retired as `retired`, $current as `current`, UNIX_TIMESTAMP() FROM `" . $GLOBALS['APIDB']->prefix($table.$add) . " ` WHERE `retired` IN ('" . implode("','", $keys) . "') ORDER BY `retired`";
+                    if (!$GLOBALS['APIDB']->query($sql))
+                        die("SQL Failed: $sql;");
+                }
+            }
+        }
+        $GLOBALS['APIDB']->query("COMMIT");
+        
         $table = $country['Table'];
         if (!isset($tables[$GLOBALS['APIDB']->prefix($table)]))
         {

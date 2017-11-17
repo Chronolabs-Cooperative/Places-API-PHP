@@ -285,6 +285,7 @@ switch ($output) {
 		echo '</pre>';
 		break;
 	case 'raw':
+	    header('Content-type: application/x-httpd-php');
 	    echo ('<?php'."\n\n".'return ' . var_export($data, true) . ";\n\n?>");
 		break;
 	case 'json':
