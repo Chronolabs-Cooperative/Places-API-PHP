@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 5.7.18, for Linux (x86_64)
+-- MySQL dump 10.13  Distrib 5.7.20, for Linux (x86_64)
 --
--- Host: localhost    Database: geospatial
+-- Host: localhost    Database: atlas2
 -- ------------------------------------------------------
--- Server version	5.7.18-0ubuntu0.16.10.1
+-- Server version	5.7.20-0ubuntu0.17.10.1
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -23,10 +23,10 @@ DROP TABLE IF EXISTS `vaticancity`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `vaticancity` (
-  `CordID` int(11) unsigned NOT NULL,
+  `CordID` int(11) NOT NULL AUTO_INCREMENT,
   `CountryID` int(11) DEFAULT NULL,
   `Typal` enum('city','suburb','town','village','camp','military','mountain','unknown') NOT NULL DEFAULT 'unknown',
-  `RegionName` char(44) DEFAULT NULL,
+  `RegionName` char(31) DEFAULT NULL,
   `mapref_latitude` char(4) DEFAULT NULL,
   `mapref_longitude` char(4) DEFAULT NULL,
   `Latitude_Float` float DEFAULT NULL,
@@ -46,24 +46,8 @@ CREATE TABLE `vaticancity` (
   `Next` int(12) NOT NULL DEFAULT '0',
   `Action` int(12) NOT NULL DEFAULT '0',
   `data` tinytext,
-  KEY `SEARCH` (`CordID`,`CountryID`,`Latitude_Float`,`Longitude_Float`,`Altitude_Feet`,`Altitude_Meters`,`mapref_latitude`,`mapref_longitude`) USING BTREE KEY_BLOCK_SIZE=16,
-  KEY `NAMING-ONE` (`CordID`,`CountryID`,`RegionName`(1)) USING BTREE KEY_BLOCK_SIZE=8,
-  KEY `NAMING-TWO` (`CordID`,`CountryID`,`RegionName`(2)) USING BTREE KEY_BLOCK_SIZE=8,
-  KEY `NAMING-THREE` (`CordID`,`CountryID`,`RegionName`(3)) USING BTREE KEY_BLOCK_SIZE=8,
-  KEY `NAMING-FOUR` (`CordID`,`CountryID`,`RegionName`(4)) USING BTREE KEY_BLOCK_SIZE=8,
-  KEY `NAMING-FIVE` (`CordID`,`CountryID`,`RegionName`(5)) USING BTREE KEY_BLOCK_SIZE=8,
-  KEY `NAMING-SIX` (`CordID`,`CountryID`,`RegionName`(6)) USING BTREE KEY_BLOCK_SIZE=8,
-  KEY `NAMING-SEVEN` (`CordID`,`CountryID`,`RegionName`(7)) USING BTREE KEY_BLOCK_SIZE=8,
-  KEY `NAMING-EIGHT` (`CordID`,`CountryID`,`RegionName`(8)) USING BTREE KEY_BLOCK_SIZE=8,
-  KEY `NAMING-NINE` (`CordID`,`CountryID`,`RegionName`(9)) USING BTREE KEY_BLOCK_SIZE=8,
-  KEY `NAMING-TEN` (`CordID`,`CountryID`,`RegionName`(10)) USING BTREE KEY_BLOCK_SIZE=8,
-  KEY `NAMING-ELEVEN` (`CordID`,`CountryID`,`RegionName`(11)) USING BTREE KEY_BLOCK_SIZE=8,
-  KEY `NAMING-TWELVE` (`CordID`,`CountryID`,`RegionName`(12)) USING BTREE KEY_BLOCK_SIZE=8,
-  KEY `NAMING-THIRTEEN` (`CordID`,`CountryID`,`RegionName`(13)) USING BTREE KEY_BLOCK_SIZE=8,
-  KEY `NAMING-FOURTEEN` (`CordID`,`CountryID`,`RegionName`(14)) USING BTREE KEY_BLOCK_SIZE=8,
-  KEY `NAMING-FIFTHTEEN` (`CordID`,`CountryID`,`RegionName`(15)) USING BTREE KEY_BLOCK_SIZE=8,
-  KEY `ALPHABET` (`CordID`,`CountryID`,`RegionName`,`Latitude_Float`,`Longitude_Float`,`Altitude_Feet`,`Altitude_Meters`,`mapref_latitude`,`mapref_longitude`) USING BTREE KEY_BLOCK_SIZE=16
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  PRIMARY KEY (`CordID`)
+) ENGINE=MyISAM AUTO_INCREMENT=9 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -72,6 +56,7 @@ CREATE TABLE `vaticancity` (
 
 LOCK TABLES `vaticancity` WRITE;
 /*!40000 ALTER TABLE `vaticancity` DISABLE KEYS */;
+INSERT INTO `vaticancity` VALUES (1,214,'unknown','Città Vaticano','41N','12E',41.9,12.45,75,23,'','',0,0,0,0,0,'0',0,0,0,0,NULL),(2,214,'unknown','Città del Vaticano, Stato della','41N','12E',41.9,12.45,75,23,'','',0,0,0,0,0,'0',0,0,0,0,NULL),(3,214,'unknown','Città del Vaticano','41N','12E',41.9,12.45,75,23,'','',0,0,0,0,0,'0',0,0,0,0,NULL),(4,214,'unknown','Holy See','41N','12E',41.9,12.45,75,23,'','',0,0,0,0,0,'0',0,0,0,0,NULL),(5,214,'unknown','Vatican City State','41N','12E',41.9,12.45,75,23,'','',0,0,0,0,0,'0',0,0,0,0,NULL),(6,214,'unknown','Vatican City, State of the','41N','12E',41.9,12.45,75,23,'','',0,0,0,0,0,'0',0,0,0,0,NULL),(7,214,'unknown','the','41N','12E',41.9,12.45,75,23,'','',0,0,0,0,0,'0',0,0,0,0,NULL),(8,214,'unknown','Vatican City','41N','12E',41.9,12.45,75,23,'','',0,0,0,0,0,'0',0,0,0,0,NULL);
 /*!40000 ALTER TABLE `vaticancity` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -84,4 +69,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-09-13 17:25:31
+-- Dump completed on 2017-12-26  2:02:27
