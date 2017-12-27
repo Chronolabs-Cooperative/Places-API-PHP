@@ -1,8 +1,8 @@
 ## Chronolabs Cooperative presents
 
-# GeoSpatial + Locational Places Services API 3.0.8
+# GeoSpatial + Locational Places Services API 3.0.9
 
-### Author: Simon Antony Roberts <wishcraft@users.sourceforge.net>
+### Author: Simon Antony Roberts <simon@snails.email>
 
 #### Demo: http://places.snails.email or http://places.xortify.com
 
