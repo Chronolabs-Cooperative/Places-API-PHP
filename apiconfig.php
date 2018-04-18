@@ -59,7 +59,6 @@ ini_set('memory_limit', '128M');
 /**
  * Keys & Identify Strings
  */
-define('API_GOOGLE_KEY','AIzaSyD0tstaeCtH0gugLJUeYcUSUT_TdXL24Uo');    // Get from: https://developers.google.com/places/web-service/get-api-key = API_GOOGLE_KEY
 define('API_PLACES_FIELDS', 'Address|Distance|RegionName|mapref_latitude|mapref_longitude|Latitude_Float|Longitude_Float|Altitude_Feet|Altitude_Meters|key');
 define('API_COUNTRY_FIELDS', 'Country|ISO2|FIPS104|ISO3|ISON|TLD|Capital|Continent|NationalitySingular|NationalityPlural|Currency|CurrencyCode|Population|Records|Updates|API|Details|key|distance');
 define('API_CONTINENT_FIELDS', 'Continent|key|Population|Records|API|Details|Updates');
@@ -69,7 +68,6 @@ define('API_ADDRESS_FIELDS','key|Unit|Building|Street|Suburb|State|Country|Count
 /**
  * Include libraries
  */
-require_once __DIR__ . DIRECTORY_SEPARATOR . 'functions.php';
 require_once __DIR__ . DIRECTORY_SEPARATOR . 'class' . DIRECTORY_SEPARATOR . 'file' . DIRECTORY_SEPARATOR . 'apifile.php';
 require_once __DIR__ . DIRECTORY_SEPARATOR . 'class' . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR . 'apicache.php';
 

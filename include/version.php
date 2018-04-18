@@ -29,5 +29,5 @@ defined('API_ROOT_PATH') || exit('Restricted access');
 /**
  *  Define API version
  */
-define('API_VERSION', 'GeoSpatial + Locational Places Services API 3.0.9');
-define('API_TYPE', 'places');
+define('API_VERSION', 'GeoSpatial + Locational Places Services API 3.0.11');
+define('API_TYPE', 'places-api');

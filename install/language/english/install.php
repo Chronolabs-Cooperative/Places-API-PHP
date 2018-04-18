@@ -15,6 +15,15 @@
 // _LANGCODE: en
 // _CHARSET : UTF-8
 // Translator: API Translation Team
+define('API_GOOGLE_KEY_LABEL','Google Places API Key [see: <a href="https://developers.google.com/places/web-service/get-api-key" target="_blank">developers.google.com</a>]');
+define('API_GOOGLE_KEY_HELP','Google Places API Key [see: <a href="https://developers.google.com/places/web-service/get-api-key" target="_blank">developers.google.com</a>]');
+define('API_FACEBOOK_APPID_KEY_LABEL','Facebook APP ID [see: <a href="https://developers.facebook.com/apps/async/create/platform-setup/dialog/" target="_blank">developers.facebook.com</a>]');
+define('API_FACEBOOK_APPID_KEY_HELP','Facebook APP ID  [see: <a href="https://developers.facebook.com/apps/async/create/platform-setup/dialog/" target="_blank">developers.facebook.com</a>]');
+define('API_FACEBOOK_SECRET_KEY_LABEL','Facebook APP Secret [see: <a href="https://developers.facebook.com/apps/async/create/platform-setup/dialog/" target="_blank">developers.facebook.com</a>]');
+define('API_FACEBOOK_SECRET_KEY_HELP','Facebook APP Secret [see: <a href="https://developers.facebook.com/apps/async/create/platform-setup/dialog/" target="_blank">developers.facebook.com</a>]');
+define('API_EXTRAS', 'Extra Settings Required for this REST API!');
+define('EXTRA_SETTINGS', 'Extra Settings Required');
+define('EXTRA_SETTINGS_TITLE', 'Extra Settings Required for this REST API!');
 define('SHOW_HIDE_HELP', 'Show/hide help text');
 // License
 define('LICENSE_NOT_WRITEABLE', 'License file "%s" is NOT writable!');

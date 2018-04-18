@@ -24,9 +24,11 @@ defined('NWLINE') or define('NWLINE', "\n");
 /**
  * Include files with definitions
  */
+include_once __DIR__ . DS . 'constants.php';
 include_once __DIR__ . DS . 'defines.php';
 include_once __DIR__ . DS . 'version.php';
 include_once __DIR__ . DS . 'license.php';
+include_once __DIR__ . DS . 'functions.php';
 
 /**
  * Include APILoad

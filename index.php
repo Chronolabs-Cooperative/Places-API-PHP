@@ -33,7 +33,7 @@ header('Blowfish-salt: '. $salter);
 
 global $source;
 require_once __DIR__ . DIRECTORY_SEPARATOR . 'apiconfig.php';
-require_once __DIR__ . DIRECTORY_SEPARATOR . 'verify.php';
+require_once __DIR__ . DIRECTORY_SEPARATOR . 'include' . DIRECTORY_SEPARATOR . 'verify.php';
 $GLOBALS['APILogger']->activated = false;
 
 /**
@@ -193,9 +193,9 @@ if (!$data = APICache::read($keyname))
 	$retries++;
 	switch ($mode) {
 		case 'countries':
-			$sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key`  FROM `$mode`  GROUP BY `CountryID` ORDER BY `Country`";
-			$result = $GLOBALS['DebauchDB']->queryF($sql);
-			while($row = $GLOBALS['DebauchDB']->fetchArray($result))
+		    $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key`  FROM `".$GLOBALS['APIDB']->prefix($mode)."`  GROUP BY `CountryID` ORDER BY `Country`";
+			$result = $GLOBALS['APIDB']->queryF($sql);
+			while($row = $GLOBALS['APIDB']->fetchArray($result))
 			{
 			    $table = $row['Table'];
 			    unset($row['Table']);
@@ -207,9 +207,9 @@ if (!$data = APICache::read($keyname))
 			}
 			break;
 		case 'continents':
-			$sql = "SELECT *, md5(concat(`ContinentID`, `Continent`, max(`ContinentID`) - `ContinentID` + 1)) as `key` FROM `$mode`  GROUP BY `ContinentID` ORDER BY `Continent`";
-			$result = $GLOBALS['DebauchDB']->queryF($sql);
-			while($row = $GLOBALS['DebauchDB']->fetchArray($result))
+		    $sql = "SELECT *, md5(concat(`ContinentID`, `Continent`, max(`ContinentID`) - `ContinentID` + 1)) as `key` FROM `".$GLOBALS['APIDB']->prefix($mode)."`  GROUP BY `ContinentID` ORDER BY `Continent`";
+			$result = $GLOBALS['APIDB']->queryF($sql);
+			while($row = $GLOBALS['APIDB']->fetchArray($result))
 			{
 			    $continent = str_replace(array(" ", "'". "`", "-"), "", ucwords(strtolower($row['Continent'])));
 			    unset($row['ContinentID']);
@@ -220,9 +220,9 @@ if (!$data = APICache::read($keyname))
 			}
 			break;
 		case 'types':
-			$sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key`  FROM `$mode`  GROUP BY `CountryID` ORDER BY `Country`";
-			$result = $GLOBALS['DebauchDB']->queryF($sql);
-			while($row = $GLOBALS['DebauchDB']->fetchArray($result))
+		    $sql = "SELECT *, md5(concat(`CountryID`, `Country`, max(`CountryID`) - `CountryID` + 1)) as `key`  FROM `".$GLOBALS['APIDB']->prefix($mode)."`  GROUP BY `CountryID` ORDER BY `Country`";
+			$result = $GLOBALS['APIDB']->queryF($sql);
+			while($row = $GLOBALS['APIDB']->fetchArray($result))
 			{
 			    $table = $row['Table'];
 			    unset($row['Table']);

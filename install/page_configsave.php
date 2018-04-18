@@ -57,6 +57,20 @@ if (true === $writeCheck) {
 
     $result = writeConfigurationFile($rewrite, $vars['ROOT_PATH'] . '/include', 'dbconfig.dist.php', 'dbconfig.php');
     $GLOBALS['error'] = !($result === true);
+    $constants = file(__DIR__ . DIRECTORY_SEPARATOR . 'include' . DIRECTORY_SEPARATOR . 'constants.dist.php');
+    foreach($constants as $line => $code)
+    {
+        foreach($_SESSION['constants'] as $key => $values)
+        {
+            if (is_array($values)) {
+                foreach($values as $field => $value)
+                    if (strpos($code, "API_".strtoupper($key)."_".strtoupper($field)))
+                        $constants[$line] = "define('API_".strtoupper($key)."_".strtoupper($field)."','$value');\n";
+            } elseif (strpos($code, "API_".strtoupper($key)))
+            $constants[$line] = "define('API_".strtoupper($key)."','$values');\n";
+        }
+    }
+    $GLOBALS['error'] = !file_put_contents(dirname(__DIR__) . DIRECTORY_SEPARATOR . 'include'  . DIRECTORY_SEPARATOR . 'constants.php' , implode($constants));
     if ($result === true) {
         $result = writeConfigurationFile($rewrite, $vars['ROOT_PATH'], 'mainfile.dist.php', 'mainfile.php');
         $GLOBALS['error'] = !($result === true);

@@ -27,6 +27,13 @@ $configs['db_types'] = array('mysql' => 'mysqli');
 $configs['conf_names'] = array(
 );
 
+// Other API Defalt Keys
+$configs['key'] = array(
+    'google' => 'AIzaSyD0tstaeCtH0gugLJUeYcUSUT_TdXL24Uo',
+    'facebook_appid' => '1246462065490215',
+    'facebook_secret' => '9d7fee38aa7dcade4c195c4dffcbf540'
+);
+
 // languages config files
 $configs['language_files'] = array(
     'global');
