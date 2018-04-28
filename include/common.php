@@ -13,7 +13,8 @@
  * @license             GNU GPL 2 (http://www.gnu.org/licenses/gpl-2.0.html)
  * @package             kernel
  */
-defined('API_MAINFILE_INCLUDED') || die('Restricted access');
+if (!defined('API_MAINFILE_INCLUDED'))
+    return false;
 
 /**
  * YOU SHOULD NEVER USE THE FOLLOWING TO CONSTANTS, THEY WILL BE REMOVED
